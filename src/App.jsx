@@ -30,6 +30,7 @@ function Header() {
 
   const handleLogout = () => {
   localStorage.removeItem('token')
+  setToken(null)
   navigate('/login') 
 }
 
