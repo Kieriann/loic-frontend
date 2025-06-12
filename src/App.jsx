@@ -34,9 +34,6 @@ function Header({ onLogout }) {
     navigate('/login')
   }
 
-  // ... reste inchangé
-
-
   return (
     <header className="bg-primary py-6 relative">
       <div className="flex justify-center items-center relative">
@@ -101,7 +98,7 @@ function AppRouter({ token, setToken }) {
   if (!token) {
     return (
       <>
-<Header setToken={setToken} />
+        <Header onLogout={() => setToken(null)} />
         <CenteredLayout>
           <h1 className="text-2xl font-bold text-darkBlue mb-6 text-center">
             {mode === 'signup' ? 'Inscription' : 'Connexion'}
@@ -136,7 +133,7 @@ function AppRouter({ token, setToken }) {
 
   return (
     <>
-<Header setToken={setToken} />
+      <Header onLogout={() => setToken(null)} />
       <Routes>
         {user.isAdmin ? (
           <>
