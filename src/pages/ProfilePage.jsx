@@ -171,7 +171,7 @@ export default function ProfilePage() {
                         <p>
                           <strong>Document :</strong>{' '}
                           <a
-                            href={`http://localhost:4000/uploads/${r.realFilePath}`}
+                            href={`${import.meta.env.VITE_API_URL}/uploads/${r.realFilePath}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-blue-600 underline"
