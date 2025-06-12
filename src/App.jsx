@@ -24,15 +24,18 @@ import { fetchProfile } from './api'
 // ─── En-tête avec logo et menu utilisateur ─────────────────────────
 //
 
-function Header() {
+function Header({ onLogout }) {
   const [open, setOpen] = useState(false)
   const navigate = useNavigate()
 
   const handleLogout = () => {
-  localStorage.removeItem('token')
-  setToken(null)
-  navigate('/login') 
-}
+    localStorage.removeItem('token')
+    onLogout()
+    navigate('/login')
+  }
+
+  // ... reste inchangé
+
 
   return (
     <header className="bg-primary py-6 relative">
