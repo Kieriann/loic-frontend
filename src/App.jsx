@@ -29,9 +29,9 @@ function Header() {
   const navigate = useNavigate()
 
   const handleLogout = () => {
-    localStorage.removeItem('token')
-    window.location.reload()
-  }
+  localStorage.removeItem('token')
+  navigate('/login') 
+}
 
   return (
     <header className="bg-primary py-6 relative">
