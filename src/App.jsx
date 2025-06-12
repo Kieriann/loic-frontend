@@ -101,7 +101,7 @@ function AppRouter({ token, setToken }) {
   if (!token) {
     return (
       <>
-        <Header />
+<Header setToken={setToken} />
         <CenteredLayout>
           <h1 className="text-2xl font-bold text-darkBlue mb-6 text-center">
             {mode === 'signup' ? 'Inscription' : 'Connexion'}
@@ -136,7 +136,7 @@ function AppRouter({ token, setToken }) {
 
   return (
     <>
-      <Header />
+<Header setToken={setToken} />
       <Routes>
         {user.isAdmin ? (
           <>
