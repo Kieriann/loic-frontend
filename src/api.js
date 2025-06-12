@@ -2,7 +2,7 @@
 // ─── Fonctions API : authentification et profil utilisateur ───────
 //
 
-const AUTH_URL = 'http://localhost:4000/api/auth'
+const AUTH_URL = `${import.meta.env.VITE_API_URL}/api/auth`
 
 export const signup = async (data) => {
   const res = await fetch(`${AUTH_URL}/signup`, {
@@ -23,7 +23,7 @@ export const login = async (data) => {
 }
 
 export const fetchProfile = async (token) => {
-  const res = await fetch('http://localhost:4000/api/profile/profil', {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

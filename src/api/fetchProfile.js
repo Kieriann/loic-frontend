@@ -3,7 +3,7 @@
 //
 
 export async function fetchProfile(token) {
-  const res = await fetch('http://localhost:4000/api/profile/profil', {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
     method: 'GET',
     headers: {
       Authorization: `Bearer ${token}`,

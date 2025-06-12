@@ -209,7 +209,7 @@ export default function EditProfilePage() {
     if (documents.cv) formData.append('cv', documents.cv)
 
     try {
-      const res = await fetch('http://localhost:4000/api/profile/profil', {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token') || ''}`,

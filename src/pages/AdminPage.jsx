@@ -5,6 +5,8 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
+const API_URL = import.meta.env.VITE_API_URL
+
 export default function AdminPage() {
   const [profils, setProfils] = useState([])
   const [search, setSearch] = useState('')
@@ -14,7 +16,7 @@ export default function AdminPage() {
   const fetchProfils = async (query = '') => {
     setLoading(true)
     try {
-      const res = await fetch(`http://localhost:4000/api/admin/profils?search=${query}`, {
+      const res = await fetch(`${API_URL}/api/admin/profils?search=${query}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
         },

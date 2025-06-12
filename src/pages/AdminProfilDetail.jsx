@@ -5,6 +5,8 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 
+const API_URL = import.meta.env.VITE_API_URL
+
 export default function AdminProfilDetail() {
   const { id } = useParams()
   const [data, setData] = useState(null)
@@ -14,7 +16,7 @@ export default function AdminProfilDetail() {
   useEffect(() => {
     const fetchProfil = async () => {
       try {
-        const res = await fetch(`http://localhost:4000/api/admin/profil/${id}`, {
+        const res = await fetch(`${API_URL}/api/admin/profil/${id}`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
           },
