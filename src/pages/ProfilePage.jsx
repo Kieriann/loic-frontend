@@ -105,18 +105,32 @@ export default function ProfilePage() {
               </div>
 
               <Section title="Langues">
-  <ul className="text-base text-gray-800 pl-5 max-w-xl mx-auto text-center">
+  <ul className="flex flex-wrap gap-3 justify-center">
     {(profile.languages || '').split(',').map((l, i) => {
       const [name, levels] = l.split(':')
       const [written, oral] = (levels || '').split('/')
       return (
-        <li key={i}>
-          {name} — écrit : {written || '–'}, oral : {oral || '–'}
+        <li
+          key={i}
+          className="bg-blue-50 rounded-xl px-4 py-2 w-44 text-center shadow-sm"
+        >
+          {/* Étiquette langue */}
+          <p className="font-semibold text-darkBlue mb-1">{name}</p>
+          {/* Niveaux écrit / parlé */}
+          <div className="flex justify-between text-sm">
+            <span>
+              <strong>Écrit</strong> : {written || '–'}
+            </span>
+            <span>
+              <strong>Parlé</strong> : {oral || '–'}
+            </span>
+          </div>
         </li>
       )
     })}
   </ul>
 </Section>
+
 
             </>
           )}
