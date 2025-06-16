@@ -98,9 +98,9 @@ export default function ProfilePage() {
 
               <div className="text-center">
                 <Section title="Tarifs journaliers">
-                  <Line label="Petit projet">{profile.smallDayRate} €</Line>
-                  <Line label="Moyen projet">{profile.mediumDayRate} €</Line>
-                  <Line label="Gros projet">{profile.highDayRate} €</Line>
+                  <Line label="Courte durée">{profile.smallDayRate} €</Line>
+                  <Line label="Moyenne durée">{profile.mediumDayRate} €</Line>
+                  <Line label="Longue durée">{profile.highDayRate} €</Line>
                 </Section>
               </div>
 
