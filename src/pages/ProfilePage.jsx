@@ -30,7 +30,7 @@ export default function ProfilePage() {
   if (loading) return <p className="p-4">Chargement...</p>
   if (!data?.profile || !data.profile.firstname) return <Navigate to="/profile/edit" replace />
 
-  const { profile, experiences } = data
+  const { profile, experiences, prestations } = data
   const address = profile.Address || {}
 
   return (
@@ -62,6 +62,7 @@ export default function ProfilePage() {
                 {selectedTab === 'profil' && 'Mon Profil'}
                 {selectedTab === 'competences' && 'Mes Experiences'}
                 {selectedTab === 'realisations' && 'Mes Réalisations'}
+                {selectedTab === 'prestations' && 'Mes Prestations'}
               </h1>
               <button
                 onClick={() => navigate('/profile/edit')}
@@ -146,9 +147,9 @@ export default function ProfilePage() {
                   <p>
                     <strong>Langages :</strong>{' '}
                     {Array.isArray(exp.languages)
-                      ? exp.languages.map((l, i) => {
+                      ? exp.languages.map((l, j) => {
                           const [name, level] = l.split(':')
-                          return <span key={i}>{name} ({level}){i < exp.languages.length - 1 ? ', ' : ''}</span>
+                          return <span key={j}>{name} ({level}){j < exp.languages.length - 1 ? ', ' : ''}</span>
                         })
                       : 'Aucun'}
                   </p>
@@ -190,24 +191,24 @@ export default function ProfilePage() {
             </Section>
           )}
 
+          {/* PRESTATIONS */}
           {selectedTab === 'prestations' && (
-  <Section title="Prestations">
-    <div className="space-y-4 w-full max-w-xl">
-      {Array.isArray(profile.prestations) && profile.prestations.length > 0 ? (
-        profile.prestations.map((p, i) => (
-          <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
-            <p><strong>Type :</strong> {p.type || 'Non renseigné'}</p>
-            <p><strong>Technologie :</strong> {p.tech || 'Non renseigné'}</p>
-            <p><strong>Niveau :</strong> {p.level || 'Non renseigné'}</p>
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-500 italic">Aucune prestation renseignée</p>
-      )}
-    </div>
-  </Section>
-)}
-
+            <Section title="Prestations">
+              <div className="space-y-4 w-full max-w-xl">
+                {Array.isArray(prestations) && prestations.length > 0 ? (
+                  prestations.map((p, i) => (
+                    <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
+                      <p><strong>Type :</strong> {p.type || 'Non renseigné'}</p>
+                      <p><strong>Technologie :</strong> {p.tech || 'Non renseigné'}</p>
+                      <p><strong>Niveau :</strong> {p.level || 'Non renseigné'}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic">Aucune prestation renseignée</p>
+                )}
+              </div>
+            </Section>
+          )}
         </div>
       </div>
     </div>
