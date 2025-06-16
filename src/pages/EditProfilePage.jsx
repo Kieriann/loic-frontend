@@ -47,76 +47,92 @@ export default function EditProfilePage() {
 }])
 
 
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        const token = localStorage.getItem('token')
-        const res = await fetchProfile(token)
+useEffect(() => {
+  const loadData = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const res = await fetchProfile(token)
 
-        if (res.profile) {
-          const {
-            firstname, lastname, phone, siret, bio,
-            smallDayRate, mediumDayRate, highDayRate,
-            languages, isEmployed, availableDate
-          } = res.profile
+      if (res.profile) {
+        const {
+          firstname, lastname, phone, siret, bio,
+          smallDayRate, mediumDayRate, highDayRate,
+          languages, isEmployed, availableDate
+        } = res.profile
 
-          setProfile({
-            firstname,
-            lastname,
-            phone,
-            siret,
-            bio,
-            smallDayRate,
-            mediumDayRate,
-            highDayRate,
-            languages,
-            isEmployed,
-            availableDate: availableDate || '',
-          })
+        setProfile({
+          firstname,
+          lastname,
+          phone,
+          siret,
+          bio,
+          smallDayRate,
+          mediumDayRate,
+          highDayRate,
+          languages,
+          isEmployed,
+          availableDate: availableDate || '',
+        })
 
-          setLangList((languages || '').split(','))
+        setLangList((languages || '').split(','))
 
-          if (res.profile.Address) {
-            const { address, city, postalCode, state, country } = res.profile.Address
-            setAddress({ address, city, postalCode, state, country })
-          }
+        if (res.profile.Address) {
+          const { address, city, postalCode, state, country } = res.profile.Address
+          setAddress({ address, city, postalCode, state, country })
         }
-
-        if (res.experiences?.length) {
-          setExperiences(res.experiences.map(exp => ({
-            title: exp.title,
-            client: exp.client || '',
-            description: exp.description,
-            domains: exp.domains,
-            languages: Array.isArray(exp.languages) ? exp.languages : [],
-            newLangInput: '',
-            newLangLevel: 'junior',
-            realTitle: exp.realTitle || '',
-            realDescription: exp.realDescription || '',
-            realFile: null,
-            realFilePath: exp.realFilePath || '',
-          })))
-        } else {
-          setExperiences([{
-            title: '',
-            client: '',
-            description: '',
-            domains: '',
-            languages: [],
-            newLangInput: '',
-            newLangLevel: 'junior',
-            realTitle: '',
-            realDescription: '',
-            realFile: null,
-          }])
-        }
-      } catch (err) {
-        console.error('Erreur chargement profil', err)
       }
-    }
 
-    loadData()
-  }, [])
+      if (res.experiences?.length) {
+        setExperiences(res.experiences.map(exp => ({
+          title: exp.title,
+          client: exp.client || '',
+          description: exp.description,
+          domains: exp.domains,
+          languages: Array.isArray(exp.languages) ? exp.languages : [],
+          newLangInput: '',
+          newLangLevel: 'junior',
+          realTitle: exp.realTitle || '',
+          realDescription: exp.realDescription || '',
+          realFile: null,
+          realFilePath: exp.realFilePath || '',
+        })))
+      } else {
+        setExperiences([{
+          title: '',
+          client: '',
+          description: '',
+          domains: '',
+          languages: [],
+          newLangInput: '',
+          newLangLevel: 'junior',
+          realTitle: '',
+          realDescription: '',
+          realFile: null,
+        }])
+      }
+
+      // Chargement des prestations
+      if (res.prestations?.length) {
+        setPrestations(res.prestations.map(p => ({
+          type: p.type || '',
+          tech: p.tech || '',
+          level: p.level || '',
+        })))
+      } else {
+        setPrestations([{
+          type: '',
+          tech: '',
+          level: 'junior',
+        }])
+      }
+    } catch (err) {
+      console.error('Erreur chargement profil', err)
+    }
+  }
+
+  loadData()
+}, [])
+
 
   const validate = () => {
     const newErrors = {}
