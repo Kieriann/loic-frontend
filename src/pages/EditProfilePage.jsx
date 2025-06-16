@@ -313,17 +313,28 @@ useEffect(() => {
 
               </div>
               <ul className="text-sm text-gray-700 space-y-1">
-{langList.map((l, i) => {
-  const [name, levels] = l.split(':')
-  const [written, oral] = levels.split('/')
-  return (
-    <li key={i}>
-      {name} — écrit : {written}, oral : {oral}
-    </li>
-  )
-})}
+  {langList.map((l, i) => {
+    const [name, levels] = l.split(':')
+    const [written, oral] = levels.split('/')
+    return (
+      <li key={i} className="flex items-center justify-between">
+        <span>
+          {name} — écrit : {written}, oral : {oral}
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setLangList(langList.filter((_, idx) => idx !== i))
+          }}
+          className="text-red-500 text-xs hover:underline ml-4"
+        >
+          Supprimer
+        </button>
+      </li>
+    )
+  })}
+</ul>
 
-              </ul>
               {errors.languages && <p className="text-red-500 text-sm">{errors.languages}</p>}
             </div>
             <DocumentUpload data={documents} setData={setDocuments} />
