@@ -193,22 +193,19 @@ export default function ProfilePage() {
 
           {/* PRESTATIONS */}
           {selectedTab === 'prestations' && (
-            <Section title="Prestations">
-              <div className="space-y-4 w-full max-w-xl">
-                {Array.isArray(prestations) && prestations.length > 0 ? (
-                  prestations.map((p, i) => (
-                    <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
-                      <p><strong>Type :</strong> {p.type || 'Non renseigné'}</p>
-                      <p><strong>Technologie :</strong> {p.tech || 'Non renseigné'}</p>
-                      <p><strong>Niveau :</strong> {p.level || 'Non renseigné'}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 italic">Aucune prestation renseignée</p>
-                )}
-              </div>
-            </Section>
-          )}
+  <Section title="Prestations">
+    {prestations && prestations.length > 0 ? (
+      prestations.map((p, i) => (
+        <p key={i} className="mb-2">
+          Je suis capable d&apos;assurer <strong>{p.type}</strong> pour <strong>{p.tech}</strong> à un niveau <strong>{p.level}</strong>.
+        </p>
+      ))
+    ) : (
+      <p className="text-gray-500 italic">Aucune prestation renseignée</p>
+    )}
+  </Section>
+)}
+
         </div>
       </div>
     </div>
