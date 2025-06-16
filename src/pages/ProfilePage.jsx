@@ -105,13 +105,19 @@ export default function ProfilePage() {
               </div>
 
               <Section title="Langues">
-                <ul className="text-base text-gray-800 pl-5 max-w-xl mx-auto text-center">
-                  {(profile.languages || '').split(',').map((l, i) => {
-                    const [name, level] = l.split(':')
-                    return <li key={i}>{name} : {level}</li>
-                  })}
-                </ul>
-              </Section>
+  <ul className="text-base text-gray-800 pl-5 max-w-xl mx-auto text-center">
+    {(profile.languages || '').split(',').map((l, i) => {
+      const [name, levels] = l.split(':')
+      const [written, oral] = (levels || '').split('/')
+      return (
+        <li key={i}>
+          {name} — écrit : {written || '–'}, oral : {oral || '–'}
+        </li>
+      )
+    })}
+  </ul>
+</Section>
+
             </>
           )}
 
