@@ -25,7 +25,8 @@ export default function EditProfilePage() {
   })
 
   const [langInput, setLangInput] = useState('')
-  const [levelInput, setLevelInput] = useState('débutant')
+  const [writtenInput, setWrittenInput] = useState('débutant')
+  const [oralInput, setOralInput] = useState('débutant')
   const [langList, setLangList] = useState([])
   const [selectedTab, setSelectedTab] = useState('profil')
   const [address, setAddress] = useState({
@@ -158,11 +159,16 @@ useEffect(() => {
   }
 
   const addLanguage = () => {
-    if (!langInput.trim()) return
-    setLangList([...langList, `${langInput.trim()}:${levelInput}`])
-    setLangInput('')
-    setLevelInput('débutant')
-  }
+  if (!langInput.trim()) return
+  setLangList([
+    ...langList, 
+    `${langInput.trim()}:${writtenInput}/${oralInput}`
+  ])
+  setLangInput('')
+  setWrittenInput('débutant')
+  setOralInput('débutant')
+}
+
 
   const updateExperience = (index, field, value) => {
     const updated = [...experiences]
@@ -283,24 +289,40 @@ useEffect(() => {
             <div className="space-y-2">
               <label className="text-xl font-semibold text-darkBlue">Langues</label>
               <div className="flex gap-2">
-                <input type="text" value={langInput} onChange={(e) => setLangInput(e.target.value)} placeholder="Langue (ex: français)" className="border rounded px-2 py-1 flex-1" />
-                <select value={levelInput} onChange={(e) => setLevelInput(e.target.value)} className="border rounded px-2 py-1">
-                  <option value="débutant">Débutant</option>
-                  <option value="intermédiaire">Intermédiaire</option>
-                  <option value="courant">Courant</option>
-                </select>
-                <button type="button" onClick={addLanguage} className="bg-darkBlue text-white px-3 py-1 rounded">Ajouter</button>
+<input
+  name="languages"
+  type="text"
+  value={langInput}
+  onChange={e => setLangInput(e.target.value)}
+  placeholder="Langue (ex: français)"
+/>
+
+<select value={writtenInput}
+  onChange={e => setWrittenInput(e.target.value)}>
+  <option value="débutant">Écrit : Débutant</option>
+  <option value="intermédiaire">Écrit : Intermédiaire</option>
+  <option value="courant">Écrit : Courant</option>
+</select>
+<select value={oralInput}
+  onChange={e => setOralInput(e.target.value)}>
+  <option value="débutant">Oral : Débutant</option>
+  <option value="intermédiaire">Oral : Intermédiaire</option>
+  <option value="courant">Oral : Courant</option>
+</select>
+<button onClick={addLanguage}>Ajouter</button>
+
               </div>
               <ul className="text-sm text-gray-700 space-y-1">
-                {langList.map((l, i) => {
-                  const [name, level] = l.split(':')
-                  return (
-                    <li key={i} className="flex gap-2 items-center">
-                      <span>{name} : {level}</span>
-                      <button type="button" onClick={() => setLangList(langList.filter((_, index) => index !== i))} className="text-red-500 text-xs hover:underline">Supprimer</button>
-                    </li>
-                  )
-                })}
+{langList.map((l, i) => {
+  const [name, levels] = l.split(':')
+  const [written, oral] = levels.split('/')
+  return (
+    <li key={i}>
+      {name} — écrit : {written}, oral : {oral}
+    </li>
+  )
+})}
+
               </ul>
               {errors.languages && <p className="text-red-500 text-sm">{errors.languages}</p>}
             </div>
@@ -407,10 +429,10 @@ useEffect(() => {
           className="border rounded px-2 py-1 w-full"
         >
           <option value="">-- Choisir --</option>
-          <option value="formation">la formation</option>
-          <option value="formation">le coaching</option>
-          <option value="maintenance">la maintenance</option>
-          <option value="développement">le développement</option>
+          <option value="la formation">la formation</option>
+          <option value="le coaching">le coaching</option>
+          <option value="la maintenance">la maintenance</option>
+          <option value="le développement">le développement</option>
         </select>
 
         <p className="font-medium text-darkBlue">pour</p>
