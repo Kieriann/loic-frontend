@@ -72,7 +72,7 @@ export default function ProfileInfo({ data, setData, errors = {} }) {
         <label className="text-xl font-semibold text-darkBlue">Tarifs journaliers</label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div>
-            <label className="block text-sm text-darkBlue mb-1">TJM petit projet (€)</label>
+            <label className="block text-sm text-darkBlue mb-1">TJM courte durée (€)</label>
             <input
               name="smallDayRate"
               type="number"
@@ -83,7 +83,7 @@ export default function ProfileInfo({ data, setData, errors = {} }) {
             {errors.smallDayRate && <p className="text-red-500 text-sm mt-1">{errors.smallDayRate}</p>}
           </div>
           <div>
-            <label className="block text-sm text-darkBlue mb-1">TJM moyen projet (€)</label>
+            <label className="block text-sm text-darkBlue mb-1">TJM moyenne durée (€)</label>
             <input
               type="number"
               value={data.mediumDayRate}
@@ -92,7 +92,7 @@ export default function ProfileInfo({ data, setData, errors = {} }) {
             />
           </div>
           <div>
-            <label className="block text-sm text-darkBlue mb-1">TJM gros projet (€)</label>
+            <label className="block text-sm text-darkBlue mb-1">TJM longue durée (€)</label>
             <input
               type="number"
               value={data.highDayRate}
