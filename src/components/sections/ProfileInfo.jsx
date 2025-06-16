@@ -71,35 +71,59 @@ export default function ProfileInfo({ data, setData, errors = {} }) {
       <div>
         <label className="text-xl font-semibold text-darkBlue">Tarifs journaliers</label>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm text-darkBlue mb-1">TJM courte durée (€)</label>
-            <input
-              name="smallDayRate"
-              type="number"
-              value={data.smallDayRate}
-              onChange={(e) => setData({ ...data, smallDayRate: Number(e.target.value) })}
-              className="p-2 border border-primary rounded w-full"
-            />
-            {errors.smallDayRate && <p className="text-red-500 text-sm mt-1">{errors.smallDayRate}</p>}
-          </div>
-          <div>
-            <label className="block text-sm text-darkBlue mb-1">TJM moyenne durée (€)</label>
-            <input
-              type="number"
-              value={data.mediumDayRate}
-              onChange={(e) => setData({ ...data, mediumDayRate: Number(e.target.value) })}
-              className="p-2 border border-primary rounded w-full"
-            />
-          </div>
-          <div>
-            <label className="block text-sm text-darkBlue mb-1">TJM longue durée (€)</label>
-            <input
-              type="number"
-              value={data.highDayRate}
-              onChange={(e) => setData({ ...data, highDayRate: Number(e.target.value) })}
-              className="p-2 border border-primary rounded w-full"
-            />
-          </div>
+<div>
+  <label className="block text-sm text-darkBlue mb-1">TJM courte durée (€)</label>
+  <input
+    name="smallDayRate"
+    type="number"
+    placeholder="—"
+    value={data.smallDayRate}
+    onChange={e => {
+      const v = e.target.value
+      setData({
+        ...data,
+        smallDayRate: v === '' ? '' : Number(v),
+      })
+    }}
+    className="p-2 border border-primary rounded w-full"
+  />
+  {errors.smallDayRate && <p className="text-red-500 text-sm mt-1">{errors.smallDayRate}</p>}
+</div>
+<div>
+  <label className="block text-sm text-darkBlue mb-1">TJM moyenne durée (€)</label>
+  <input
+    name="mediumDayRate"
+    type="number"
+    placeholder="—"
+    value={data.mediumDayRate}
+    onChange={e => {
+      const v = e.target.value
+      setData({
+        ...data,
+        mediumDayRate: v === '' ? '' : Number(v),
+      })
+    }}
+    className="p-2 border border-primary rounded w-full"
+  />
+</div>
+<div>
+  <label className="block text-sm text-darkBlue mb-1">TJM longue durée (€)</label>
+  <input
+    name="highDayRate"
+    type="number"
+    placeholder="—"
+    value={data.highDayRate}
+    onChange={e => {
+      const v = e.target.value
+      setData({
+        ...data,
+        highDayRate: v === '' ? '' : Number(v),
+      })
+    }}
+    className="p-2 border border-primary rounded w-full"
+  />
+</div>
+
         </div>
       </div>
     </div>
