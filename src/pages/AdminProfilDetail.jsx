@@ -78,7 +78,7 @@ export default function AdminProfilDetail() {
             <div key={i} className="bg-[#f8fbff] border border-primary rounded p-4 mb-4">
               <p><strong>Titre :</strong> {exp.title}</p>
               <p><strong>Description :</strong> {exp.description}</p>
-              <p><strong>Expériences :</strong> {exp.skills}</p>
+              <p><strong>Experiences :</strong> {exp.skills}</p>
               <p><strong>Langues :</strong> {exp.languages}</p>
             </div>
           ))}

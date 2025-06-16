@@ -40,7 +40,7 @@ export default function ProfilePage() {
         {/* Onglets */}
         <div className="w-48 bg-white rounded-2xl shadow-md p-6 h-full">
           <div className="flex flex-col gap-3">
-            {['profil', 'competences', 'realisations'].map(tab => (
+            {['profil', 'competences', 'realisations', 'prestations'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
@@ -48,7 +48,7 @@ export default function ProfilePage() {
                   selectedTab === tab ? 'bg-blue-100 text-darkBlue' : 'hover:bg-blue-50'
                 }`}
               >
-                {tab === 'competences' ? 'Expériences' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab === 'competences' ? 'Experiences' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </div>
@@ -60,7 +60,7 @@ export default function ProfilePage() {
             <div className="flex justify-between items-center">
               <h1 className="text-2xl text-darkBlue font-bold">
                 {selectedTab === 'profil' && 'Mon Profil'}
-                {selectedTab === 'competences' && 'Mes Expériences'}
+                {selectedTab === 'competences' && 'Mes Experiences'}
                 {selectedTab === 'realisations' && 'Mes Réalisations'}
               </h1>
               <button
@@ -114,9 +114,9 @@ export default function ProfilePage() {
             </>
           )}
 
-          {/* EXPÉRIENCES */}
+          {/* EXPERIENCES */}
           {selectedTab === 'competences' && (
-            <Section title="Expériences">
+            <Section title="Experiences">
               <div className="text-center mb-6">
                 {profile.isEmployed ? (
                   <p className="text-red-600 font-semibold">
@@ -189,6 +189,25 @@ export default function ProfilePage() {
               </div>
             </Section>
           )}
+
+          {selectedTab === 'prestations' && (
+  <Section title="Prestations">
+    <div className="space-y-4 w-full max-w-xl">
+      {Array.isArray(profile.prestations) && profile.prestations.length > 0 ? (
+        profile.prestations.map((p, i) => (
+          <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
+            <p><strong>Type :</strong> {p.type || 'Non renseigné'}</p>
+            <p><strong>Technologie :</strong> {p.tech || 'Non renseigné'}</p>
+            <p><strong>Niveau :</strong> {p.level || 'Non renseigné'}</p>
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500 italic">Aucune prestation renseignée</p>
+      )}
+    </div>
+  </Section>
+)}
+
         </div>
       </div>
     </div>

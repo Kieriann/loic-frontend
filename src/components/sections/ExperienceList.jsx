@@ -1,5 +1,5 @@
 //
-// ─── Bloc formulaire : liste des expériences professionnelles ──────
+// ─── Bloc formulaire : liste des experiences professionnelles ──────
 //
 
 import React from 'react'

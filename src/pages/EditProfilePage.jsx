@@ -21,14 +21,13 @@ export default function EditProfilePage() {
     highDayRate: 0,
     languages: '',
     isEmployed: false,
-    availableDate: '',
+    availableDate: null,
   })
 
   const [langInput, setLangInput] = useState('')
   const [levelInput, setLevelInput] = useState('débutant')
   const [langList, setLangList] = useState([])
   const [selectedTab, setSelectedTab] = useState('profil')
-
   const [address, setAddress] = useState({
     address: '',
     city: '',
@@ -36,12 +35,17 @@ export default function EditProfilePage() {
     state: '',
     country: '',
   })
-
   const [experiences, setExperiences] = useState([])
   const [documents, setDocuments] = useState({ photo: null, cv: null })
   const [errors, setErrors] = useState({})
   const [popup, setPopup] = useState({ open: false, index: null, type: '' })
   const navigate = useNavigate()
+  const [prestations, setPrestations] = useState([{
+  type: '',
+  tech: '',
+  level: 'junior',
+}])
+
 
   useEffect(() => {
     const loadData = async () => {
@@ -205,6 +209,8 @@ export default function EditProfilePage() {
     formData.append('profile', JSON.stringify({ ...profile, languages: langList.join(',') }))
     formData.append('address', JSON.stringify(address))
     formData.append('experiences', JSON.stringify(formattedExperiences))
+    formData.append('prestations', JSON.stringify(prestations))
+
     if (documents.photo) formData.append('photo', documents.photo)
     if (documents.cv) formData.append('cv', documents.cv)
 
@@ -242,12 +248,16 @@ export default function EditProfilePage() {
 
         <h1 className="text-2xl text-darkBlue font-bold text-center">Modifier mon profil</h1>
         <div className="flex gap-3 justify-center">
-          {['profil', 'expériences', 'realisations'].map(tab => (
-            <button key={tab} onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 rounded-xl font-semibold ${selectedTab === tab ? 'bg-blue-100 text-darkBlue' : 'hover:bg-blue-50'}`}>
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
+        {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
+  <button key={tab} onClick={() => setSelectedTab(tab)}
+    className={`px-4 py-2 rounded-xl font-semibold ${selectedTab === tab ? 'bg-blue-100 text-darkBlue' : 'hover:bg-blue-50'}`}>
+    {tab === 'realisations' ? 'Réalisations' :
+     tab === 'experiences' ? 'Experiences' :
+     tab === 'prestations' ? 'Prestations' :
+     tab.charAt(0).toUpperCase() + tab.slice(1)}
+  </button>
+))}
+
         </div>
 
         {selectedTab === 'profil' && (
@@ -282,7 +292,7 @@ export default function EditProfilePage() {
           </>
         )}
 
-        {selectedTab === 'expériences' && (
+        {selectedTab === 'experiences' && (
           <>
             <div className="flex items-center gap-6 mb-4">
               <label className="inline-flex items-center gap-2 font-semibold text-darkBlue">
@@ -292,7 +302,15 @@ export default function EditProfilePage() {
               {profile.isEmployed && (
                 <>
                   <label className="font-semibold text-darkBlue ml-12">Disponible à partir du</label>
-                  <input type="date" value={profile.availableDate} onChange={(e) => setProfile({ ...profile, availableDate: e.target.value })} className="border rounded px-2 py-1" />
+          <input
+      type="date"
+      name="availableDate"
+      min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+      value={profile.availableDate}
+      onChange={(e) => setProfile({ ...profile, availableDate: e.target.value })}
+      className="border rounded px-2 py-1"
+    />
+
                 </>
               )}
             </div>
@@ -330,39 +348,114 @@ export default function EditProfilePage() {
               </div>
             ))}
 
-            <div className="text-center mt-4">
-              <button type="button" onClick={addExperience} className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition">Ajouter une expérience</button>
-            </div>
+
           </>
         )}
 
         {selectedTab === 'realisations' && (
-          <>
-            {experiences.map((real, i) => (
-              <div key={i} className="border rounded p-4 space-y-3">
-                <input type="text" placeholder="Titre de la réalisation" value={real.realTitle} onChange={(e) => updateExperience(i, 'realTitle', e.target.value)} className="border rounded px-3 py-2 w-full" />
-                <textarea placeholder="Description" value={real.realDescription} onChange={(e) => updateExperience(i, 'realDescription', e.target.value)} className="border rounded px-3 py-2 w-full min-h-[100px]" />
-                <>
-                  <input type="file" className="hidden" id={`real-doc-${i}`} onChange={(e) => updateExperience(i, 'realFile', e.target.files[0])} />
-                  <button type="button" className="text-darkBlue underline text-sm" onClick={() => document.getElementById(`real-doc-${i}`).click()}>
-                    Ajouter un document
-                  </button>
-                  {real.realFile
-                    ? <p className="text-sm text-gray-600 italic">{real.realFile.name}</p>
-                    : real.realFilePath && <p className="text-sm text-gray-600 italic">{real.realFilePath}</p>}
-                </>
-                <button onClick={() => setPopup({ open: true, index: i, type: 'réalisation' })} className="text-red-600 underline text-sm ml-12">Supprimer cette réalisation</button>
-              </div>
-            ))}
+  <>
+    {experiences.map((real, i) => (
+      <div key={i} className="border rounded p-4 space-y-3">
+        <input type="text" placeholder="Titre de la réalisation" value={real.realTitle} onChange={(e) => updateExperience(i, 'realTitle', e.target.value)} className="border rounded px-3 py-2 w-full" />
+        <textarea placeholder="Description" value={real.realDescription} onChange={(e) => updateExperience(i, 'realDescription', e.target.value)} className="border rounded px-3 py-2 w-full min-h-[100px]" />
+       <input type="file" className="hidden" id={`real-doc-${i}`} onChange={(e) => updateExperience(i, 'realFile', e.target.files[0])} />
+<button type="button" className="text-darkBlue underline text-sm" onClick={() => document.getElementById(`real-doc-${i}`).click()}>
+  Ajouter un document
+</button>
+{real.realFile
+  ? <p className="text-sm text-gray-600 italic">{real.realFile.name}</p>
+  : real.realFilePath && <p className="text-sm text-gray-600 italic">{real.realFilePath}</p>}
 
-            <div className="text-center mt-4">
-              <button type="button" onClick={addExperience} className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition">Ajouter une réalisation</button>
-            </div>
-          </>
-        )}
+        <button onClick={() => setPopup({ open: true, index: i, type: 'realisation' })} className="text-red-600 underline text-sm ml-12">Supprimer cette réalisation</button>
+      </div>
+    ))}
+
+    <div className="text-center mt-4">
+      <button type="button" onClick={addExperience} className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition">Ajouter une réalisation</button>
+    </div>
+  </>
+)}
+
+{selectedTab === 'prestations' && (
+  <>
+    {(prestations.length ? prestations : [{}]).map((p, i) => (
+      <div key={i} className="border rounded p-4 space-y-3">
+        <p className="font-medium text-darkBlue">Je suis capable d'assurer</p>
+        <select
+          value={p.type || ''}
+          onChange={e => {
+            const copy = [...prestations]
+            copy[i] = { ...copy[i], type: e.target.value }
+            setPrestations(copy)
+          }}
+          className="border rounded px-2 py-1 w-full"
+        >
+          <option value="">-- Choisir --</option>
+          <option value="formation">la formation</option>
+          <option value="formation">le coaching</option>
+          <option value="maintenance">la maintenance</option>
+          <option value="développement">le développement</option>
+        </select>
+
+        <p className="font-medium text-darkBlue">pour</p>
+        <input
+          type="text"
+          placeholder="Ex: React, Java"
+          value={p.tech || ''}
+          onChange={e => {
+            const copy = [...prestations]
+            copy[i] = { ...copy[i], tech: e.target.value }
+            setPrestations(copy)
+          }}
+          className="border rounded px-2 py-1 w-full"
+        />
+
+        <p className="font-medium text-darkBlue">à un niveau</p>
+        <select
+          value={p.level || 'junior'}
+          onChange={e => {
+            const copy = [...prestations]
+            copy[i] = { ...copy[i], level: e.target.value }
+            setPrestations(copy)
+          }}
+          className="border rounded px-2 py-1 w-full"
+        >
+          <option value="junior">junior</option>
+          <option value="intermédiaire">intermédiaire</option>
+          <option value="expert">expert</option>
+        </select>
+
+        <button
+          type="button"
+          onClick={() => {
+            const copy = [...prestations]
+            copy.splice(i, 1)
+            setPrestations(copy)
+          }}
+          disabled={prestations.length <= 1}
+          className="text-red-600 underline text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          Supprimer cette prestation
+        </button>
+      </div>
+    ))}
+
+    <div className="text-center mt-4">
+      <button
+        type="button"
+        onClick={() => setPrestations([...prestations, { type: '', tech: '', level: 'junior' }])}
+        className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
+      >
+        Ajouter une prestation
+      </button>
+    </div>
+  </>
+)}
 
         <div className="text-center">
-          <button onClick={handleSubmit} className="bg-darkBlue text-white px-6 py-3 rounded-xl hover:bg-[#001a5c] transition">Enregistrer le profil</button>
+          <button onClick={handleSubmit} className="bg-darkBlue text-white px-6 py-3 rounded-xl hover:bg-[#001a5c] transition">
+            Enregistrer le profil
+          </button>
         </div>
       </div>
     </div>
