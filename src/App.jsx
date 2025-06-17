@@ -3,21 +3,23 @@
 //
 
 import React, { useEffect, useState } from 'react'
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+} from 'react-router-dom'
+
 import Signup from './pages/Signup'
 import Login from './pages/Login'
+import ConfirmEmailPage from './pages/ConfirmEmailPage'
 import EditProfilePage from './pages/EditProfilePage'
 import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
 import AdminProfilDetail from './pages/AdminProfilDetail'
 import CenteredLayout from './components/CenteredLayout'
 import logo from './assets/logo.png'
-import {
-  BrowserRouter as Router,
-  Route,
-  Routes,
-  Navigate,
-  useNavigate,
-} from 'react-router-dom'
 import { fetchProfile } from './api'
 
 //
@@ -30,7 +32,7 @@ function Header({ onLogout }) {
 
   const handleLogout = () => {
     localStorage.removeItem('token')
-    onLogout()
+    onLogout(null)
     navigate('/login')
   }
 
@@ -73,69 +75,54 @@ function Header({ onLogout }) {
 //
 
 function AppRouter({ token, setToken }) {
-  const [mode, setMode] = useState('login')
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!token) return
-
-    const getProfile = async () => {
-      try {
-        const res = await fetchProfile(token)
-        setUser({ isAdmin: res.isAdmin })
-      } catch (err) {
+    if (!token) {
+      setLoading(false)
+      return
+    }
+    fetchProfile(token)
+      .then(res => setUser({ isAdmin: res.isAdmin }))
+      .catch(() => {
         localStorage.removeItem('token')
         setToken(null)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    getProfile()
+      })
+      .finally(() => setLoading(false))
   }, [token, setToken])
 
+  if (loading) return <p className="p-4">Chargement…</p>
+
+  // Routes publiques (inscription, connexion, confirmation)
   if (!token) {
     return (
       <>
-        <Header onLogout={() => setToken(null)} />
+        <Header onLogout={setToken} />
         <CenteredLayout>
-          <h1 className="text-2xl font-bold text-darkBlue mb-6 text-center">
-            {mode === 'signup' ? 'Inscription' : 'Connexion'}
-          </h1>
-          {mode === 'signup' ? (
-            <>
-              <Signup onLogin={setToken} />
-              <p className="mt-4 text-center">
-                Déjà inscrit ?{' '}
-                <button className="text-darkBlue underline" onClick={() => setMode('login')}>
-                  Se connecter
-                </button>
-              </p>
-            </>
-          ) : (
-            <>
-              <Login onLogin={setToken} />
-              <p className="mt-4 text-center">
-                Pas encore de compte ?{' '}
-                <button className="text-darkBlue underline" onClick={() => setMode('signup')}>
-                  S’inscrire
-                </button>
-              </p>
-            </>
-          )}
+          <Routes>
+            <Route
+              path="/signup"
+              element={<Signup onLogin={t => { localStorage.setItem('token', t); setToken(t) }} />}
+            />
+            <Route
+              path="/login"
+              element={<Login onLogin={t => { localStorage.setItem('token', t); setToken(t) }} />}
+            />
+            <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
         </CenteredLayout>
       </>
     )
   }
 
-  if (loading || !user) return <p className="p-4">Chargement...</p>
-
+  // Routes privées après authentification
   return (
     <>
-      <Header onLogout={() => setToken(null)} />
+      <Header onLogout={setToken} />
       <Routes>
-        {user.isAdmin ? (
+        {user?.isAdmin ? (
           <>
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/profil/:id" element={<AdminProfilDetail />} />
@@ -145,6 +132,7 @@ function AppRouter({ token, setToken }) {
           <>
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/edit" element={<EditProfilePage />} />
+            <Route path="/confirm-email" element={<ConfirmEmailPage />} />
             <Route path="*" element={<Navigate to="/profile" replace />} />
           </>
         )}
@@ -161,9 +149,9 @@ function App() {
   const [token, setToken] = useState(localStorage.getItem('token'))
 
   return (
-    <Router>
+    <BrowserRouter>
       <AppRouter token={token} setToken={setToken} />
-    </Router>
+    </BrowserRouter>
   )
 }
 
