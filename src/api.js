@@ -1,6 +1,7 @@
 //
 // ─── Fonctions API : authentification et profil utilisateur ───────
 //
+console.log('AUTH_URL =', AUTH_URL);
 
 const AUTH_URL = `${import.meta.env.VITE_API_URL}/api/auth`
 
@@ -19,8 +20,15 @@ export const login = async (data) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  return res.json()
+  const json = await res.json()
+  if (!res.ok) {
+    const err = new Error(json.error || 'Erreur de connexion')
+    err.response = { status: res.status, data: json }
+    throw err
+  }
+  return json
 }
+
 
 export const fetchProfile = async (token) => {
   const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
