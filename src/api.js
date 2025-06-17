@@ -1,9 +1,7 @@
-//
-// ─── Fonctions API : authentification et profil utilisateur ───────
-//
-console.log('AUTH_URL =', AUTH_URL);
+// src/api.js
 
-const AUTH_URL = `${import.meta.env.VITE_API_URL}/api/auth`
+const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const AUTH_URL = `${baseURL}/api/auth`
 
 export const signup = async (data) => {
   const res = await fetch(`${AUTH_URL}/signup`, {
@@ -11,7 +9,9 @@ export const signup = async (data) => {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
-  return res.json()
+  const json = await res.json()
+  if (!res.ok) throw new Error(json.error || 'Erreur d’inscription')
+  return json
 }
 
 export const login = async (data) => {
@@ -29,17 +29,14 @@ export const login = async (data) => {
   return json
 }
 
-
 export const fetchProfile = async (token) => {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
+  const res = await fetch(`${baseURL}/api/profile/profil`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     },
   })
-
   if (!res.ok) throw new Error('Unauthorized')
-
   return res.json()
 }
