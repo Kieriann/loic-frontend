@@ -98,16 +98,30 @@ function AppRouter({ token, setToken }) {
   if (!token) {
     return (
       <>
-        <Header onLogout={setToken} />
+        <Header onLogout={() => setToken(null)} />
         <CenteredLayout>
           <Routes>
             <Route
               path="/signup"
-              element={<Signup onLogin={t => { localStorage.setItem('token', t); setToken(t) }} />}
+              element={
+                <Signup
+                  onLogin={t => {
+                    localStorage.setItem('token', t)
+                    setToken(t)
+                  }}
+                />
+              }
             />
             <Route
               path="/login"
-              element={<Login onLogin={t => { localStorage.setItem('token', t); setToken(t) }} />}
+              element={
+                <Login
+                  onLogin={t => {
+                    localStorage.setItem('token', t)
+                    setToken(t)
+                  }}
+                />
+              }
             />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
@@ -115,6 +129,7 @@ function AppRouter({ token, setToken }) {
         </CenteredLayout>
       </>
     )
+
   }
 
   // Routes privées après authentification
