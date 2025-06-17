@@ -8,6 +8,7 @@ import {
   Routes,
   Route,
   Navigate,
+  Link,
   useNavigate,
 } from 'react-router-dom'
 
@@ -94,7 +95,7 @@ function AppRouter({ token, setToken }) {
 
   if (loading) return <p className="p-4">Chargement…</p>
 
-  // Routes publiques (inscription, connexion, confirmation)
+  // ─── Routes publiques (inscription, connexion, confirmation) ─────
   if (!token) {
     return (
       <>
@@ -102,25 +103,41 @@ function AppRouter({ token, setToken }) {
         <CenteredLayout>
           <Routes>
             <Route
-              path="/signup"
+              path="/login"
               element={
-                <Signup
-                  onLogin={t => {
-                    localStorage.setItem('token', t)
-                    setToken(t)
-                  }}
-                />
+                <>
+                  <Login
+                    onLogin={t => {
+                      localStorage.setItem('token', t)
+                      setToken(t)
+                    }}
+                  />
+                  <p className="mt-4 text-center">
+                    Pas encore de compte ?{' '}
+                    <Link to="/signup" className="text-darkBlue underline">
+                      S’inscrire
+                    </Link>
+                  </p>
+                </>
               }
             />
             <Route
-              path="/login"
+              path="/signup"
               element={
-                <Login
-                  onLogin={t => {
-                    localStorage.setItem('token', t)
-                    setToken(t)
-                  }}
-                />
+                <>
+                  <Signup
+                    onLogin={t => {
+                      localStorage.setItem('token', t)
+                      setToken(t)
+                    }}
+                  />
+                  <p className="mt-4 text-center">
+                    Déjà inscrit ?{' '}
+                    <Link to="/login" className="text-darkBlue underline">
+                      Se connecter
+                    </Link>
+                  </p>
+                </>
               }
             />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
@@ -129,10 +146,9 @@ function AppRouter({ token, setToken }) {
         </CenteredLayout>
       </>
     )
-
   }
 
-  // Routes privées après authentification
+  // ─── Routes privées après authentification ────────────────────────
   return (
     <>
       <Header onLogout={setToken} />
