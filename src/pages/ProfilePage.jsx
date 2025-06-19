@@ -104,6 +104,18 @@ export default function ProfilePage() {
                 </Section>
               </div>
 
+              
+                <div className="text-center">
+                  <Section title="Télétravail">
+                    <p>
+                      Je souhaite télétravailler{' '}
+                      <strong>{profile.teleworkDays}</strong>{' '}
+                      jour{profile.teleworkDays > 1 ? 's' : ''} sur 5 jours travaillés.
+                    </p>
+                  </Section>
+                </div>
+
+
               <Section title="Langues">
   <ul className="text-base text-gray-800 pl-5 max-w-xl mx-auto text-center">
     {(profile.languages || '').split(',').map((l, i) => {
