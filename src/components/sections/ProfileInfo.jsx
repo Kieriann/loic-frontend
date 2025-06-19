@@ -125,7 +125,7 @@ export default function ProfileInfo({ data, setData, errors = {} }) {
       <div className="mt-4">
         <label className="block text-xl font-semibold text-darkBlue mb-1">Télétravail</label>
         <div className="flex items-center gap-2">
-          <span>Je souhaite travailler</span>
+          <span>Je souhaite télétravailler</span>
           <select
             name="teleworkDays"
             value={data.teleworkDays}
@@ -136,7 +136,7 @@ export default function ProfileInfo({ data, setData, errors = {} }) {
               <option key={n} value={n}>{n}</option>
             ))}
           </select>
-          <span>jour(s) sur 5</span>
+          <span>jour(s) sur 5 jours travaillés.</span>
         </div>
       </div>
     </div>
