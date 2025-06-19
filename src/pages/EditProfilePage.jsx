@@ -22,6 +22,7 @@ export default function EditProfilePage() {
     languages: '',
     isEmployed: false,
     availableDate: null,
+    teleworkDays: 0,
   })
 
   const [langInput, setLangInput] = useState('')
@@ -58,7 +59,7 @@ useEffect(() => {
         const {
           firstname, lastname, phone, siret, bio,
           smallDayRate, mediumDayRate, highDayRate,
-          languages, isEmployed, availableDate
+          languages, isEmployed, availableDate, teleworkDays = 0
         } = res.profile
 
         setProfile({
@@ -73,6 +74,7 @@ useEffect(() => {
           languages,
           isEmployed,
           availableDate: availableDate || '',
+          teleworkDays,
         })
 
         setLangList((languages || '').split(','))
@@ -228,7 +230,7 @@ useEffect(() => {
       }
     })
 
-    formData.append('profile', JSON.stringify({ ...profile, languages: langList.join(',') }))
+    formData.append('profile', JSON.stringify({ ...profile, languages: langList.join(','), teleworkDays: profile.teleworkDays }))
     formData.append('address', JSON.stringify(address))
     formData.append('experiences', JSON.stringify(formattedExperiences))
     formData.append('prestations', JSON.stringify(prestations))
