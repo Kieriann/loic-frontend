@@ -25,11 +25,11 @@ export default function Login({ onLogin }) {
         onLogin(result.token)
       }
     } catch (err) {
-      // Si l'API expose le status, on peut l'interpréter
       const status = err.response?.status
       const apiMsg = err.response?.data?.error
 
       if (status === 403) {
+        // e-mail non confirmé
         setError("Ton e-mail n'est pas encore confirmé. Vérifie ta boîte mail.")
       } else if (apiMsg) {
         setError(apiMsg)
