@@ -50,11 +50,17 @@ export default function EditProfilePage() {
 
 
 useEffect(() => {
+  
   const loadData = async () => {
     try {
       const token = localStorage.getItem('token')
       const res = await fetchProfile(token)
-      setDocuments(res.profile.documents || {})
+const photoDoc = res.documents.find(d => d.type === 'ID_PHOTO')
+const cvDoc = res.documents.find(d => d.type === 'CV')
+setDocuments({
+  photo: photoDoc || null,
+  cv: cvDoc || null
+})
 
 
       if (res.profile) {
