@@ -3,18 +3,19 @@
 //
 
 import React, { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { signup } from '../api'
 
 export default function Signup({ onLogin }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     const result = await signup({ email, password })
     if (result.token) {
-      localStorage.setItem('token', result.token)
-      onLogin(result.token)
+      navigate('/signup-success')
     }
   }
 

@@ -13,6 +13,7 @@ import {
 } from 'react-router-dom'
 
 import Signup from './pages/Signup'
+import SignupSuccess from './pages/SignupSuccess'
 import Login from './pages/Login'
 import ConfirmEmailPage from './pages/ConfirmEmailPage'
 import EditProfilePage from './pages/EditProfilePage'
@@ -139,6 +140,10 @@ function AppRouter({ token, setToken }) {
                   </p>
                 </>
               }
+            />
+            <Route
+              path="/signup-success"
+              element={<SignupSuccess />}
             />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
