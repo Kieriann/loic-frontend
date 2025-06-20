@@ -133,8 +133,6 @@ export default function ProfilePage() {
             </>
           )}
 
-         donc, calmement.
-je te donne un bout de code. tu me rends EXACTEMENT ce bout de code, mais avec les modifications dedans, comme ça il n'y aura pas d'erreur d'indentation n'est ce pas?
  {/* EXPERIENCES */}
 {selectedTab === 'competences' && (
   <Section title="Experiences">
