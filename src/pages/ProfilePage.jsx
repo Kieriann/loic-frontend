@@ -132,8 +132,7 @@ export default function ProfilePage() {
 
             </>
           )}
-
- {/* EXPERIENCES */}
+{/* EXPERIENCES */}
 {selectedTab === 'competences' && (
   <Section title="Experiences">
     <div className="text-center mb-6">
@@ -189,6 +188,7 @@ export default function ProfilePage() {
     ))}
   </Section>
 )}
+
 
 
               {experiences.length === 0 && (
