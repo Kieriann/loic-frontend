@@ -16,11 +16,15 @@ export default function Signup() {
     setError('')
     try {
       const result = await signup({ email, password })
-      if (result.token) {
+      console.log('signup result →', result)
+      if (result.message) {
         setSubmitted(true)
+      } else {
+        setError('Échec de l’inscription')
       }
     } catch (err) {
-      setError(err.error || 'Échec de l’inscription')
+      console.error(err)
+      setError('Échec de l’inscription')
     }
   }
 
