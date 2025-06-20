@@ -1,3 +1,7 @@
+//
+// ─── Page d'inscription utilisateur ───────────────────────────────
+//
+
 import React, { useState } from 'react'
 import { signup } from '../api'
 
@@ -32,6 +36,7 @@ export default function Signup() {
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       {error && <p className="text-red-600">{error}</p>}
+
       <label className="block text-darkBlue font-semibold">Email</label>
       <input
         value={email}
