@@ -133,7 +133,9 @@ export default function ProfilePage() {
             </>
           )}
 
-{/* EXPERIENCES */}
+         donc, calmement.
+je te donne un bout de code. tu me rends EXACTEMENT ce bout de code, mais avec les modifications dedans, comme ça il n'y aura pas d'erreur d'indentation n'est ce pas?
+ {/* EXPERIENCES */}
 {selectedTab === 'competences' && (
   <Section title="Experiences">
     <div className="text-center mb-6">
@@ -187,10 +189,8 @@ export default function ProfilePage() {
         </p>
       </div>
     ))}
-
   </Section>
 )}
-
 
 
               {experiences.length === 0 && (
