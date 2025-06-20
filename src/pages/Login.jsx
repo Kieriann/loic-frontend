@@ -56,7 +56,7 @@ export default function Login({ onLogin }) {
         </div>
       )}
 
-      <label className="block text-darkBlue font-semibold">Email</label>
+      <label className="block text-darkBlue font-semibold">Emailcoucou</label>
       <input
         value={email}
         onChange={(e) => setEmail(e.target.value)}
