@@ -41,7 +41,20 @@ function FileInput({ label, file, onChange }) {
         </label>
         <span className="text-darkBlue text-sm italic">{label}</span>
       </div>
-      {file && <span className="text-sm text-gray-700 ml-1">{file.name}</span>}
+
+      {file && (
+        <div className="flex items-center gap-2 ml-1">
+          <span className="text-sm text-gray-700">{file.name || file}</span>
+          <button
+            type="button"
+            onClick={() => onChange(null)}
+            className="text-red-600 text-sm underline"
+          >
+            Supprimer
+          </button>
+        </div>
+      )}
     </div>
   )
 }
+

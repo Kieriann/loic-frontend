@@ -54,6 +54,8 @@ useEffect(() => {
     try {
       const token = localStorage.getItem('token')
       const res = await fetchProfile(token)
+      setDocuments(res.profile.documents || {})
+
 
       if (res.profile) {
         const {
