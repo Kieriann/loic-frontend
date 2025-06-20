@@ -134,24 +134,62 @@ export default function ProfilePage() {
           )}
 
           {/* EXPERIENCES */}
-          {selectedTab === 'competences' && (
-            <Section title="Experiences">
-              <div className="text-center mb-6">
-                {profile.isEmployed ? (
-                  <p className="text-red-600 font-semibold">
-                    Je serai disponible à partir du :{' '}
-                    {profile.availableDate ? (
-                      <strong>{profile.availableDate}</strong>
-                    ) : (
-                      <em className="text-gray-500">non précisée</em>
-                    )}
-                  </p>
-                ) : (
-                  <p className="text-green-600 font-semibold">
-                    Je suis actuellement disponible
-                  </p>
-                )}
-              </div>
+{selectedTab === 'competences' && (
+  <Section title="Experiences">
+    <div className="text-center mb-6">
+      {profile.isEmployed ? (
+        <p className="text-red-600 font-semibold">
+          Je serai disponible à partir du :{' '}
+          {profile.availableDate ? (
+            <strong>
+              {new Date(profile.availableDate).toLocaleDateString('fr-FR', {
+                day:   '2-digit',
+                month: '2-digit',
+                year:  'numeric'
+              })}
+            </strong>
+          ) : (
+            <em className="text-gray-500">non précisée</em>
+          )}
+        </p>
+      ) : (
+        <p className="text-green-600 font-semibold">
+          Je suis actuellement disponible
+        </p>
+      )}
+    </div>
+
+    {experiences.length === 0 && (
+      <p className="text-gray-500">Aucune expérience renseignée</p>
+    )}
+    {experiences.map((exp, i) => (
+      <div
+        key={i}
+        className="border border-primary rounded p-4 space-y-2 w-full max-w-xl bg-[#f8fbff]"
+      >
+        <p><strong>Titre :</strong> {exp.title}</p>
+        <p><strong>Client :</strong> {exp.client}</p>
+        <p><strong>Description :</strong> {exp.description}</p>
+        <p><strong>Domaines :</strong> {exp.domains}</p>
+        <p>
+          <strong>Langages :</strong>{' '}
+          {Array.isArray(exp.languages)
+            ? exp.languages.map((l, j) => {
+                const [name, level] = l.split(':')
+                return (
+                  <span key={j}>
+                    {name} ({level})
+                    {j < exp.languages.length - 1 ? ', ' : ''}
+                  </span>
+                )
+              })
+            : 'Aucun'}
+        </p>
+      </div>
+    ))}
+  </Section>
+)}
+
 
               {experiences.length === 0 && (
                 <p className="text-gray-500">Aucune expérience renseignée</p>
