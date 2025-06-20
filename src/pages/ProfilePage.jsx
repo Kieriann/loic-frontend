@@ -5,11 +5,13 @@
 import React, { useEffect, useState } from 'react'
 import { fetchProfile } from '../api/fetchProfile'
 import { Navigate, useNavigate } from 'react-router-dom'
+import axios from 'axios'
 
 export default function ProfilePage() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [selectedTab, setSelectedTab] = useState('profil')
+  const [documents, setDocuments] = useState([])
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -25,6 +27,21 @@ export default function ProfilePage() {
       }
     }
     load()
+  }, [])
+
+  useEffect(() => {
+    const fetchDocs = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/documents/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        setDocuments(res.data)
+      } catch (err) {
+        console.error('Erreur chargement documents', err)
+      }
+    }
+    fetchDocs()
   }, [])
 
   if (loading) return <p className="p-4">Chargement...</p>
@@ -125,6 +142,26 @@ export default function ProfilePage() {
                       </li>
                     )
                   })}
+                </ul>
+              </Section>
+
+              <Section title="Documents">
+                <ul className="list-disc list-inside text-left max-w-xl mx-auto">
+                  {documents.length === 0 && (
+                    <li className="text-gray-500 italic">Aucun document</li>
+                  )}
+                  {documents.map((doc) => (
+                    <li key={doc.id}>
+                      <a
+                        href={doc.fileUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline"
+                      >
+                        {doc.fileName}
+                      </a>
+                    </li>
+                  ))}
                 </ul>
               </Section>
             </>
