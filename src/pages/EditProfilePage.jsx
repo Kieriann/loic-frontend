@@ -59,7 +59,7 @@ useEffect(() => {
         const {
           firstname, lastname, phone, siret, bio,
           smallDayRate, mediumDayRate, highDayRate,
-          languages, isEmployed, availableDate, teleworkDays = 0
+          languages, isEmployed, availableDate
         } = res.profile
 
         setProfile({
@@ -74,7 +74,6 @@ useEffect(() => {
           languages,
           isEmployed,
           availableDate: availableDate || '',
-          teleworkDays,
         })
 
         setLangList((languages || '').split(','))
@@ -94,6 +93,9 @@ useEffect(() => {
           languages: Array.isArray(exp.languages) ? exp.languages : [],
           newLangInput: '',
           newLangLevel: 'junior',
+          realTech: Array.isArray(exp.realTech) ? exp.realTech : [],
+          newRealTechInput: '',
+          newRealTechLevel: 'junior',
           realTitle: exp.realTitle || '',
           realDescription: exp.realDescription || '',
           realFile: null,
@@ -108,9 +110,13 @@ useEffect(() => {
           languages: [],
           newLangInput: '',
           newLangLevel: 'junior',
+          realTech: [],
+          newRealTechInput: '',
+          newRealTechLevel: 'junior',
           realTitle: '',
           realDescription: '',
           realFile: null,
+          realFilePath: '',
         }])
       }
 
@@ -154,6 +160,7 @@ useEffect(() => {
     if (Object.keys(newErrors).length > 0) {
       const firstKey = Object.keys(newErrors)[0]
       const el = document.querySelector(`[name="${firstKey}"]`)
+
       if (el?.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
       return false
     }
@@ -192,6 +199,23 @@ useEffect(() => {
     setExperiences(updated)
   }
 
+  const addRealTech = (index) => {
+  const updated = [...experiences];
+  if (!updated[index].newRealTechInput.trim()) return;
+  updated[index].realTech.push(
+    `${updated[index].newRealTechInput}:${updated[index].newRealTechLevel}`
+  );
+  updated[index].newRealTechInput = '';
+  updated[index].newRealTechLevel = 'junior';
+  setExperiences(updated);
+};
+
+const removeRealTech = (expIndex, techIndex) => {
+  const updated = [...experiences];
+  updated[expIndex].realTech.splice(techIndex, 1);
+  setExperiences(updated);
+};
+
   const addExperience = () => {
     setExperiences([...experiences, {
       title: '',
@@ -201,6 +225,9 @@ useEffect(() => {
       languages: [],
       newLangInput: '',
       newLangLevel: 'junior',
+      realTech: [],
+      newRealTechInput: '',
+      newRealTechLevel: 'junior',
       realTitle: '',
       realDescription: '',
       realFile: null,
@@ -230,7 +257,7 @@ useEffect(() => {
       }
     })
 
-    formData.append('profile', JSON.stringify({ ...profile, languages: langList.join(','), teleworkDays: profile.teleworkDays }))
+    formData.append('profile', JSON.stringify({ ...profile, languages: langList.join(',') }))
     formData.append('address', JSON.stringify(address))
     formData.append('experiences', JSON.stringify(formattedExperiences))
     formData.append('prestations', JSON.stringify(prestations))
@@ -409,6 +436,46 @@ useEffect(() => {
       <div key={i} className="border rounded p-4 space-y-3">
         <input type="text" placeholder="Titre de la réalisation" value={real.realTitle} onChange={(e) => updateExperience(i, 'realTitle', e.target.value)} className="border rounded px-3 py-2 w-full" />
         <textarea placeholder="Description" value={real.realDescription} onChange={(e) => updateExperience(i, 'realDescription', e.target.value)} className="border rounded px-3 py-2 w-full min-h-[100px]" />
+          {/* Langages et logiciels */}
+<div className="flex gap-2">
+  <input
+    type="text"
+    placeholder="Langages et logiciels"
+    value={real.newRealTechInput}
+    onChange={e => updateExperience(i, 'newRealTechInput', e.target.value)}
+    className="border rounded px-2 py-1 flex-1"
+  />
+  <select
+    value={real.newRealTechLevel}
+    onChange={e => updateExperience(i, 'newRealTechLevel', e.target.value)}
+    className="border rounded px-2 py-1"
+  >
+    <option value="junior">Junior</option>
+    <option value="intermédiaire">Intermédiaire</option>
+    <option value="senior">Senior</option>
+  </select>
+  <button onClick={() => addRealTech(i)} className="bg-darkBlue text-white px-3 py-1 rounded">
+    Ajouter
+  </button>
+</div>
+
+<ul className="text-sm text-gray-700 space-y-1">
+  {real.realTech.map((t, j) => {
+    const [name, level] = t.split(':');
+    return (
+      <li key={j} className="flex gap-2 items-center">
+        <span>{name} : {level}</span>
+        <button
+          type="button"
+          onClick={() => removeRealTech(i, j)}
+          className="text-red-500 text-xs hover:underline"
+        >
+          Supprimer
+        </button>
+      </li>
+    );
+  })}
+</ul>
        <input type="file" className="hidden" id={`real-doc-${i}`} onChange={(e) => updateExperience(i, 'realFile', e.target.files[0])} />
 <button type="button" className="text-darkBlue underline text-sm" onClick={() => document.getElementById(`real-doc-${i}`).click()}>
   Ajouter un document
