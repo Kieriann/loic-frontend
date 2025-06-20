@@ -264,8 +264,19 @@ const removeRealTech = (expIndex, techIndex) => {
     formData.append('experiences', JSON.stringify(formattedExperiences))
     formData.append('prestations', JSON.stringify(prestations))
 
-    if (documents.photo) formData.append('photo', documents.photo)
-    if (documents.cv) formData.append('cv', documents.cv)
+if (documents.photo) {
+  formData.append('photo', documents.photo)
+} else if (profile.photoPath) {
+  formData.append('removePhoto', 'true')
+}
+
+if (documents.cv) {
+  formData.append('cv', documents.cv)
+} else if (profile.cvPath) {
+  formData.append('removeCV', 'true')
+}
+
+
 
     try {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
