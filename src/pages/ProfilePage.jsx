@@ -154,7 +154,7 @@ useEffect(() => {
                   {documents.map((doc) => (
                     <li key={doc.id}>
                       <a
-                        href={doc.fileUrl}
+                  href={`${import.meta.env.VITE_API_URL}/uploads/${doc.fileName}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 underline"
