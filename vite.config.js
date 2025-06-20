@@ -1,8 +1,10 @@
-export default {
+require('dotenv').config()
+
+module.exports = {
   server: {
     proxy: {
       '/uploads': {
-        target: import.meta.env.VITE_API_URL,
+        target: process.env.VITE_API_URL,
         changeOrigin: true,
       },
     },
