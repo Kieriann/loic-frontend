@@ -29,20 +29,21 @@ export default function ProfilePage() {
     load()
   }, [])
 
-  useEffect(() => {
-    const fetchDocs = async () => {
-      try {
-        const token = localStorage.getItem('token')
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/documents/me`, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        setDocuments(res.data)
-      } catch (err) {
-        console.error('Erreur chargement documents', err)
-      }
+useEffect(() => {
+  const fetchDocs = async () => {
+    try {
+      const token = localStorage.getItem('token')
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents/me`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      setDocuments(res.data)
+    } catch (err) {
+      console.error('Erreur chargement documents', err)
     }
-    fetchDocs()
-  }, [])
+  }
+  fetchDocs()
+}, [])
+
 
   if (loading) return <p className="p-4">Chargement...</p>
   if (!data?.profile || !data.profile.firstname) return <Navigate to="/profile/edit" replace />
