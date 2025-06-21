@@ -58,9 +58,10 @@ useEffect(() => {
 const photoDoc = res.documents.find(d => d.type === 'ID_PHOTO')
 const cvDoc = res.documents.find(d => d.type === 'CV')
 setDocuments({
-  photo: photoDoc || null,
-  cv: cvDoc || null
+  photo: photoDoc ? photoDoc.originalName : null,
+  cv: cvDoc ? cvDoc.originalName : null
 })
+
 
 
       if (res.profile) {
