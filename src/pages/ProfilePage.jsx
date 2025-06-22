@@ -152,19 +152,23 @@ useEffect(() => {
     {documents.length === 0 && (
       <li className="text-gray-500 italic">Aucun document</li>
     )}
-    {documents.map((doc) => (
-      <li key={doc.id}>
-        <strong>{doc.type === 'CV' ? 'CV' : 'Photo'} :</strong>{' '}
-        <a
-          href={`${import.meta.env.VITE_API_URL}/uploads/${doc.fileName}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 underline"
-        >
-          {doc.originalName}
-        </a>
-      </li>
-    ))}
+{Array.isArray(documents) && documents.map((doc) => {
+  if (!doc || typeof doc !== 'object' || !doc.id) return null
+  return (
+    <li key={doc.id}>
+      <strong>{doc.type === 'CV' ? 'CV' : 'Photo'} :</strong>{' '}
+      <a
+        href={`${import.meta.env.VITE_API_URL}/uploads/${doc.fileName}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-blue-600 underline"
+      >
+        {doc.originalName}
+      </a>
+    </li>
+  )
+})}
+
   </ul>
 </Section>
 
