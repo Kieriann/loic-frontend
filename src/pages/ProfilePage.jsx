@@ -36,6 +36,8 @@ useEffect(() => {
 const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
+      console.log('documents', documents)
+
 setDocuments(Array.isArray(res.data) ? res.data : Object.values(res.data || {}))
     } catch (err) {
       console.error('Erreur chargement documents', err)
