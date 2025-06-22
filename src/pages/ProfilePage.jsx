@@ -146,25 +146,27 @@ useEffect(() => {
                 </ul>
               </Section>
 
-              <Section title="Documents">
-                <ul className="list-disc list-inside text-left max-w-xl mx-auto">
-                  {documents.length === 0 && (
-                    <li className="text-gray-500 italic">Aucun document</li>
-                  )}
-                  {documents.map((doc) => (
-                    <li key={doc.id}>
-                      <a
-                  href={`${import.meta.env.VITE_API_URL}/uploads/${doc.fileName}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline"
-                      >
-                        {doc.fileName}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </Section>
+<Section title="Documents">
+  <ul className="list-disc list-inside text-left max-w-xl mx-auto">
+    {documents.length === 0 && (
+      <li className="text-gray-500 italic">Aucun document</li>
+    )}
+    {documents.map((doc) => (
+      <li key={doc.id}>
+        <strong>{doc.type === 'CV' ? 'CV' : 'Photo'} :</strong>{' '}
+        <a
+          href={`${import.meta.env.VITE_API_URL}/uploads/${doc.fileName}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline"
+        >
+          {doc.originalName}
+        </a>
+      </li>
+    ))}
+  </ul>
+</Section>
+
             </>
           )}
 
