@@ -33,18 +33,19 @@ useEffect(() => {
   const fetchDocs = async () => {
     try {
       const token = localStorage.getItem('token')
-const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents/me`, {
+      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      console.log('documents', documents)
-
-setDocuments(Array.isArray(res.data) ? res.data : Object.values(res.data || {}))
+      const docs = Array.isArray(res.data) ? res.data : Object.values(res.data || {})
+      console.log('documents', docs)
+      setDocuments(docs)
     } catch (err) {
       console.error('Erreur chargement documents', err)
     }
   }
   fetchDocs()
 }, [])
+
 
 
 
