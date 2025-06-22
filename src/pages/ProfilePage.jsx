@@ -36,13 +36,14 @@ useEffect(() => {
       const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents/me`, {
         headers: { Authorization: `Bearer ${token}` }
       })
-      setDocuments(res.data)
+      setDocuments(res.data || [])
     } catch (err) {
       console.error('Erreur chargement documents', err)
     }
   }
   fetchDocs()
 }, [])
+
 
 
   if (loading) return <p className="p-4">Chargement...</p>
@@ -166,6 +167,8 @@ useEffect(() => {
     ))}
   </ul>
 </Section>
+
+
 
             </>
           )}
