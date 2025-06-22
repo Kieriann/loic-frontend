@@ -152,10 +152,12 @@ setDocuments(Array.isArray(res.data) ? res.data : Object.values(res.data || {}))
     {documents.length === 0 && (
       <li className="text-gray-500 italic">Aucun document</li>
     )}
-{Array.isArray(documents) && documents.map((doc) => {
-  if (!doc || typeof doc !== 'object' || !doc.id) return null
+{Array.isArray(documents) && documents.map((doc, index) => {
+  if (!doc || typeof doc !== 'object') return null
+
   return (
-    <li key={doc.id}>
+    <li key={doc.id || index}
+>
       <strong>{doc.type === 'CV' ? 'CV' : 'Photo'} :</strong>{' '}
       <a
         href={`${import.meta.env.VITE_API_URL}/uploads/${doc.fileName}`}
