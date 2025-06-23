@@ -292,24 +292,26 @@ const profilePayload = {
 formData.append('profile', JSON.stringify(profilePayload))
 
 
-    try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-        },
-        body: formData,
-      })
+try {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+    },
+    body: formData,
+  })
 
-      if (!res.ok) throw new Error('Échec de l’enregistrement')
-      navigate('/profile')
-    } catch (err) {
-      const text = await err.response?.text?.()
-console.error('Erreur backend :', text || err)
-alert("Erreur : " + (text || err.message))
-
-    }
+  if (!res.ok) {
+    const resText = await res.text()
+    console.error('Erreur backend complète :', resText)
+    throw new Error(resText)
   }
+
+  navigate('/profile')
+} catch (err) {
+  alert('Erreur backend : ' + (err.message || 'inconnue'))
+}
+
 
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
