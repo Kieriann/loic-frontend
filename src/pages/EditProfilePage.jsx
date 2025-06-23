@@ -277,17 +277,19 @@ const removeRealTech = (expIndex, techIndex) => {
 
 if (documents.photo) {
   formData.append('photo', documents.photo)
-} else {
-  formData.append('removePhoto', 'true')
 }
-
 if (documents.cv) {
   formData.append('cv', documents.cv)
-} else {
-  formData.append('removeCV', 'true')
 }
 
+const profilePayload = {
+  ...profile,
+  languages: langList.join(','),
+  removePhoto: documents.photo ? false : true,
+  removeCV: documents.cv ? false : true,
+}
 
+formData.append('profile', JSON.stringify(profilePayload))
 
 
     try {
