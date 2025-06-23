@@ -165,14 +165,18 @@ useEffect(() => {
   return (
     <li key={doc.id || index}>
       <strong>{typeLabel} :</strong>{' '}
-      <a
-  href={`https://res.cloudinary.com/dwwt3sgbw/${doc.type === 'CV' ? 'raw' : 'image'}/upload/${doc.fileName}`}
+<a
+  href={doc.type === 'CV'
+    ? `https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${doc.fileName}&embedded=true`
+    : `https://res.cloudinary.com/dwwt3sgbw/image/upload/${doc.fileName}`
+  }
   target="_blank"
   rel="noopener noreferrer"
   className="text-blue-600 underline"
 >
   {name}
 </a>
+
 
     </li>
   )
