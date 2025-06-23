@@ -37,7 +37,8 @@ export default function EditProfilePage() {
     state: '',
     country: '',
   })
-  const [experiences, setExperiences] = useState([])
+const [experiences, setExperiences] = useState([])
+const [realisations, setRealisations] = useState([])
   const [documents, setDocuments] = useState({ photo: null, cv: null })
   const [errors, setErrors] = useState({})
   const [popup, setPopup] = useState({ open: false, index: null, type: '' })
@@ -131,6 +132,29 @@ const cvDoc = docArray.find(d => d.type === 'CV')
           realFilePath: '',
         }])
       }
+// Chargement des réalisations
+const realList = res.realisations || []
+setRealisations(realList.map(real => ({
+  realTitle: real.title || '',
+  realDescription: real.description || '',
+  realTech: Array.isArray(real.techs) ? real.techs : [],
+  newRealTechInput: '',
+  newRealTechLevel: 'junior',
+  realFile: null,
+  realFilePath: real.fileName ? `${import.meta.env.VITE_CLOUDINARY_URL}/${real.fileName}` : '',
+})))
+if (!realList.length) {
+  setRealisations([{
+    realTitle: '',
+    realDescription: '',
+    realTech: [],
+    newRealTechInput: '',
+    newRealTechLevel: 'junior',
+    realFile: null,
+    realFilePath: '',
+  }])
+}
+
 
       // Chargement des prestations
       if (res.prestations?.length) {
@@ -257,87 +281,120 @@ const removeRealTech = (expIndex, techIndex) => {
   const sanitizeFileName = (name) =>
   name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_")
 
-  
+
+const updateRealisation = (index, field, value) => {
+  const updated = [...realisations]
+  updated[index][field] = value
+  setRealisations(updated)
+}
+
+const addRealisation = () => {
+  setRealisations([...realisations, {
+    realTitle: '',
+    realDescription: '',
+    realTech: [],
+    newRealTechInput: '',
+    newRealTechLevel: 'junior',
+    realFile: null,
+    realFilePath: '',
+  }])
+}
+
+const addRealTech = (index) => {
+  const updated = [...realisations]
+  if (!updated[index].newRealTechInput.trim()) return
+  updated[index].realTech.push(`${updated[index].newRealTechInput}:${updated[index].newRealTechLevel}`)
+  updated[index].newRealTechInput = ''
+  updated[index].newRealTechLevel = 'junior'
+  setRealisations(updated)
+}
+
+const removeRealTech = (index, techIndex) => {
+  const updated = [...realisations]
+  updated[index].realTech.splice(techIndex, 1)
+  setRealisations(updated)
+}
+
 const handleSubmit = async () => {
   if (!validate()) return
 
   const formData = new FormData()
 
+  if (!profile.availableDate) profile.availableDate = ''
+
+  const profilePayload = {
+    ...profile,
+    languages: langList.join(','),
+  }
+
   const formattedExperiences = experiences.map(exp => ({
-    ...exp,
-    realFilePath: exp.realFilePath || '',
-  }))
+  title: exp.title,
+  client: exp.client,
+  description: exp.description,
+  domains: exp.domains,
+  languages: exp.languages,
+}))
 
 
+  formData.append('profile', JSON.stringify(profilePayload))
+  formData.append('address', JSON.stringify(address))
+  formData.append('experiences', JSON.stringify(formattedExperiences))
+  formData.append('prestations', JSON.stringify(prestations))
 
+  if (documents.photo) {
+    formData.append('photo', documents.photo)
+  } else {
+    formData.append('removePhoto', 'true')
+  }
 
-    if (!profile.availableDate) profile.availableDate = ''
+  if (documents.cv) {
+    formData.append('cv', documents.cv)
+  } else {
+    formData.append('removeCV', 'true')
+  }
 
-
-const profilePayload = {
-  ...profile,
-  languages: langList.join(','),
-}
-
-formData.append('profile', JSON.stringify(profilePayload))
-formData.append('address', JSON.stringify(address))
-formData.append('experiences', JSON.stringify(formattedExperiences))
-
-const realFormData = new FormData()
-realFormData.append('data', JSON.stringify(experiences))
-
-
-formData.append('prestations', JSON.stringify(prestations))
-
-if (documents.photo) {
-  formData.append('photo', documents.photo)
-} else {
-  formData.append('removePhoto', 'true')
-}
-
-if (documents.cv) {
-  formData.append('cv', documents.cv)
-} else {
-  formData.append('removeCV', 'true')
-}
-
-
-try {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-    },
-    body: formData,
+  const realFormData = new FormData()
+  realFormData.append('data', JSON.stringify(realisations))
+  realisations.forEach((r, i) => {
+    if (r.realFile && r.realFile instanceof File) {
+      realFormData.append('realFiles', r.realFile, sanitizeFileName(r.realFile.name))
+    }
   })
 
-  await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
-  method: 'POST',
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-  },
-  body: realFormData,
-})
-
-
-if (!res.ok) {
-  const resText = await res.text()
   try {
-    const json = JSON.parse(resText)
-    console.error('Erreur backend complète :', json)
-  } catch {
-    console.error('Erreur backend brute :', resText)
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+      },
+      body: formData,
+    })
+
+    await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+      },
+      body: realFormData,
+    })
+
+    if (!res.ok) {
+      const resText = await res.text()
+      try {
+        const json = JSON.parse(resText)
+        console.error('Erreur backend complète :', json)
+      } catch {
+        console.error('Erreur backend brute :', resText)
+      }
+      throw new Error(resText)
+    }
+
+    navigate('/profile')
+  } catch (err) {
+    alert('Erreur backend : ' + (err.message || 'inconnue'))
   }
-  throw new Error(resText)
 }
 
-
-
-  navigate('/profile')
-} catch (err) {
-  alert('Erreur backend : ' + (err.message || 'inconnue'))
-}
-  }
 
 
   return (
@@ -490,22 +547,22 @@ if (!res.ok) {
 
         {selectedTab === 'realisations' && (
   <>
-    {experiences.map((real, i) => (
+    {realisations.map((real, i) => (
       <div key={i} className="border rounded p-4 space-y-3">
-        <input type="text" placeholder="Titre de la réalisation" value={real.realTitle} onChange={(e) => updateExperience(i, 'realTitle', e.target.value)} className="border rounded px-3 py-2 w-full" />
-        <textarea placeholder="Description" value={real.realDescription} onChange={(e) => updateExperience(i, 'realDescription', e.target.value)} className="border rounded px-3 py-2 w-full min-h-[100px]" />
+        <input type="text" placeholder="Titre de la réalisation" value={real.realTitle} onChange={(e) => updateRealisation(i, 'realTitle', e.target.value)} className="border rounded px-3 py-2 w-full" />
+        <textarea placeholder="Description" value={real.realDescription} onChange={(e) => updateRealisation(i, 'realDescription', e.target.value)} className="border rounded px-3 py-2 w-full min-h-[100px]" />
           {/* Langages et logiciels */}
 <div className="flex gap-2">
   <input
     type="text"
     placeholder="Langages et logiciels"
     value={real.newRealTechInput}
-    onChange={e => updateExperience(i, 'newRealTechInput', e.target.value)}
+    onChange={e => updateRealisation(i, 'newRealTechInput', e.target.value)}
     className="border rounded px-2 py-1 flex-1"
   />
   <select
     value={real.newRealTechLevel}
-    onChange={e => updateExperience(i, 'newRealTechLevel', e.target.value)}
+    onChange={e => updateRealisation(i, 'newRealTechLevel', e.target.value)}
     className="border rounded px-2 py-1"
   >
     <option value="junior">Junior</option>
@@ -516,6 +573,8 @@ if (!res.ok) {
     Ajouter
   </button>
 </div>
+
+
 
 <ul className="text-sm text-gray-700 space-y-1">
   {real.realTech.map((t, j) => {
@@ -534,7 +593,7 @@ if (!res.ok) {
     );
   })}
 </ul>
-       <input type="file" className="hidden" id={`real-doc-${i}`} onChange={(e) => updateExperience(i, 'realFile', e.target.files[0])} />
+       <input type="file" className="hidden" id={`real-doc-${i}`} onChange={(e) => updateRealisation(i, 'realFile', e.target.files[0])} />
 <button type="button" className="text-darkBlue underline text-sm" onClick={() => document.getElementById(`real-doc-${i}`).click()}>
   Ajouter un document
 </button>
@@ -551,15 +610,18 @@ if (!res.ok) {
 </a>
 }
 
+
         <button onClick={() => setPopup({ open: true, index: i, type: 'realisation' })} className="text-red-600 underline text-sm ml-12">Supprimer cette réalisation</button>
       </div>
     ))}
 
     <div className="text-center mt-4">
-      <button type="button" onClick={addExperience} className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition">Ajouter une réalisation</button>
+      <button type="button" onClick={addRealisation} className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition">Ajouter une réalisation</button>
     </div>
   </>
 )}
+
+
 
 {selectedTab === 'prestations' && (
   <>
