@@ -20,6 +20,7 @@ export default function ProfilePage() {
         const token = localStorage.getItem('token')
         const res = await fetchProfile(token)
         setData(res)
+        console.log('profil récupéré', res)
       } catch (err) {
         console.error('Erreur chargement', err)
       } finally {
@@ -52,7 +53,7 @@ useEffect(() => {
   if (loading) return <p className="p-4">Chargement...</p>
   if (!data?.profile || !data.profile.firstname) return <Navigate to="/profile/edit" replace />
 
-  const { profile, experiences, prestations } = data
+  const { profile, experiences, prestations, realisations } = data
   const address = profile.Address || {}
   console.log('realFilePaths filtrés :', experiences.filter(e => e.realFilePath).map(e => e.realFilePath))
 
@@ -248,41 +249,35 @@ useEffect(() => {
 
           {/* RÉALISATIONS */}
           {selectedTab === 'realisations' && (
-            <Section title="Réalisations">
-              <div className="space-y-4 w-full max-w-xl">
-                {experiences
-  .filter(r => r.realTitle?.trim() || r.realDescription?.trim() || r.realFilePath?.trim())
-                  .map((r, i) => (
-                    <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
-                      {r.realTitle && <p><strong>Titre :</strong> {r.realTitle}</p>}
-                      {r.realDescription && <p><strong>Description :</strong> {r.realDescription}</p>}
-                      {r.realFilePath && (
-                        <p>
-                          <strong>Document :</strong>{' '}
-<a
-  href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${r.realFilePath}&embedded=true`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-blue-600 underline"
->
-  {r.realFilePath.split('/').pop()}
-</a>
+  <Section title="Réalisations">
+    <div className="space-y-4 w-full max-w-xl">
+      {realisations && realisations.length > 0 ? (
+        realisations.map((r, i) => (
+          <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
+            {r.title && <p><strong>Titre :</strong> {r.title}</p>}
+            {r.description && <p><strong>Description :</strong> {r.description}</p>}
+            {r.fileName && (
+              <p>
+                <strong>Document :</strong>{' '}
+                <a
+                  href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${r.fileName}&embedded=true`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 underline"
+                >
+                  {r.fileName.split('/').pop()}
+                </a>
+              </p>
+            )}
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500 italic">Aucune réalisation renseignée</p>
+      )}
+    </div>
+  </Section>
+)}
 
-
-
-
-
-                        </p>
-                      )}
-                    </div>
-                  ))}
-
-                {experiences.filter(r => r.realTitle?.trim() || r.realDescription?.trim()).length === 0 && (
-                  <p className="text-gray-500 italic">Aucune réalisation renseignée</p>
-                )}
-              </div>
-            </Section>
-          )}
 
           {/* PRESTATIONS */}
           {selectedTab === 'prestations' && (
