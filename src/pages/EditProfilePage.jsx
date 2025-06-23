@@ -55,8 +55,9 @@ useEffect(() => {
       const token = localStorage.getItem('token')
       const res = await fetchProfile(token)
 
-      const photoDoc = res.documents.find(d => d.type === 'ID_PHOTO')
-      const cvDoc = res.documents.find(d => d.type === 'CV')
+const docArray = Array.isArray(res.documents) ? res.documents : Object.values(res.documents || {})
+const photoDoc = docArray.find(d => d.type === 'ID_PHOTO')
+const cvDoc = docArray.find(d => d.type === 'CV')
 
       setDocuments({
         photo: photoDoc || null,
