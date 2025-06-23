@@ -270,24 +270,28 @@ const removeRealTech = (expIndex, techIndex) => {
     })
 
     if (!profile.availableDate) profile.availableDate = ''
-    formData.append('address', JSON.stringify(address))
-    formData.append('experiences', JSON.stringify(formattedExperiences))
-    formData.append('prestations', JSON.stringify(prestations))
-
-if (documents.photo) {
-  formData.append('photo', documents.photo)
-}
-if (documents.cv) {
-  formData.append('cv', documents.cv)
-}
 
 const profilePayload = {
   ...profile,
   languages: langList.join(','),
 }
 
-
 formData.append('profile', JSON.stringify(profilePayload))
+formData.append('address', JSON.stringify(address))
+formData.append('experiences', JSON.stringify(formattedExperiences))
+formData.append('prestations', JSON.stringify(prestations))
+
+if (documents.photo) {
+  formData.append('photo', documents.photo)
+} else {
+  formData.append('removePhoto', 'true')
+}
+
+if (documents.cv) {
+  formData.append('cv', documents.cv)
+} else {
+  formData.append('removeCV', 'true')
+}
 
 
 try {
