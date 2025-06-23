@@ -284,9 +284,8 @@ if (documents.cv) {
 const profilePayload = {
   ...profile,
   languages: langList.join(','),
-  removePhoto: documents.photo ? false : true,
-  removeCV: documents.cv ? false : true,
 }
+
 
 formData.append('profile', JSON.stringify(profilePayload))
 
