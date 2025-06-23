@@ -270,7 +270,6 @@ const removeRealTech = (expIndex, techIndex) => {
     })
 
     if (!profile.availableDate) profile.availableDate = ''
-    formData.append('profile', JSON.stringify({ ...profile, languages: langList.join(',') }))
     formData.append('address', JSON.stringify(address))
     formData.append('experiences', JSON.stringify(formattedExperiences))
     formData.append('prestations', JSON.stringify(prestations))
@@ -311,6 +310,7 @@ try {
 } catch (err) {
   alert('Erreur backend : ' + (err.message || 'inconnue'))
 }
+  }
 
 
   return (
@@ -610,4 +610,3 @@ try {
     </div>
   )
 }
-
