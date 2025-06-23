@@ -269,6 +269,7 @@ const removeRealTech = (expIndex, techIndex) => {
       }
     })
 
+    if (!profile.availableDate) profile.availableDate = ''
     formData.append('profile', JSON.stringify({ ...profile, languages: langList.join(',') }))
     formData.append('address', JSON.stringify(address))
     formData.append('experiences', JSON.stringify(formattedExperiences))
