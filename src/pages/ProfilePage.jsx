@@ -244,7 +244,7 @@ useEffect(() => {
             <Section title="Réalisations">
               <div className="space-y-4 w-full max-w-xl">
                 {experiences
-                  .filter(r => r.realTitle?.trim() || r.realDescription?.trim())
+  .filter(r => r.realTitle?.trim() || r.realDescription?.trim() || r.realFilePath?.trim())
                   .map((r, i) => (
                     <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
                       {r.realTitle && <p><strong>Titre :</strong> {r.realTitle}</p>}
