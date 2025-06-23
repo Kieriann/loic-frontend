@@ -260,13 +260,14 @@ useEffect(() => {
                         <p>
                           <strong>Document :</strong>{' '}
 <a
-href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/${encodeURIComponent(r.realFilePath)}.pdf`}
+  href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/${r.realFilePath}.pdf`}
   target="_blank"
   rel="noopener noreferrer"
   className="text-blue-600 underline"
 >
   Voir le fichier
 </a>
+
 
 
 
