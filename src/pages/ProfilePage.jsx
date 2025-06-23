@@ -158,21 +158,29 @@ useEffect(() => {
 {Array.isArray(documents) && documents.map((doc, index) => {
   if (!doc || typeof doc !== 'object') return null
 
+  const typeLabel = doc.type === 'CV' ? 'CV' : 'Photo'
+  const name = doc.originalName
+  const link = doc.fileName
+
   return (
-    <li key={doc.id || index}
->
-      <strong>{doc.type === 'CV' ? 'CV' : 'Photo'} :</strong>{' '}
-      <a
-        href={`${import.meta.env.VITE_API_URL}/uploads/${doc.fileName}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="text-blue-600 underline"
-      >
-        {doc.originalName}
-      </a>
+    <li key={doc.id || index}>
+      <strong>{typeLabel} :</strong>{' '}
+      {name && link ? (
+        <a
+          href={`${import.meta.env.VITE_API_URL}/uploads/${link}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline"
+        >
+          {name}
+        </a>
+      ) : (
+        <span className="text-gray-500 italic">Non renseigné</span>
+      )}
     </li>
   )
 })}
+
 
   </ul>
 </Section>
