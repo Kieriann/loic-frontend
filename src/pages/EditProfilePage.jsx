@@ -258,10 +258,12 @@ const removeRealTech = (expIndex, techIndex) => {
     if (!validate()) return
 
     const formData = new FormData()
-    const formattedExperiences = experiences.map(exp => ({
-      ...exp,
-realFilePath: exp.realFile ? `real_${i}_${exp.realFile.name}` : exp.realFilePath || '',
-    }))
+    const formattedExperiences = experiences.map((exp, i) => ({
+  ...exp,
+  realFilePath: exp.realFile ? `real_${i}_${exp.realFile.name}` : exp.realFilePath || '',
+}))
+
+
 
     experiences.forEach((exp, i) => {
       if (exp.realFile) {
