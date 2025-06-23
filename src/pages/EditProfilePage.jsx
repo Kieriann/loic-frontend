@@ -262,26 +262,26 @@ const removeRealTech = (expIndex, techIndex) => {
     if (!validate()) return
 
     const formData = new FormData()
- // Upload vers Cloudinary
 for (const [i, exp] of experiences.entries()) {
   if (exp.realFile) {
     const file = exp.realFile
     const form = new FormData()
-form.append('file', file)
-form.append('upload_preset', 'ml_default')
-form.append('public_id', `real_${i}_${file.name.replace(/\.[^/.]+$/, '')}`)
-form.append('resource_type', 'raw')
-
+    form.append('file', file)
+    form.append('upload_preset', 'ml_default')
+    form.append('public_id', `real_${i}_${file.name.replace(/\.[^/.]+$/, '')}`)
+    form.append('resource_type', 'raw')
 
     const res = await fetch(`https://api.cloudinary.com/v1_1/dwwt3sgbw/raw/upload`, {
       method: 'POST',
       body: form
     })
-const data = await res.json()
-experiences[i].realFilePath = data.public_id
 
+    const data = await res.json()
+    const extension = file.name.split('.').pop()
+    experiences[i].realFilePath = `${data.public_id}.${extension}`
   }
 }
+
 
 // Formatage
 const formattedExperiences = experiences.map(exp => ({
