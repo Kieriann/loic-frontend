@@ -254,20 +254,28 @@ const removeRealTech = (expIndex, techIndex) => {
     setPopup({ open: false, index: null, type: '' })
   }
 
+  const sanitizeFileName = (name) =>
+  name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_")
+
+  
   const handleSubmit = async () => {
     if (!validate()) return
 
     const formData = new FormData()
-    const formattedExperiences = experiences.map((exp, i) => ({
-  ...exp,
-  realFilePath: exp.realFile ? `real_${i}_${exp.realFile.name}` : exp.realFilePath || '',
-}))
+    const formattedExperiences = experiences.map((exp, i) => {
+  const safeName = exp.realFile ? sanitizeFileName(exp.realFile.name) : ''
+  return {
+    ...exp,
+    realFilePath: exp.realFile ? `real_${i}_${safeName}` : exp.realFilePath || ''
+  }
+})
+
 
 
 
     experiences.forEach((exp, i) => {
       if (exp.realFile) {
-        formData.append('realFiles', exp.realFile, `real_${i}_${exp.realFile.name}`)
+formData.append('realFiles', exp.realFile, `real_${i}_${sanitizeFileName(exp.realFile.name)}`)
       }
     })
 
