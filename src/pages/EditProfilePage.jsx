@@ -260,7 +260,7 @@ const removeRealTech = (expIndex, techIndex) => {
     const formData = new FormData()
     const formattedExperiences = experiences.map(exp => ({
       ...exp,
-      realFilePath: exp.realFile ? `real_${exp.realFile.name}` : exp.realFilePath || '',
+realFilePath: exp.realFile ? `real_${i}_${exp.realFile.name}` : exp.realFilePath || '',
     }))
 
     experiences.forEach((exp, i) => {
