@@ -235,23 +235,6 @@ if (!realList.length) {
     setExperiences(updated)
   }
 
-  const addRealTech = (index) => {
-  const updated = [...experiences];
-  if (!updated[index].newRealTechInput.trim()) return;
-  updated[index].realTech.push(
-    `${updated[index].newRealTechInput}:${updated[index].newRealTechLevel}`
-  );
-  updated[index].newRealTechInput = '';
-  updated[index].newRealTechLevel = 'junior';
-  setExperiences(updated);
-};
-
-const removeRealTech = (expIndex, techIndex) => {
-  const updated = [...experiences];
-  updated[expIndex].realTech.splice(techIndex, 1);
-  setExperiences(updated);
-};
-
   const addExperience = () => {
     setExperiences([...experiences, {
       title: '',
