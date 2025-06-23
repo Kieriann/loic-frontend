@@ -258,49 +258,27 @@ const removeRealTech = (expIndex, techIndex) => {
   name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_")
 
   
-  const handleSubmit = async () => {
-    if (!validate()) return
+const handleSubmit = async () => {
+  if (!validate()) return
 
-    const formData = new FormData()
-for (const [i, exp] of experiences.entries()) {
-    console.log('realFile à l’index', i, ':', exp.realFile)
-if (!exp.realFile || !(exp.realFile instanceof File)) continue
+  const formData = new FormData()
 
-  const file = exp.realFile
-  const form = new FormData()
-  form.append('file', file)
-  form.append('upload_preset', 'ml_default')
-  form.append('public_id', `real_${i}_${sanitizeFileName(file.name.replace(/\.[^/.]+$/, ''))}`)
-  form.append('resource_type', 'raw')
+  experiences.forEach((exp, i) => {
+    if (exp.realFile && exp.realFile instanceof File) {
+      formData.append('realFiles', exp.realFile, `real_${i}_${sanitizeFileName(exp.realFile.name)}`)
+    }
+  })
 
-const res = await fetch(`https://api.cloudinary.com/v1_1/dwwt3sgbw/auto/upload`, {
-  method: 'POST',
-  body: form
-})
-
-const data = await res.json()
-experiences[i].realFilePath = data.secure_url
-}
-
-
-// Formatage
-const formattedExperiences = experiences.map(exp => ({
-  ...exp,
-  realFilePath: exp.realFilePath || '',
-}))
+  const formattedExperiences = experiences.map(exp => ({
+    ...exp,
+    realFilePath: exp.realFilePath || '',
+  }))
 
 
 
-
-
-    experiences.forEach((exp, i) => {
-      if (exp.realFile && exp.realFile instanceof File) {
-  formData.append('realFiles', exp.realFile, `real_${i}_${sanitizeFileName(exp.realFile.name)}`)
-}
-
-    })
 
     if (!profile.availableDate) profile.availableDate = ''
+
 
 const profilePayload = {
   ...profile,
