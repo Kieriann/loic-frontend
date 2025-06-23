@@ -304,8 +304,10 @@ formData.append('profile', JSON.stringify(profilePayload))
       if (!res.ok) throw new Error('Échec de l’enregistrement')
       navigate('/profile')
     } catch (err) {
-      console.error(err)
-      alert("Erreur lors de l'enregistrement")
+      const text = await err.response?.text?.()
+console.error('Erreur backend :', text || err)
+alert("Erreur : " + (text || err.message))
+
     }
   }
 
