@@ -263,7 +263,9 @@ const removeRealTech = (expIndex, techIndex) => {
 
     const formData = new FormData()
 for (const [i, exp] of experiences.entries()) {
-  if (exp.realFile && exp.realFile.name) {
+    console.log('realFile à l’index', i, ':', exp.realFile)
+if (!exp.realFile || !(exp.realFile instanceof File)) continue
+
   const file = exp.realFile
   const form = new FormData()
   form.append('file', file)
@@ -295,9 +297,10 @@ const formattedExperiences = experiences.map(exp => ({
 
 
     experiences.forEach((exp, i) => {
-      if (exp.realFile) {
-formData.append('realFiles', exp.realFile, `real_${i}_${sanitizeFileName(exp.realFile.name)}`)
-      }
+      if (exp.realFile && exp.realFile instanceof File) {
+  formData.append('realFiles', exp.realFile, `real_${i}_${sanitizeFileName(exp.realFile.name)}`)
+}
+
     })
 
     if (!profile.availableDate) profile.availableDate = ''
