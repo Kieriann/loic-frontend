@@ -254,7 +254,7 @@ useEffect(() => {
                         <p>
                           <strong>Document :</strong>{' '}
                           <a
-href={`https://res.cloudinary.com/dwwt3sgbw/auto/upload/${r.realFilePath}`}
+href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/${doc.fileName}.pdf`}
   target="_blank"
   rel="noopener noreferrer"
   className="text-blue-600 underline"
