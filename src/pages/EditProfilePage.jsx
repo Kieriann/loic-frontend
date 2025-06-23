@@ -355,7 +355,7 @@ if (!res.ok) {
   alert('Erreur backend : ' + (err.message || 'inconnue'))
 }
   }
-}
+
 
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
@@ -662,4 +662,4 @@ if (!res.ok) {
       </div>
     </div>
   )
-
+}
