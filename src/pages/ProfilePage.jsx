@@ -266,9 +266,6 @@ useEffect(() => {
   Voir le fichier
 </a>
 
-
-
-
                         </p>
                       )}
                     </div>
