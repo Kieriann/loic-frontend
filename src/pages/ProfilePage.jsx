@@ -265,7 +265,6 @@ useEffect(() => {
   rel="noopener noreferrer"
   className="text-blue-600 underline"
 >
-  Voir le fichier
 </a>
 
 
