@@ -263,12 +263,6 @@ const handleSubmit = async () => {
 
   const formData = new FormData()
 
-  experiences.forEach((exp, i) => {
-    if (exp.realFile && exp.realFile instanceof File) {
-      formData.append('realFiles', exp.realFile, `real_${i}_${sanitizeFileName(exp.realFile.name)}`)
-    }
-  })
-
   const formattedExperiences = experiences.map(exp => ({
     ...exp,
     realFilePath: exp.realFilePath || '',
@@ -288,6 +282,11 @@ const profilePayload = {
 formData.append('profile', JSON.stringify(profilePayload))
 formData.append('address', JSON.stringify(address))
 formData.append('experiences', JSON.stringify(formattedExperiences))
+
+const realFormData = new FormData()
+realFormData.append('data', JSON.stringify(experiences))
+
+
 formData.append('prestations', JSON.stringify(prestations))
 
 if (documents.photo) {
@@ -311,6 +310,15 @@ try {
     },
     body: formData,
   })
+
+  await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+  method: 'POST',
+  headers: {
+    Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+  },
+  body: realFormData,
+})
+
 
 if (!res.ok) {
   const resText = await res.text()
