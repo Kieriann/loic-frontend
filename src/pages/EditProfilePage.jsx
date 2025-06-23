@@ -283,7 +283,7 @@ if (!exp.realFile || !(exp.realFile instanceof File)) continue
   experiences[i].realFilePath = `${data.public_id}.${extension}`
 }
 
-}
+
 
 
 // Formatage
@@ -349,12 +349,13 @@ if (!res.ok) {
 }
 
 
+
   navigate('/profile')
 } catch (err) {
   alert('Erreur backend : ' + (err.message || 'inconnue'))
 }
   }
-
+}
 
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
