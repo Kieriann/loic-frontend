@@ -270,7 +270,7 @@ if (!exp.realFile || !(exp.realFile instanceof File)) continue
   const form = new FormData()
   form.append('file', file)
   form.append('upload_preset', 'ml_default')
-  form.append('public_id', `real_${i}_${file.name.replace(/\.[^/.]+$/, '')}`)
+  form.append('public_id', `real_${i}_${sanitizeFileName(file.name.replace(/\.[^/.]+$/, ''))}`)
   form.append('resource_type', 'raw')
 
   const res = await fetch(`https://api.cloudinary.com/v1_1/dwwt3sgbw/raw/upload`, {
