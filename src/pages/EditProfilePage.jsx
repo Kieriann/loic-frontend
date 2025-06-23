@@ -524,7 +524,16 @@ if (!res.ok) {
 </button>
 {real.realFile
   ? <p className="text-sm text-gray-600 italic">{real.realFile.name}</p>
-  : real.realFilePath && <p className="text-sm text-gray-600 italic">{real.realFilePath}</p>}
+  : real.realFilePath && 
+  <a
+  href={real.realFilePath}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="text-sm text-blue-600 underline"
+>
+  Voir le document
+</a>
+}
 
         <button onClick={() => setPopup({ open: true, index: i, type: 'realisation' })} className="text-red-600 underline text-sm ml-12">Supprimer cette réalisation</button>
       </div>
