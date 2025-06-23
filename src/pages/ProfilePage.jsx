@@ -159,7 +159,7 @@ useEffect(() => {
   if (!doc || typeof doc !== 'object') return null
 
   const typeLabel = doc.type === 'CV' ? 'CV' : 'Photo'
-  const name = doc.originalName
+  const name = doc.fileName
   const link = doc.fileName
 
   return (
