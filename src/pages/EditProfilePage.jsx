@@ -300,11 +300,17 @@ try {
     body: formData,
   })
 
-  if (!res.ok) {
-    const resText = await res.text()
-    console.error('Erreur backend complète :', resText)
-    throw new Error(resText)
+if (!res.ok) {
+  const resText = await res.text()
+  try {
+    const json = JSON.parse(resText)
+    console.error('Erreur backend complète :', json)
+  } catch {
+    console.error('Erreur backend brute :', resText)
   }
+  throw new Error(resText)
+}
+
 
   navigate('/profile')
 } catch (err) {
