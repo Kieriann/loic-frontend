@@ -269,8 +269,8 @@ for (const [i, exp] of experiences.entries()) {
     const form = new FormData()
     form.append('file', file)
     form.append('upload_preset', 'ml_default')
-    form.append('public_id', `real_${i}_${file.name}`)
-    form.append('folder', 'realisations')
+    form.append('public_id', `realisations/real_${i}_${file.name}`)
+
     form.append('resource_type', 'raw')
 
     const res = await fetch(`https://api.cloudinary.com/v1_1/dwwt3sgbw/raw/upload`, {
@@ -278,7 +278,7 @@ for (const [i, exp] of experiences.entries()) {
       body: form
     })
     const data = await res.json()
-    experiences[i].realFilePath = data.public_id + '.' + file.name.split('.').pop()
+experiences[i].realFilePath = data.public_id
   }
 }
 
