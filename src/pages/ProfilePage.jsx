@@ -257,14 +257,15 @@ useEffect(() => {
                       {r.realFilePath && (
                         <p>
                           <strong>Document :</strong>{' '}
-                          <a
-href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${r.realFilePath}&embedded=true`}
+<a
+  href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${r.realFilePath}&embedded=true`}
   target="_blank"
   rel="noopener noreferrer"
   className="text-blue-600 underline"
 >
   Voir le fichier
 </a>
+
 
                         </p>
                       )}
