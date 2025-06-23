@@ -280,7 +280,7 @@ const res = await fetch(`https://api.cloudinary.com/v1_1/dwwt3sgbw/raw/upload`, 
 
 const data = await res.json()
 experiences[i].realFilePath = data.secure_url
-
+}
 
 
 
