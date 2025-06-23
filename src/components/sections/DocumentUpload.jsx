@@ -44,7 +44,7 @@ function FileInput({ label, file, onChange }) {
 
       {file && (
         <div className="flex items-center gap-2 ml-1">
-          <span className="text-sm text-gray-700">{file.name || file}</span>
+<span className="text-sm text-gray-700">{typeof file === 'string' ? file : file?.name || file?.fileName}</span>
           <button
             type="button"
             onClick={() => onChange(null)}
