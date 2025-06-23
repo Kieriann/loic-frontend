@@ -277,15 +277,16 @@ const removeRealTech = (expIndex, techIndex) => {
 
 if (documents.photo) {
   formData.append('photo', documents.photo)
-} else if (profile.photoPath) {
+} else {
   formData.append('removePhoto', 'true')
 }
 
 if (documents.cv) {
   formData.append('cv', documents.cv)
-} else if (profile.cvPath) {
+} else {
   formData.append('removeCV', 'true')
 }
+
 
 
 
