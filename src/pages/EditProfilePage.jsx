@@ -273,15 +273,14 @@ if (!exp.realFile || !(exp.realFile instanceof File)) continue
   form.append('public_id', `real_${i}_${sanitizeFileName(file.name.replace(/\.[^/.]+$/, ''))}`)
   form.append('resource_type', 'raw')
 
-  const res = await fetch(`https://api.cloudinary.com/v1_1/dwwt3sgbw/raw/upload`, {
-    method: 'POST',
-    body: form
-  })
+const res = await fetch(`https://api.cloudinary.com/v1_1/dwwt3sgbw/raw/upload`, {
+  method: 'POST',
+  body: form
+})
 
-  const data = await res.json()
-  const extension = file.name.split('.').pop()
-  experiences[i].realFilePath = `${data.public_id}.${extension}`
-}
+const data = await res.json()
+experiences[i].realFilePath = data.secure_url
+
 
 
 
