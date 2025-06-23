@@ -258,18 +258,19 @@ console.log('realisations récupérées :', realisations)
             {r.title && <p><strong>Titre :</strong> {r.title}</p>}
             {r.description && <p><strong>Description :</strong> {r.description}</p>}
             {r.fileName && (
-              <p>
-                <strong>Document :</strong>{' '}
-                <a
-                  href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${r.fileName}&embedded=true`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 underline"
-                >
-                  {r.fileName.split('/').pop()}
-                </a>
-              </p>
-            )}
+  <p>
+    <strong>Document :</strong>{' '}
+    <a
+      href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/${r.fileName}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 underline"
+    >
+      Télécharger
+    </a>
+  </p>
+)}
+
           </div>
         ))
       ) : (
