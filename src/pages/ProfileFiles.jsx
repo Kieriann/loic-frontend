@@ -71,15 +71,18 @@ export default function ProfileFiles({ files }) {
         
         return isPhoto ? (
           <div key={index} className="flex flex-col items-center">
-            <img
-              src={fileUrl}
-              alt="Photo de profil"
-              className="w-32 h-32 object-cover rounded-full border-2 border-gray-200"
-              onError={(e) => {
-                console.error(`Erreur chargement image: ${fileUrl}`);
-                e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2U1ZTdlYiIvPjx0ZXh0IHg9IjYwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNmI3MjgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSI+UGhvdG88L3RleHQ+PC9zdmc+";
-              }}
-            />
+            <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+  <img
+    src={fileUrl}
+    alt="Photo de profil"
+    className="w-32 h-32 object-cover rounded-full border-2 border-gray-200"
+    onError={(e) => {
+      console.error(`Erreur chargement image: ${fileUrl}`);
+      e.target.src = "data:image/svg+xml;base64,...";
+    }}
+  />
+</a>
+
             <p className="text-sm text-gray-500">{file.originalName || "Photo"}</p>
           </div>
         ) : (
