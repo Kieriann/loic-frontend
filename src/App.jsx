@@ -149,6 +149,7 @@ function AppRouter({ token, setToken }) {
             />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </CenteredLayout>
