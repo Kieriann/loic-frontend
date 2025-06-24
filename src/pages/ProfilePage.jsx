@@ -62,6 +62,8 @@ useEffect(() => {
   console.log('realFilePaths filtrés :', experiences.filter(e => e.realFilePath).map(e => e.realFilePath))
 
 console.log('realisations récupérées :', realisations)
+console.log('Fichiers de la première réalisation :', realisations[0]?.files)
+
 
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
