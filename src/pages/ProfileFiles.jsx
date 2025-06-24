@@ -1,13 +1,19 @@
 import React from "react"
 
-
 export default function ProfileFiles({ files }) {
   if (!files?.length) return null
 
   const getCloudinaryUrl = (file) => {
-    const type = file.resourceType === "image" ? "image" : "raw"
-    const ext = file.format && !file.public_id.endsWith(`.${file.format}`) ? `.${file.format}` : ""
-    return `https://res.cloudinary.com/dwwt3sgbw/${type}/upload/v${file.version}/${file.public_id}${ext}`
+    if (!file) return ""
+    
+    // Détermine le type de ressource (image ou raw)
+    const resourceType = file.resourceType === "image" ? "image" : "raw"
+    
+    // Utilise le format stocké ou extrait de l'extension du fichier
+    const format = file.format || (file.originalName?.split('.').pop() || "")
+    
+    // Construit l'URL correctement
+    return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${file.version}/${file.public_id}${format ? `.${format}` : ''}`
   }
 
   return (
@@ -19,7 +25,7 @@ export default function ProfileFiles({ files }) {
             <img
               key={f.id}
               src={getCloudinaryUrl(f)}
-              alt={f.originalName}
+              alt={f.originalName || ""}
               style={{ maxWidth: 120, marginRight: 8, display: "inline-block" }}
             />
           ) : (
@@ -31,7 +37,7 @@ export default function ProfileFiles({ files }) {
               className="text-blue-600 underline"
               style={{ marginRight: 8, display: "inline-block" }}
             >
-              {f.originalName}
+              {f.originalName || "Document"}
             </a>
           )
         )}

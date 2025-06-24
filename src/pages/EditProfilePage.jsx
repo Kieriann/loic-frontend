@@ -144,7 +144,7 @@ export default function EditProfilePage() {
           newRealTechLevel: 'junior',
           realFiles: (real.files || []).map(f => ({
             id: f.id,
-            url: `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/raw/upload/v${f.version}/${f.public_id}.${f.format}`,
+            url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${file.version}/${file.public_id}${file.format ? `.${file.format}` : ''}`,
             name: f.originalName,
             source: 'cloud'
           }))
