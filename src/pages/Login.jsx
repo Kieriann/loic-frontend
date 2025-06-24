@@ -82,6 +82,12 @@ export default function Login({ onLogin }) {
       >
         Se connecter
       </button>
+      <p className="mt-2 text-center">
+  <Link to="/forgot-password" className="text-darkBlue underline">
+    Mot de passe oublié ?
+  </Link>
+</p>
+
     </form>
   )
 }
