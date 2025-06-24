@@ -46,12 +46,18 @@ const [realisations, setRealisations] = useState([])
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
 const initialTab = searchParams.get('tab')
-const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
   const [prestations, setPrestations] = useState([{
   type: '',
   tech: '',
   level: 'junior',
 }])
+const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
+
+useEffect(() => {
+  if (initialTab) {
+    setSelectedTab(initialTab)
+  }
+}, [initialTab])
 
 
 useEffect(() => {

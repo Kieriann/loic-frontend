@@ -95,7 +95,7 @@ console.log('realisations récupérées :', realisations)
                 {selectedTab === 'prestations' && 'Mes Prestations'}
               </h1>
               <button
-                onClick={() => navigate('/profile/edit')}
+              onClick={() => navigate(`/profile/edit?tab=${selectedTab}`)}
                 className="text-sm text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
               >
                 Modifier
