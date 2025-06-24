@@ -135,20 +135,26 @@ export default function EditProfilePage() {
 
         // --- CORRECTION : Initialisation des réalisations AVEC fichiers ---
         const realList = res.realisations || []
-        setRealisations(realList.length ? realList.map(real => ({
-          id: real.id || '',
-          realTitle: real.title || '',
-          realDescription: real.description || '',
-          realTech: Array.isArray(real.techs) ? real.techs : [],
-          newRealTechInput: '',
-          newRealTechLevel: 'junior',
-          realFiles: (real.files || []).map(f => ({
-            id: f.id,
-            url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${file.version}/${file.public_id}${file.format ? `.${file.format}` : ''}`,
-            name: f.originalName,
-            source: 'cloud'
-          }))
-        })) : [{
+setRealisations(realList.length ? realList.map(real => ({
+  id: real.id || '',
+  realTitle: real.title || '',
+  realDescription: real.description || '',
+  realTech: Array.isArray(real.techs) ? real.techs : [],
+  newRealTechInput: '',
+  newRealTechLevel: 'junior',
+  realFiles: (real.files || []).map(f => {
+    const format = f.format ? `.${f.format}` : '';
+    return {
+      id: f.id,
+      url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${f.public_id}${format}`,
+      name: f.originalName || 'Fichier',
+      source: 'cloud',
+      version: f.version,
+      public_id: f.public_id,
+      format: f.format
+    };
+  })
+})) : [{
           realTitle: '',
           realDescription: '',
           realTech: [],
