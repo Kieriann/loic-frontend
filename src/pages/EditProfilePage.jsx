@@ -348,6 +348,8 @@ const handleSubmit = async () => {
   }
 
 const realFormData = new FormData()
+console.log('realisations filtrées :', realisations.filter(real => real.realTitle || real.realDescription || real.realTech.length))
+
 realFormData.append('data', JSON.stringify(
   realisations
     .filter(real => real.realTitle || real.realDescription || real.realTech.length)
