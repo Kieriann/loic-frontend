@@ -7,6 +7,7 @@ import { fetchProfile } from '../api/fetchProfile'
 import { Navigate, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useSearchParams } from 'react-router-dom'
+import ProfileFiles from './ProfileFiles'
 
 export default function ProfilePage() {
   const [data, setData] = useState(null)
@@ -23,7 +24,6 @@ export default function ProfilePage() {
         const token = localStorage.getItem('token')
         const res = await fetchProfile(token)
         setData(res)
-        // console.log('profil récupéré', res)
       } catch (err) {
         console.error('Erreur chargement', err)
       } finally {
@@ -151,35 +151,7 @@ export default function ProfilePage() {
               </Section>
 
               <Section title="Documents">
-                <ul className="list-disc list-inside text-left max-w-xl mx-auto">
-                  {documents.length === 0 && (
-                    <li className="text-gray-500 italic">Aucun document</li>
-                  )}
-                  {Array.isArray(documents) && documents.map((doc, index) => {
-                    if (!doc || typeof doc !== 'object' || !doc.fileName || !doc.type) return null
-
-                    const typeLabel = doc.type === 'CV' ? 'CV' : 'Photo'
-                    const name = doc.fileName
-                    const link = doc.fileName
-
-                    return (
-                      <li key={doc.id || index}>
-                        <strong>{typeLabel} :</strong>{' '}
-                        <a
-                          href={doc.type === 'CV'
-                            ? `https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${doc.fileName}&embedded=true`
-                            : `https://res.cloudinary.com/dwwt3sgbw/image/upload/${doc.fileName}`
-                          }
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline"
-                        >
-                          {name}
-                        </a>
-                      </li>
-                    )
-                  })}
-                </ul>
+                <ProfileFiles files={documents} />
               </Section>
             </>
           )}
@@ -255,22 +227,8 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {r.files && r.files.length > 0 && (
-  <div className="space-y-1">
-    <strong>Documents :</strong>
-    {r.files.map((f, idx) => (
-      <div key={idx}>
-        <a
-          href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version}/${f.public_id}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 underline"
-        >
-          {f.originalName}
-        </a>
-      </div>
-    ))}
-  </div>
-)}
+                        <ProfileFiles files={r.files} />
+                      )}
                     </div>
                   ))
                 ) : (
