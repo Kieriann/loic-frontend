@@ -255,22 +255,22 @@ export default function ProfilePage() {
                         </div>
                       )}
                       {r.files && r.files.length > 0 && (
-                        <div className="space-y-1">
-                          <strong>Documents :</strong>
-                          {r.files.map((f, idx) => (
-                            <div key={idx}>
-                              <a
-                                href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version}/${f.public_id}.${f.format}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 underline"
-                              >
-                                {f.originalName}
-                              </a>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+  <div className="space-y-1">
+    <strong>Documents :</strong>
+    {r.files.map((f, idx) => (
+      <div key={idx}>
+        <a
+          href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version}/${f.public_id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline"
+        >
+          {f.originalName}
+        </a>
+      </div>
+    ))}
+  </div>
+)}
                     </div>
                   ))
                 ) : (
