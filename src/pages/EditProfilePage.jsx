@@ -349,13 +349,16 @@ const handleSubmit = async () => {
 
 const realFormData = new FormData()
 realFormData.append('data', JSON.stringify(
-  realisations.map(real => ({
-    ...(real.id ? { id: real.id } : {}),
-    title: real.realTitle,
-    description: real.realDescription,
-    techs: real.realTech
-  }))
+  realisations
+    .filter(real => real.realTitle || real.realDescription || real.realTech.length)
+    .map(real => ({
+      ...(real.id ? { id: real.id } : {}),
+      title: real.realTitle,
+      description: real.realDescription,
+      techs: real.realTech
+    }))
 ))
+
 
 realisations.forEach(r => {
   if (Array.isArray(r.realFiles)) {
