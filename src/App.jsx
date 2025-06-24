@@ -24,6 +24,8 @@ import CenteredLayout from './components/CenteredLayout'
 import logo from './assets/logo.png'
 import { fetchProfile } from './api'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
+
 
 
 //
