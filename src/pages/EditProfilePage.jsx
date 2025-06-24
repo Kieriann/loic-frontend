@@ -602,7 +602,7 @@ navigate(`/profile?tab=${selectedTab}`)
           className="text-darkBlue underline text-sm"
           onClick={() => document.getElementById(`real-doc-${i}`).click()}
         >
-          Ajouter un ou plusieurs documents
+          Ajouter un document
         </button>
 
         {/* Affichage des fichiers sélectionnés */}
