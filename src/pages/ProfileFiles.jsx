@@ -1,93 +1,103 @@
-// src/components/ProfileFiles.jsx
 import React from "react";
 
 export default function ProfileFiles({ files }) {
-  if (!files?.length) return null;
+  if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
 
-  const getCloudinaryUrl = (file) => {
-    // S'assurer que file existe
-    if (!file || !file.public_id) {
-      console.error("Fichier invalide:", file);
-      return "#";
+  // Log pour debug
+  console.log("Fichiers à afficher:", JSON.stringify(files, null, 2));
+
+  const getFileUrl = (file) => {
+    if (!file) return null;
+    
+    // Déterminer si c'est un document ID_PHOTO ou autre
+    const isPhoto = file.type === "ID_PHOTO";
+    const isCV = file.type === "CV";
+    
+    // Déterminer le type de ressource pour Cloudinary
+    const resourceType = isPhoto ? "image" : "raw";
+    
+    // Si le fileName est une URL complète, la retourner directement
+    if (file.fileName && file.fileName.startsWith('http')) {
+      return file.fileName;
     }
     
-    // Déterminer si c'est une image ou un document
-    // Pour les PDFs et documents, on utilise resource_type=raw
-    const resourceType = file.originalName?.toLowerCase().endsWith('.pdf') || 
-                        file.originalName?.toLowerCase().includes('.doc') ||
-                        file.originalName?.toLowerCase().includes('.txt') ||
-                        file.originalName?.toLowerCase().includes('.xls')
-                          ? "raw" 
-                          : "image";
+    // Pour construire l'URL Cloudinary
+    let url = "";
     
-    // Récupérer le numéro de version (important)
-    const version = file.version || '';
-    
-    // Obtenir le format depuis la propriété format ou depuis le nom du fichier
-    let format = '';
-    if (file.format) {
-      format = `.${file.format}`;
-    } else if (file.originalName) {
-      const parts = file.originalName.split('.');
+    try {
+      // Format de fileName attendu: "v{version}/{public_id}" ou juste "{public_id}"
+      const parts = file.fileName?.split('/') || [];
+      let version = "";
+      let publicId = file.fileName || "";
+      
       if (parts.length > 1) {
-        format = `.${parts.pop()}`;
+        // S'il y a un slash, le premier élément est probablement la version
+        if (parts[0].startsWith('v')) {
+          version = parts[0].substring(1); // Enlever le 'v' initial
+          publicId = parts.slice(1).join('/'); // Le reste est le public_id
+        }
       }
+      
+      // Format est soit stocké explicitement, soit extrait du nom original
+      const format = file.format || 
+                    (file.originalName ? file.originalName.split('.').pop() : "");
+      
+      // Si on a un format, l'ajouter à l'URL
+      const formatSuffix = format ? `.${format}` : "";
+      
+      // Construire l'URL Cloudinary complète
+      url = `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/` + 
+            (version ? `v${version}/` : "") + 
+            `${publicId}${formatSuffix}`;
+      
+      console.log(`URL construite pour ${file.originalName || file.type}: ${url}`);
+      return url;
+    } catch (error) {
+      console.error("Erreur de construction d'URL:", error, file);
+      return null;
     }
-    
-    // Construire l'URL complète
-    let url = `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload`;
-    
-    // Ajouter la version si disponible
-    if (version) {
-      url += `/v${version}`;
-    }
-    
-    // Ajouter le public_id et le format si nécessaire
-    url += `/${file.public_id}${format}`;
-    
-    console.log(`URL construite pour ${file.originalName}: ${url}`);
-    return url;
   };
 
   return (
-    <div>
-      <strong>Documents :</strong>
-      <div>
-        {files.map((f, index) => {
-          const url = getCloudinaryUrl(f);
-          const isImage = !f.originalName?.toLowerCase().endsWith('.pdf') && 
-                         !f.originalName?.toLowerCase().includes('.doc') && 
-                         !f.originalName?.toLowerCase().includes('.txt') && 
-                         !f.originalName?.toLowerCase().includes('.xls');
-          
-          return isImage ? (
+    <div className="space-y-2">
+      {files.map((file, index) => {
+        const fileUrl = getFileUrl(file);
+        const isPhoto = file.type === "ID_PHOTO";
+        const isDocument = file.type === "CV" || !isPhoto;
+        
+        if (!fileUrl) {
+          return <p key={index} className="text-red-500">URL invalide pour {file.originalName || "fichier"}</p>;
+        }
+        
+        return isPhoto ? (
+          <div key={index} className="flex flex-col items-center">
             <img
-              key={f.id || index}
-              src={url}
-              alt={f.originalName || "Image"}
-              style={{ maxWidth: 120, marginRight: 8, display: "inline-block" }}
+              src={fileUrl}
+              alt="Photo de profil"
+              className="w-32 h-32 object-cover rounded-full border-2 border-gray-200"
               onError={(e) => {
-                console.error(`Erreur chargement image: ${url}`);
-                e.target.src = "https://via.placeholder.com/120x90?text=Erreur";
+                console.error(`Erreur chargement image: ${fileUrl}`);
+                e.target.src = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgZmlsbD0iI2U1ZTdlYiIvPjx0ZXh0IHg9IjYwIiB5PSI2MCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE2IiBmaWxsPSIjNmI3MjgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBhbGlnbm1lbnQtYmFzZWxpbmU9Im1pZGRsZSI+UGhvdG88L3RleHQ+PC9zdmc+";
               }}
             />
-          ) : (
+            <p className="text-sm text-gray-500">{file.originalName || "Photo"}</p>
+          </div>
+        ) : (
+          <div key={index} className="flex items-center gap-2">
             <a
-              key={f.id || index}
-              href={url}
+              href={fileUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-blue-600 underline"
-              style={{ marginRight: 8, display: "inline-block" }}
-              onClick={(e) => {
-                console.log(`Ouverture document: ${url}`);
-              }}
+              className="text-blue-600 hover:underline flex items-center gap-1"
             >
-              {f.originalName || "Document"}
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              {file.originalName || "Document"}
             </a>
-          );
-        })}
-      </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

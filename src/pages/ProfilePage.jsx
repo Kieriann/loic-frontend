@@ -54,7 +54,9 @@ export default function ProfilePage() {
 
   const { profile, experiences = [], prestations = [], realisations = [] } = data
   const address = profile.Address || {}
-
+n
+console.log("Documents du profil:", documents);
+console.log("Photo du profil:", documents?.find(doc => doc.type === "ID_PHOTO"));
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
       <div className="w-full max-w-6xl flex gap-6 items-stretch">
