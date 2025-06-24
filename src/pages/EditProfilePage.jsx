@@ -339,9 +339,12 @@ const handleSubmit = async () => {
   const realFormData = new FormData()
   realFormData.append('data', JSON.stringify(realisations))
   realisations.forEach((r, i) => {
-    if (r.realFile && r.realFile instanceof File) {
-      realFormData.append('realFiles', r.realFile, sanitizeFileName(r.realFile.name))
-    }
+    if (Array.isArray(r.realFiles)) {
+  r.realFiles.forEach(f => {
+    realFormData.append('realFiles', f, sanitizeFileName(f.name))
+  })
+}
+
   })
 
   try {
@@ -528,81 +531,85 @@ const handleSubmit = async () => {
           </>
         )}
 
-        {selectedTab === 'realisations' && (
+{selectedTab === 'realisations' && (
   <>
     {realisations.map((real, i) => (
       <div key={i} className="border rounded p-4 space-y-3">
         <input type="text" placeholder="Titre de la réalisation" value={real.realTitle} onChange={(e) => updateRealisation(i, 'realTitle', e.target.value)} className="border rounded px-3 py-2 w-full" />
         <textarea placeholder="Description" value={real.realDescription} onChange={(e) => updateRealisation(i, 'realDescription', e.target.value)} className="border rounded px-3 py-2 w-full min-h-[100px]" />
-          {/* Langages et logiciels */}
-<div className="flex gap-2">
-  <input
-    type="text"
-    placeholder="Langages et logiciels"
-    value={real.newRealTechInput}
-    onChange={e => updateRealisation(i, 'newRealTechInput', e.target.value)}
-    className="border rounded px-2 py-1 flex-1"
-  />
-  <select
-    value={real.newRealTechLevel}
-    onChange={e => updateRealisation(i, 'newRealTechLevel', e.target.value)}
-    className="border rounded px-2 py-1"
-  >
-    <option value="junior">Junior</option>
-    <option value="intermédiaire">Intermédiaire</option>
-    <option value="senior">Senior</option>
-  </select>
-  <button onClick={() => addRealTech(i)} className="bg-darkBlue text-white px-3 py-1 rounded">
-    Ajouter
-  </button>
-</div>
 
+        {/* Langages et logiciels */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            placeholder="Langages et logiciels"
+            value={real.newRealTechInput}
+            onChange={e => updateRealisation(i, 'newRealTechInput', e.target.value)}
+            className="border rounded px-2 py-1 flex-1"
+          />
+          <select
+            value={real.newRealTechLevel}
+            onChange={e => updateRealisation(i, 'newRealTechLevel', e.target.value)}
+            className="border rounded px-2 py-1"
+          >
+            <option value="junior">Junior</option>
+            <option value="intermédiaire">Intermédiaire</option>
+            <option value="senior">Senior</option>
+          </select>
+          <button onClick={() => addRealTech(i)} className="bg-darkBlue text-white px-3 py-1 rounded">
+            Ajouter
+          </button>
+        </div>
 
+        <ul className="text-sm text-gray-700 space-y-1">
+          {real.realTech.map((t, j) => {
+            const [name, level] = t.split(':');
+            return (
+              <li key={j} className="flex gap-2 items-center">
+                <span>{name} : {level}</span>
+                <button
+                  type="button"
+                  onClick={() => removeRealTech(i, j)}
+                  className="text-red-500 text-xs hover:underline"
+                >
+                  Supprimer
+                </button>
+              </li>
+            );
+          })}
+        </ul>
 
-<ul className="text-sm text-gray-700 space-y-1">
-  {real.realTech.map((t, j) => {
-    const [name, level] = t.split(':');
-    return (
-      <li key={j} className="flex gap-2 items-center">
-        <span>{name} : {level}</span>
+        {/* Champs fichiers multiples */}
+        <input
+  type="file"
+  className="hidden"
+  id={`real-doc-${i}`}
+  multiple
+  onChange={(e) => updateRealisation(i, 'realFiles', Array.from(e.target.files))}
+/>
+
         <button
           type="button"
-          onClick={() => removeRealTech(i, j)}
-          className="text-red-500 text-xs hover:underline"
+          className="text-darkBlue underline text-sm"
+          onClick={() => document.getElementById(`real-doc-${i}`).click()}
         >
-          Supprimer
+          Ajouter un ou plusieurs documents
         </button>
-      </li>
-    );
-  })}
-</ul>
-       <input type="file" className="hidden" id={`real-doc-${i}`} onChange={(e) => updateRealisation(i, 'realFile', e.target.files[0])} />
-<button type="button" className="text-darkBlue underline text-sm" onClick={() => document.getElementById(`real-doc-${i}`).click()}>
-  Ajouter un document
-</button>
-{real.realFile
-  ? <p className="text-sm text-gray-600 italic">{real.realFile.name}</p>
-  : real.realFilePath && 
-  <a
-  href={real.realFilePath}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-sm text-blue-600 underline"
->
-  Voir le document
-</a>
-}
 
-
-        <button onClick={() => setPopup({ open: true, index: i, type: 'realisation' })} className="text-red-600 underline text-sm ml-12">Supprimer cette réalisation</button>
+        <button onClick={() => setPopup({ open: true, index: i, type: 'realisation' })} className="text-red-600 underline text-sm ml-12">
+          Supprimer cette réalisation
+        </button>
       </div>
     ))}
 
     <div className="text-center mt-4">
-      <button type="button" onClick={addRealisation} className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition">Ajouter une réalisation</button>
+      <button type="button" onClick={addRealisation} className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition">
+        Ajouter une réalisation
+      </button>
     </div>
   </>
 )}
+
 
 
 

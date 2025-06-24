@@ -257,20 +257,24 @@ console.log('realisations récupérées :', realisations)
           <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
             {r.title && <p><strong>Titre :</strong> {r.title}</p>}
             {r.description && <p><strong>Description :</strong> {r.description}</p>}
-            {r.fileName && (
-              <p>
-                <strong>Document :</strong>{' '}
-                <a
-  href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${r.fileName}&embedded=true`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-blue-600 underline"
->
-  Voir le document
-</a>
+            {r.files?.length > 0 && (
+  <div className="space-y-1">
+    <strong>Documents :</strong>
+    {r.files.map((f, idx) => (
+      <div key={idx}>
+        <a
+          href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${f.fileName}&embedded=true`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline"
+        >
+          {f.originalName}
+        </a>
+      </div>
+    ))}
+  </div>
+)}
 
-              </p>
-            )}
 
 
           </div>
