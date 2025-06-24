@@ -6,6 +6,8 @@ import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { login } from '../api'
 import { decodeToken } from '../utils/decodeToken'
+import { Link } from 'react-router-dom'
+
 
 export default function Login({ onLogin }) {
   const [email, setEmail] = useState('')
