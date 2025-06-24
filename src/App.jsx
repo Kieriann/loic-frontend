@@ -23,6 +23,8 @@ import AdminProfilDetail from './pages/AdminProfilDetail'
 import CenteredLayout from './components/CenteredLayout'
 import logo from './assets/logo.png'
 import { fetchProfile } from './api'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+
 
 //
 // ─── En-tête avec logo et menu utilisateur ─────────────────────────
