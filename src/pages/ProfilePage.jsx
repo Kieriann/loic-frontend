@@ -285,10 +285,6 @@ console.log('Fichiers de la première réalisation :', realisations[0]?.files)
 )}
 
 
-
-
-
-
           </div>
         ))
       ) : (
