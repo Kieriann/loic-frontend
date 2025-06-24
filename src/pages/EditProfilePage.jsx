@@ -346,16 +346,23 @@ const handleSubmit = async () => {
     formData.append('removeCV', 'true')
   }
 
-  const realFormData = new FormData()
-  realFormData.append('data', JSON.stringify(realisations))
-  realisations.forEach((r, i) => {
-    if (Array.isArray(r.realFiles)) {
-  r.realFiles.forEach(f => {
-    realFormData.append('realFiles', f, sanitizeFileName(f.name))
-  })
-}
+const realFormData = new FormData()
+realFormData.append('data', JSON.stringify(
+  realisations.map(real => ({
+    ...(real.id ? { id: real.id } : {}),
+    title: real.realTitle,
+    description: real.realDescription,
+    techs: real.realTech
+  }))
+))
 
-  })
+realisations.forEach(r => {
+  if (Array.isArray(r.realFiles)) {
+    r.realFiles.forEach(f => {
+      realFormData.append('realFiles', f, sanitizeFileName(f.name))
+    })
+  }
+})
 
   try {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
