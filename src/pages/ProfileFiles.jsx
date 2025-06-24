@@ -1,3 +1,5 @@
+import React from "react"
+
 
 export default function ProfileFiles({ files }) {
   if (!files?.length) return null
