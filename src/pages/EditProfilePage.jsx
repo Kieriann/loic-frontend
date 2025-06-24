@@ -8,6 +8,8 @@ import AddressInfo from '../components/sections/AddressInfo'
 import DocumentUpload from '../components/sections/DocumentUpload'
 import { fetchProfile } from '../api/fetchProfile'
 import { useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
+
 
 export default function EditProfilePage() {
   const [profile, setProfile] = useState({
