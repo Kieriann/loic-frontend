@@ -538,7 +538,6 @@ const handleSubmit = async () => {
         <input type="text" placeholder="Titre de la réalisation" value={real.realTitle} onChange={(e) => updateRealisation(i, 'realTitle', e.target.value)} className="border rounded px-3 py-2 w-full" />
         <textarea placeholder="Description" value={real.realDescription} onChange={(e) => updateRealisation(i, 'realDescription', e.target.value)} className="border rounded px-3 py-2 w-full min-h-[100px]" />
 
-        {/* Langages et logiciels */}
         <div className="flex gap-2">
           <input
             type="text"
@@ -579,14 +578,14 @@ const handleSubmit = async () => {
           })}
         </ul>
 
-        {/* Champs fichiers multiples */}
+        {/* Input fichiers multiples */}
         <input
-  type="file"
-  className="hidden"
-  id={`real-doc-${i}`}
-  multiple
-  onChange={(e) => updateRealisation(i, 'realFiles', Array.from(e.target.files))}
-/>
+          type="file"
+          className="hidden"
+          id={`real-doc-${i}`}
+          multiple
+          onChange={(e) => updateRealisation(i, 'realFiles', Array.from(e.target.files))}
+        />
 
         <button
           type="button"
@@ -595,6 +594,15 @@ const handleSubmit = async () => {
         >
           Ajouter un ou plusieurs documents
         </button>
+
+        {/* Affichage des fichiers sélectionnés */}
+        {real.realFiles && real.realFiles.length > 0 && (
+          <ul className="text-sm text-gray-600 mt-2">
+            {real.realFiles.map((file, idx) => (
+              <li key={idx}>{file.name}</li>
+            ))}
+          </ul>
+        )}
 
         <button onClick={() => setPopup({ open: true, index: i, type: 'realisation' })} className="text-red-600 underline text-sm ml-12">
           Supprimer cette réalisation
@@ -609,8 +617,6 @@ const handleSubmit = async () => {
     </div>
   </>
 )}
-
-
 
 
 {selectedTab === 'prestations' && (
