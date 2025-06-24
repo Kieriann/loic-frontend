@@ -259,15 +259,15 @@ console.log('realisations récupérées :', realisations)
       {realisations && realisations.length > 0 ? (
         realisations.map((r, i) => (
           <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
-            {r.title && <p><strong>Titre :</strong> {r.title}</p>}
-            {r.description && <p><strong>Description :</strong> {r.description}</p>}
-            {r.files?.length > 0 && (
+            <p><strong>Titre :</strong> {r.title || 'Sans titre'}</p>
+<p><strong>Description :</strong> {r.description || 'Aucune description'}</p>
+{r.files && r.files.length > 0 && (
   <div className="space-y-1">
     <strong>Documents :</strong>
     {r.files.map((f, idx) => (
       <div key={idx}>
         <a
-href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/v1/${f.fileName}&embedded=true`}
+          href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/v1/${f.fileName}&embedded=true`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 underline"
@@ -278,6 +278,7 @@ href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/r
     ))}
   </div>
 )}
+
 
 
 
