@@ -1,15 +1,9 @@
-//
-// ─── Page : modification complète du profil utilisateur ───────────
-//
-
 import React, { useState, useEffect } from 'react'
 import ProfileInfo from '../components/sections/ProfileInfo'
 import AddressInfo from '../components/sections/AddressInfo'
 import DocumentUpload from '../components/sections/DocumentUpload'
 import { fetchProfile } from '../api/fetchProfile'
-import { useNavigate } from 'react-router-dom'
-import { useSearchParams } from 'react-router-dom'
-
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 export default function EditProfilePage() {
   const [profile, setProfile] = useState({
@@ -38,157 +32,151 @@ export default function EditProfilePage() {
     state: '',
     country: '',
   })
-const [experiences, setExperiences] = useState([])
-const [realisations, setRealisations] = useState([])
+  const [experiences, setExperiences] = useState([])
+  const [realisations, setRealisations] = useState([])
   const [documents, setDocuments] = useState({ photo: null, cv: null })
   const [errors, setErrors] = useState({})
   const [popup, setPopup] = useState({ open: false, index: null, type: '' })
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
-const initialTab = searchParams.get('tab')
+  const initialTab = searchParams.get('tab')
   const [prestations, setPrestations] = useState([{
-  type: '',
-  tech: '',
-  level: 'junior',
-}])
-const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
+    type: '',
+    tech: '',
+    level: 'junior',
+  }])
+  const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
 
-useEffect(() => {
-  if (initialTab) {
-    setSelectedTab(initialTab)
-  }
-}, [initialTab])
+  useEffect(() => {
+    if (initialTab) {
+      setSelectedTab(initialTab)
+    }
+  }, [initialTab])
 
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        const res = await fetchProfile(token)
 
-useEffect(() => {
-  const loadData = async () => {
-    try {
-      const token = localStorage.getItem('token')
-      const res = await fetchProfile(token)
+        const docArray = Array.isArray(res.documents) ? res.documents : Object.values(res.documents || {})
+        const photoDoc = docArray.find(d => d.type === 'ID_PHOTO')
+        const cvDoc = docArray.find(d => d.type === 'CV')
 
-const docArray = Array.isArray(res.documents) ? res.documents : Object.values(res.documents || {})
-const photoDoc = docArray.find(d => d.type === 'ID_PHOTO')
-const cvDoc = docArray.find(d => d.type === 'CV')
-
-      setDocuments({
-        photo: photoDoc || null,
-        cv: cvDoc || null
-      })
-
-
-
-
-      if (res.profile) {
-        const {
-          firstname, lastname, phone, siret, bio,
-          smallDayRate, mediumDayRate, highDayRate,
-          languages, isEmployed, availableDate
-        } = res.profile
-
-        setProfile({
-          firstname,
-          lastname,
-          phone,
-          siret,
-          bio,
-          smallDayRate,
-          mediumDayRate,
-          highDayRate,
-          languages,
-          isEmployed,
-          availableDate: availableDate || '',
+        setDocuments({
+          photo: photoDoc || null,
+          cv: cvDoc || null
         })
 
-        setLangList((languages || '').split(','))
+        if (res.profile) {
+          const {
+            firstname, lastname, phone, siret, bio,
+            smallDayRate, mediumDayRate, highDayRate,
+            languages, isEmployed, availableDate
+          } = res.profile
 
-        if (res.profile.Address) {
-          const { address, city, postalCode, state, country } = res.profile.Address
-          setAddress({ address, city, postalCode, state, country })
+          setProfile({
+            firstname,
+            lastname,
+            phone,
+            siret,
+            bio,
+            smallDayRate,
+            mediumDayRate,
+            highDayRate,
+            languages,
+            isEmployed,
+            availableDate: availableDate || '',
+          })
+
+          setLangList((languages || '').split(','))
+
+          if (res.profile.Address) {
+            const { address, city, postalCode, state, country } = res.profile.Address
+            setAddress({ address, city, postalCode, state, country })
+          }
         }
-      }
 
-      if (res.experiences?.length) {
-        setExperiences(res.experiences.map(exp => ({
-          title: exp.title,
-          client: exp.client || '',
-          description: exp.description,
-          domains: exp.domains,
-          languages: Array.isArray(exp.languages) ? exp.languages : [],
-          newLangInput: '',
-          newLangLevel: 'junior',
-          realTech: Array.isArray(exp.realTech) ? exp.realTech : [],
+        if (res.experiences?.length) {
+          setExperiences(res.experiences.map(exp => ({
+            title: exp.title,
+            client: exp.client || '',
+            description: exp.description,
+            domains: exp.domains,
+            languages: Array.isArray(exp.languages) ? exp.languages : [],
+            newLangInput: '',
+            newLangLevel: 'junior',
+            realTech: Array.isArray(exp.realTech) ? exp.realTech : [],
+            newRealTechInput: '',
+            newRealTechLevel: 'junior',
+            realTitle: exp.realTitle || '',
+            realDescription: exp.realDescription || '',
+            realFile: null,
+            realFilePath: exp.realFilePath || '',
+          })))
+        } else {
+          setExperiences([{
+            title: '',
+            client: '',
+            description: '',
+            domains: '',
+            languages: [],
+            newLangInput: '',
+            newLangLevel: 'junior',
+            realTech: [],
+            newRealTechInput: '',
+            newRealTechLevel: 'junior',
+            realTitle: '',
+            realDescription: '',
+            realFile: null,
+            realFilePath: '',
+          }])
+        }
+
+        // --- CORRECTION : Initialisation des réalisations AVEC fichiers ---
+        const realList = res.realisations || []
+        setRealisations(realList.length ? realList.map(real => ({
+          id: real.id || '',
+          realTitle: real.title || '',
+          realDescription: real.description || '',
+          realTech: Array.isArray(real.techs) ? real.techs : [],
           newRealTechInput: '',
           newRealTechLevel: 'junior',
-          realTitle: exp.realTitle || '',
-          realDescription: exp.realDescription || '',
-          realFile: null,
-          realFilePath: exp.realFilePath || '',
-        })))
-      } else {
-        setExperiences([{
-          title: '',
-          client: '',
-          description: '',
-          domains: '',
-          languages: [],
-          newLangInput: '',
-          newLangLevel: 'junior',
+          realFiles: (real.files || []).map(f => ({
+            id: f.id,
+            url: `https://res.cloudinary.com/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/raw/upload/v${f.version}/${f.public_id}.${f.format}`,
+            name: f.originalName,
+            source: 'cloud'
+          }))
+        })) : [{
+          realTitle: '',
+          realDescription: '',
           realTech: [],
           newRealTechInput: '',
           newRealTechLevel: 'junior',
-          realTitle: '',
-          realDescription: '',
-          realFile: null,
-          realFilePath: '',
+          realFiles: [],
         }])
-      }
-// Chargement des réalisations
-const realList = res.realisations || []
-setRealisations(realList.map(real => ({
-  id: real.id || '',
-  realTitle: real.title || '',
-  realDescription: real.description || '',
-  realTech: Array.isArray(real.techs) ? real.techs : [],
-  newRealTechInput: '',
-  newRealTechLevel: 'junior',
-  realFile: null,
-  realFilePath: real.fileName ? `${import.meta.env.VITE_CLOUDINARY_URL}/${real.fileName}` : '',
-})))
-if (!realList.length) {
-  setRealisations([{
-    realTitle: '',
-    realDescription: '',
-    realTech: [],
-    newRealTechInput: '',
-    newRealTechLevel: 'junior',
-    realFile: null,
-    realFilePath: '',
-  }])
-}
 
-
-      // Chargement des prestations
-      if (res.prestations?.length) {
-        setPrestations(res.prestations.map(p => ({
-          type: p.type || '',
-          tech: p.tech || '',
-          level: p.level || '',
-        })))
-      } else {
-        setPrestations([{
-          type: '',
-          tech: '',
-          level: 'junior',
-        }])
+        if (res.prestations?.length) {
+          setPrestations(res.prestations.map(p => ({
+            type: p.type || '',
+            tech: p.tech || '',
+            level: p.level || '',
+          })))
+        } else {
+          setPrestations([{
+            type: '',
+            tech: '',
+            level: 'junior',
+          }])
+        }
+      } catch (err) {
+        console.error('Erreur chargement profil', err)
       }
-    } catch (err) {
-      console.error('Erreur chargement profil', err)
     }
-  }
 
-  loadData()
-}, [])
-
+    loadData()
+  }, [])
 
   const validate = () => {
     const newErrors = {}
@@ -215,16 +203,15 @@ if (!realList.length) {
   }
 
   const addLanguage = () => {
-  if (!langInput.trim()) return
-  setLangList([
-    ...langList, 
-    `${langInput.trim()}:${writtenInput}/${oralInput}`
-  ])
-  setLangInput('')
-  setWrittenInput('débutant')
-  setOralInput('débutant')
-}
-
+    if (!langInput.trim()) return
+    setLangList([
+      ...langList,
+      `${langInput.trim()}:${writtenInput}/${oralInput}`
+    ])
+    setLangInput('')
+    setWrittenInput('débutant')
+    setOralInput('débutant')
+  }
 
   const updateExperience = (index, field, value) => {
     const updated = [...experiences]
@@ -272,142 +259,160 @@ if (!realList.length) {
     setPopup({ open: false, index: null, type: '' })
   }
 
-  const sanitizeFileName = (name) =>
-  name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, "_")
-
-
-const updateRealisation = (index, field, value) => {
-  const updated = [...realisations]
-  updated[index][field] = value
-  setRealisations(updated)
-}
-
-const addRealisation = () => {
-  setRealisations([...realisations, {
-    realTitle: '',
-    realDescription: '',
-    realTech: [],
-    newRealTechInput: '',
-    newRealTechLevel: 'junior',
-    realFile: null,
-    realFilePath: '',
-  }])
-}
-
-const addRealTech = (index) => {
-  const updated = [...realisations]
-  if (!updated[index].newRealTechInput.trim()) return
-  updated[index].realTech.push(`${updated[index].newRealTechInput}:${updated[index].newRealTechLevel}`)
-  updated[index].newRealTechInput = ''
-  updated[index].newRealTechLevel = 'junior'
-  setRealisations(updated)
-}
-
-const removeRealTech = (index, techIndex) => {
-  const updated = [...realisations]
-  updated[index].realTech.splice(techIndex, 1)
-  setRealisations(updated)
-}
-
-const handleSubmit = async () => {
-  if (!validate()) return
-
-  const formData = new FormData()
-
-  if (!profile.availableDate) profile.availableDate = ''
-
-  const profilePayload = {
-    ...profile,
-    languages: langList.join(','),
-  }
-
-  const formattedExperiences = experiences.map(exp => ({
-  title: exp.title,
-  client: exp.client,
-  description: exp.description,
-  domains: exp.domains,
-  languages: exp.languages,
-}))
-
-
-  formData.append('profile', JSON.stringify(profilePayload))
-  formData.append('address', JSON.stringify(address))
-  formData.append('experiences', JSON.stringify(formattedExperiences))
-  formData.append('prestations', JSON.stringify(prestations))
-
-  if (documents.photo) {
-    formData.append('photo', documents.photo)
-  } else {
-    formData.append('removePhoto', 'true')
-  }
-
-  if (documents.cv) {
-    formData.append('cv', documents.cv)
-  } else {
-    formData.append('removeCV', 'true')
-  }
-
-const realFormData = new FormData()
-console.log('realisations filtrées :', realisations.filter(real => real.realTitle || real.realDescription || real.realTech.length))
-
-realFormData.append('data', JSON.stringify(
-  realisations
-    .filter(real => real.realTitle || real.realDescription || real.realTech.length)
-    .map(real => ({
-      ...(real.id ? { id: real.id } : {}),
-      title: real.realTitle,
-      description: real.realDescription,
-      techs: real.realTech
-    }))
-))
-
-
-realisations.forEach((r, index) => {
-  if (Array.isArray(r.realFiles)) {
-    r.realFiles.forEach((f, fileIndex) => {
-      const sanitized = sanitizeFileName(f.name)
-      const prefixedName = `real-${index}-${fileIndex}-${sanitized}`
-      realFormData.append('realFiles', f, prefixedName)
+  // --- CORRECTION : FONCTIONS POUR GÉRER LES FICHIERS DES RÉALISATIONS ---
+  const onRealFilesChange = (ri, files) => {
+    setRealisations(prev => {
+      const updated = [...prev]
+      updated[ri].realFiles = [
+        ...(updated[ri].realFiles || []),
+        ...Array.from(files).map(f => ({
+          file: f,
+          name: f.name,
+          source: 'new'
+        }))
+      ]
+      return updated
     })
   }
-})
 
-
-  try {
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-      },
-      body: formData,
+  const removeRealFile = (ri, fileIdx) => {
+    setRealisations(prev => {
+      const updated = [...prev]
+      updated[ri].realFiles = updated[ri].realFiles.filter((_, idx) => idx !== fileIdx)
+      return updated
     })
+  }
 
-    await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-      },
-      body: realFormData,
-    })
+  const updateRealisation = (index, field, value) => {
+    const updated = [...realisations]
+    updated[index][field] = value
+    setRealisations(updated)
+  }
 
-    if (!res.ok) {
-      const resText = await res.text()
-      try {
-        const json = JSON.parse(resText)
-        console.error('Erreur backend complète :', json)
-      } catch {
-        console.error('Erreur backend brute :', resText)
-      }
-      throw new Error(resText)
+  const addRealisation = () => {
+    setRealisations([...realisations, {
+      realTitle: '',
+      realDescription: '',
+      realTech: [],
+      newRealTechInput: '',
+      newRealTechLevel: 'junior',
+      realFiles: [],
+    }])
+  }
+
+  const addRealTech = (index) => {
+    const updated = [...realisations]
+    if (!updated[index].newRealTechInput.trim()) return
+    updated[index].realTech.push(`${updated[index].newRealTechInput}:${updated[index].newRealTechLevel}`)
+    updated[index].newRealTechInput = ''
+    updated[index].newRealTechLevel = 'junior'
+    setRealisations(updated)
+  }
+
+  const removeRealTech = (index, techIndex) => {
+    const updated = [...realisations]
+    updated[index].realTech.splice(techIndex, 1)
+    setRealisations(updated)
+  }
+
+  function sanitizeFileName(name) {
+    return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_')
+  }
+
+  const handleSubmit = async () => {
+    if (!validate()) return
+
+    const formData = new FormData()
+
+    if (!profile.availableDate) profile.availableDate = ''
+
+    const profilePayload = {
+      ...profile,
+      languages: langList.join(','),
     }
 
-navigate(`/profile?tab=${selectedTab}`)
-  } catch (err) {
-    alert('Erreur backend : ' + (err.message || 'inconnue'))
+    const formattedExperiences = experiences.map(exp => ({
+      title: exp.title,
+      client: exp.client,
+      description: exp.description,
+      domains: exp.domains,
+      languages: exp.languages,
+    }))
+
+    formData.append('profile', JSON.stringify(profilePayload))
+    formData.append('address', JSON.stringify(address))
+    formData.append('experiences', JSON.stringify(formattedExperiences))
+    formData.append('prestations', JSON.stringify(prestations))
+
+    if (documents.photo) {
+      formData.append('photo', documents.photo)
+    } else {
+      formData.append('removePhoto', 'true')
+    }
+
+    if (documents.cv) {
+      formData.append('cv', documents.cv)
+    } else {
+      formData.append('removeCV', 'true')
+    }
+
+    // --- CORRECTION : FormData réalisations AVEC gestion fichiers ---
+    const realFormData = new FormData()
+    const realisationsPayload = realisations
+      .filter(real => real.realTitle || real.realDescription || real.realTech.length)
+      .map((real, idx) => ({
+        ...(real.id ? { id: real.id } : {}),
+        title: real.realTitle,
+        description: real.realDescription,
+        techs: real.realTech,
+        filesToKeep: (real.realFiles || [])
+          .filter(f => f.source === 'cloud')
+          .map(f => f.id)
+      }))
+    realFormData.append('data', JSON.stringify(realisationsPayload))
+    realisations.forEach((real, realIdx) => {
+      (real.realFiles || []).forEach((f, fileIdx) => {
+        if (f.source === 'new') {
+          const sanitized = sanitizeFileName(f.name)
+          const prefixedName = `real-${realIdx}-${fileIdx}-${sanitized}`
+          realFormData.append('realFiles', f.file, prefixedName)
+        }
+      })
+    })
+
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+        body: formData,
+      })
+
+      await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+        body: realFormData,
+      })
+
+      if (!res.ok) {
+        const resText = await res.text()
+        try {
+          const json = JSON.parse(resText)
+          console.error('Erreur backend complète :', json)
+        } catch {
+          console.error('Erreur backend brute :', resText)
+        }
+        throw new Error(resText)
+      }
+
+      navigate(`/profile?tab=${selectedTab}`)
+    } catch (err) {
+      alert('Erreur backend : ' + (err.message || 'inconnue'))
+    }
   }
-}
-
-
 
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
@@ -426,16 +431,15 @@ navigate(`/profile?tab=${selectedTab}`)
 
         <h1 className="text-2xl text-darkBlue font-bold text-center">Modifier mon profil</h1>
         <div className="flex gap-3 justify-center">
-        {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
-  <button key={tab} onClick={() => setSelectedTab(tab)}
-    className={`px-4 py-2 rounded-xl font-semibold ${selectedTab === tab ? 'bg-blue-100 text-darkBlue' : 'hover:bg-blue-50'}`}>
-    {tab === 'realisations' ? 'Réalisations' :
-     tab === 'experiences' ? 'Experiences' :
-     tab === 'prestations' ? 'Prestations' :
-     tab.charAt(0).toUpperCase() + tab.slice(1)}
-  </button>
-))}
-
+          {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
+            <button key={tab} onClick={() => setSelectedTab(tab)}
+              className={`px-4 py-2 rounded-xl font-semibold ${selectedTab === tab ? 'bg-blue-100 text-darkBlue' : 'hover:bg-blue-50'}`}>
+              {tab === 'realisations' ? 'Réalisations' :
+                tab === 'experiences' ? 'Experiences' :
+                  tab === 'prestations' ? 'Prestations' :
+                    tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </div>
 
         {selectedTab === 'profil' && (
@@ -445,52 +449,50 @@ navigate(`/profile?tab=${selectedTab}`)
             <div className="space-y-2">
               <label className="text-xl font-semibold text-darkBlue">Langues</label>
               <div className="flex gap-2">
-<input
-  name="languages"
-  type="text"
-  value={langInput}
-  onChange={e => setLangInput(e.target.value)}
-  placeholder="Langue (ex: français)"
-/>
+                <input
+                  name="languages"
+                  type="text"
+                  value={langInput}
+                  onChange={e => setLangInput(e.target.value)}
+                  placeholder="Langue (ex: français)"
+                />
 
-<select value={writtenInput}
-  onChange={e => setWrittenInput(e.target.value)}>
-  <option value="débutant">Écrit : Débutant</option>
-  <option value="intermédiaire">Écrit : Intermédiaire</option>
-  <option value="courant">Écrit : Courant</option>
-</select>
-<select value={oralInput}
-  onChange={e => setOralInput(e.target.value)}>
-  <option value="débutant">Oral : Débutant</option>
-  <option value="intermédiaire">Oral : Intermédiaire</option>
-  <option value="courant">Oral : Courant</option>
-</select>
-<button onClick={addLanguage}>Ajouter</button>
-
+                <select value={writtenInput}
+                  onChange={e => setWrittenInput(e.target.value)}>
+                  <option value="débutant">Écrit : Débutant</option>
+                  <option value="intermédiaire">Écrit : Intermédiaire</option>
+                  <option value="courant">Écrit : Courant</option>
+                </select>
+                <select value={oralInput}
+                  onChange={e => setOralInput(e.target.value)}>
+                  <option value="débutant">Oral : Débutant</option>
+                  <option value="intermédiaire">Oral : Intermédiaire</option>
+                  <option value="courant">Oral : Courant</option>
+                </select>
+                <button onClick={addLanguage}>Ajouter</button>
               </div>
               <ul className="text-sm text-gray-700 space-y-1">
-  {langList.map((l, i) => {
-    const [name, levels] = l.split(':')
-    const [written, oral] = levels.split('/')
-    return (
-      <li key={i} className="flex items-center justify-between">
-        <span>
-          {name} — écrit : {written}, oral : {oral}
-        </span>
-        <button
-          type="button"
-          onClick={() => {
-            setLangList(langList.filter((_, idx) => idx !== i))
-          }}
-          className="text-red-500 text-xs hover:underline ml-4"
-        >
-          Supprimer
-        </button>
-      </li>
-    )
-  })}
-</ul>
-
+                {langList.map((l, i) => {
+                  const [name, levels] = l.split(':')
+                  const [written, oral] = levels.split('/')
+                  return (
+                    <li key={i} className="flex items-center justify-between">
+                      <span>
+                        {name} — écrit : {written}, oral : {oral}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setLangList(langList.filter((_, idx) => idx !== i))
+                        }}
+                        className="text-red-500 text-xs hover:underline ml-4"
+                      >
+                        Supprimer
+                      </button>
+                    </li>
+                  )
+                })}
+              </ul>
               {errors.languages && <p className="text-red-500 text-sm">{errors.languages}</p>}
             </div>
             <DocumentUpload data={documents} setData={setDocuments} />
@@ -507,15 +509,14 @@ navigate(`/profile?tab=${selectedTab}`)
               {profile.isEmployed && (
                 <>
                   <label className="font-semibold text-darkBlue ml-12">Disponible à partir du</label>
-          <input
-      type="date"
-      name="availableDate"
-      min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-      value={profile.availableDate}
-      onChange={(e) => setProfile({ ...profile, availableDate: e.target.value })}
-      className="border rounded px-2 py-1"
-    />
-
+                  <input
+                    type="date"
+                    name="availableDate"
+                    min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
+                    value={profile.availableDate}
+                    onChange={(e) => setProfile({ ...profile, availableDate: e.target.value })}
+                    className="border rounded px-2 py-1"
+                  />
                 </>
               )}
             </div>
@@ -552,174 +553,195 @@ navigate(`/profile?tab=${selectedTab}`)
                 <button onClick={() => setPopup({ open: true, index: i, type: 'expérience' })} className="text-red-600 underline text-sm">Supprimer cette expérience</button>
               </div>
             ))}
-
-
           </>
         )}
 
-{selectedTab === 'realisations' && (
-  <>
-    {realisations.map((real, i) => (
-      <div key={i} className="border rounded p-4 space-y-3">
-        <input type="text" placeholder="Titre de la réalisation" value={real.realTitle} onChange={(e) => updateRealisation(i, 'realTitle', e.target.value)} className="border rounded px-3 py-2 w-full" />
-        <textarea placeholder="Description" value={real.realDescription} onChange={(e) => updateRealisation(i, 'realDescription', e.target.value)} className="border rounded px-3 py-2 w-full min-h-[100px]" />
+        {selectedTab === 'realisations' && (
+          <>
+            {realisations.map((real, i) => (
+              <div key={i} className="border rounded p-4 space-y-3">
+                <input
+                  type="text"
+                  placeholder="Titre de la réalisation"
+                  value={real.realTitle}
+                  onChange={(e) => updateRealisation(i, 'realTitle', e.target.value)}
+                  className="border rounded px-3 py-2 w-full"
+                />
+                <textarea
+                  placeholder="Description"
+                  value={real.realDescription}
+                  onChange={(e) => updateRealisation(i, 'realDescription', e.target.value)}
+                  className="border rounded px-3 py-2 w-full min-h-[100px]"
+                />
 
-        <div className="flex gap-2">
-          <input
-            type="text"
-            placeholder="Langages et logiciels"
-            value={real.newRealTechInput}
-            onChange={e => updateRealisation(i, 'newRealTechInput', e.target.value)}
-            className="border rounded px-2 py-1 flex-1"
-          />
-          <select
-            value={real.newRealTechLevel}
-            onChange={e => updateRealisation(i, 'newRealTechLevel', e.target.value)}
-            className="border rounded px-2 py-1"
-          >
-            <option value="junior">Junior</option>
-            <option value="intermédiaire">Intermédiaire</option>
-            <option value="senior">Senior</option>
-          </select>
-          <button onClick={() => addRealTech(i)} className="bg-darkBlue text-white px-3 py-1 rounded">
-            Ajouter
-          </button>
-        </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="Langages et logiciels"
+                    value={real.newRealTechInput}
+                    onChange={e => updateRealisation(i, 'newRealTechInput', e.target.value)}
+                    className="border rounded px-2 py-1 flex-1"
+                  />
+                  <select
+                    value={real.newRealTechLevel}
+                    onChange={e => updateRealisation(i, 'newRealTechLevel', e.target.value)}
+                    className="border rounded px-2 py-1"
+                  >
+                    <option value="junior">Junior</option>
+                    <option value="intermédiaire">Intermédiaire</option>
+                    <option value="senior">Senior</option>
+                  </select>
+                  <button onClick={() => addRealTech(i)} className="bg-darkBlue text-white px-3 py-1 rounded">
+                    Ajouter
+                  </button>
+                </div>
 
-        <ul className="text-sm text-gray-700 space-y-1">
-          {real.realTech.map((t, j) => {
-            const [name, level] = t.split(':');
-            return (
-              <li key={j} className="flex gap-2 items-center">
-                <span>{name} : {level}</span>
+                <ul className="text-sm text-gray-700 space-y-1">
+                  {real.realTech.map((t, j) => {
+                    const [name, level] = t.split(':');
+                    return (
+                      <li key={j} className="flex gap-2 items-center">
+                        <span>{name} : {level}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeRealTech(i, j)}
+                          className="text-red-500 text-xs hover:underline"
+                        >
+                          Supprimer
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+
+                {/* Input fichiers multiples */}
+                <input
+                  type="file"
+                  className="hidden"
+                  id={`real-doc-${i}`}
+                  multiple
+                  onChange={e => onRealFilesChange(i, e.target.files)}
+                />
+
                 <button
                   type="button"
-                  onClick={() => removeRealTech(i, j)}
-                  className="text-red-500 text-xs hover:underline"
+                  className="text-darkBlue underline text-sm"
+                  onClick={() => document.getElementById(`real-doc-${i}`).click()}
                 >
-                  Supprimer
+                  Ajouter un document
                 </button>
-              </li>
-            );
-          })}
-        </ul>
 
-        {/* Input fichiers multiples */}
-        <input
-          type="file"
-          className="hidden"
-          id={`real-doc-${i}`}
-          multiple
-          onChange={(e) => updateRealisation(i, 'realFiles', Array.from(e.target.files))}
-        />
+                {/* Affichage des fichiers */}
+                <ul className="text-sm text-gray-600 mt-2">
+                  {(real.realFiles || []).map((file, idx) => (
+                    <li key={idx} className="flex items-center gap-2">
+                      {file.source === 'cloud'
+                        ? <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{file.name}</a>
+                        : <span>{file.name}</span>
+                      }
+                      <button
+                        type="button"
+                        className="ml-2 text-red-600 text-xs"
+                        onClick={() => removeRealFile(i, idx)}
+                      >
+                        Supprimer
+                      </button>
+                    </li>
+                  ))}
+                </ul>
 
-        <button
-          type="button"
-          className="text-darkBlue underline text-sm"
-          onClick={() => document.getElementById(`real-doc-${i}`).click()}
-        >
-          Ajouter un document
-        </button>
-
-        {/* Affichage des fichiers sélectionnés */}
-        {real.realFiles && real.realFiles.length > 0 && (
-          <ul className="text-sm text-gray-600 mt-2">
-            {real.realFiles.map((file, idx) => (
-              <li key={idx}>{file.name}</li>
+                <button
+                  onClick={() => setPopup({ open: true, index: i, type: 'realisation' })}
+                  className="text-red-600 underline text-sm ml-12"
+                >
+                  Supprimer cette réalisation
+                </button>
+              </div>
             ))}
-          </ul>
+
+            <div className="text-center mt-4">
+              <button type="button" onClick={addRealisation} className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition">
+                Ajouter une réalisation
+              </button>
+            </div>
+          </>
         )}
 
-        <button onClick={() => setPopup({ open: true, index: i, type: 'realisation' })} className="text-red-600 underline text-sm ml-12">
-          Supprimer cette réalisation
-        </button>
-      </div>
-    ))}
+        {selectedTab === 'prestations' && (
+          <>
+            {(prestations.length ? prestations : [{}]).map((p, i) => (
+              <div key={i} className="border rounded p-4 space-y-3">
+                <p className="font-medium text-darkBlue">Je suis capable d'assurer</p>
+                <select
+                  value={p.type || ''}
+                  onChange={e => {
+                    const copy = [...prestations]
+                    copy[i] = { ...copy[i], type: e.target.value }
+                    setPrestations(copy)
+                  }}
+                  className="border rounded px-2 py-1 w-full"
+                >
+                  <option value="">-- Choisir --</option>
+                  <option value="la formation">la formation</option>
+                  <option value="le coaching">le coaching</option>
+                  <option value="la maintenance">la maintenance</option>
+                  <option value="le développement">le développement</option>
+                </select>
 
-    <div className="text-center mt-4">
-      <button type="button" onClick={addRealisation} className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition">
-        Ajouter une réalisation
-      </button>
-    </div>
-  </>
-)}
+                <p className="font-medium text-darkBlue">pour</p>
+                <input
+                  type="text"
+                  placeholder="Ex: React, Java"
+                  value={p.tech || ''}
+                  onChange={e => {
+                    const copy = [...prestations]
+                    copy[i] = { ...copy[i], tech: e.target.value }
+                    setPrestations(copy)
+                  }}
+                  className="border rounded px-2 py-1 w-full"
+                />
 
+                <p className="font-medium text-darkBlue">à un niveau</p>
+                <select
+                  value={p.level || 'junior'}
+                  onChange={e => {
+                    const copy = [...prestations]
+                    copy[i] = { ...copy[i], level: e.target.value }
+                    setPrestations(copy)
+                  }}
+                  className="border rounded px-2 py-1 w-full"
+                >
+                  <option value="junior">junior</option>
+                  <option value="intermédiaire">intermédiaire</option>
+                  <option value="expert">expert</option>
+                </select>
 
-{selectedTab === 'prestations' && (
-  <>
-    {(prestations.length ? prestations : [{}]).map((p, i) => (
-      <div key={i} className="border rounded p-4 space-y-3">
-        <p className="font-medium text-darkBlue">Je suis capable d'assurer</p>
-        <select
-          value={p.type || ''}
-          onChange={e => {
-            const copy = [...prestations]
-            copy[i] = { ...copy[i], type: e.target.value }
-            setPrestations(copy)
-          }}
-          className="border rounded px-2 py-1 w-full"
-        >
-          <option value="">-- Choisir --</option>
-          <option value="la formation">la formation</option>
-          <option value="le coaching">le coaching</option>
-          <option value="la maintenance">la maintenance</option>
-          <option value="le développement">le développement</option>
-        </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const copy = [...prestations]
+                    copy.splice(i, 1)
+                    setPrestations(copy)
+                  }}
+                  disabled={prestations.length <= 1}
+                  className="text-red-600 underline text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Supprimer cette prestation
+                </button>
+              </div>
+            ))}
 
-        <p className="font-medium text-darkBlue">pour</p>
-        <input
-          type="text"
-          placeholder="Ex: React, Java"
-          value={p.tech || ''}
-          onChange={e => {
-            const copy = [...prestations]
-            copy[i] = { ...copy[i], tech: e.target.value }
-            setPrestations(copy)
-          }}
-          className="border rounded px-2 py-1 w-full"
-        />
-
-        <p className="font-medium text-darkBlue">à un niveau</p>
-        <select
-          value={p.level || 'junior'}
-          onChange={e => {
-            const copy = [...prestations]
-            copy[i] = { ...copy[i], level: e.target.value }
-            setPrestations(copy)
-          }}
-          className="border rounded px-2 py-1 w-full"
-        >
-          <option value="junior">junior</option>
-          <option value="intermédiaire">intermédiaire</option>
-          <option value="expert">expert</option>
-        </select>
-
-        <button
-          type="button"
-          onClick={() => {
-            const copy = [...prestations]
-            copy.splice(i, 1)
-            setPrestations(copy)
-          }}
-          disabled={prestations.length <= 1}
-          className="text-red-600 underline text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          Supprimer cette prestation
-        </button>
-      </div>
-    ))}
-
-    <div className="text-center mt-4">
-      <button
-        type="button"
-        onClick={() => setPrestations([...prestations, { type: '', tech: '', level: 'junior' }])}
-        className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
-      >
-        Ajouter une prestation
-      </button>
-    </div>
-  </>
-)}
+            <div className="text-center mt-4">
+              <button
+                type="button"
+                onClick={() => setPrestations([...prestations, { type: '', tech: '', level: 'junior' }])}
+                className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
+              >
+                Ajouter une prestation
+              </button>
+            </div>
+          </>
+        )}
 
         <div className="text-center">
           <button onClick={handleSubmit} className="bg-darkBlue text-white px-6 py-3 rounded-xl hover:bg-[#001a5c] transition">

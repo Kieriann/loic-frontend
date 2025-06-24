@@ -8,13 +8,12 @@ import { Navigate, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useSearchParams } from 'react-router-dom'
 
-
 export default function ProfilePage() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [searchParams] = useSearchParams()
-const initialTab = searchParams.get('tab')
-const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
+  const initialTab = searchParams.get('tab')
+  const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
   const [documents, setDocuments] = useState([])
   const navigate = useNavigate()
 
@@ -24,7 +23,7 @@ const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
         const token = localStorage.getItem('token')
         const res = await fetchProfile(token)
         setData(res)
-        console.log('profil récupéré', res)
+        // console.log('profil récupéré', res)
       } catch (err) {
         console.error('Erreur chargement', err)
       } finally {
@@ -34,36 +33,27 @@ const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
     load()
   }, [])
 
-useEffect(() => {
-  const fetchDocs = async () => {
-    try {
-      const token = localStorage.getItem('token')
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents/me`, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      const docs = Array.isArray(res.data) ? res.data : Object.values(res.data || {})
-      console.log('documents', docs)
-      setDocuments(docs)
-    } catch (err) {
-      console.error('Erreur chargement documents', err)
+  useEffect(() => {
+    const fetchDocs = async () => {
+      try {
+        const token = localStorage.getItem('token')
+        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents/me`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        const docs = Array.isArray(res.data) ? res.data : Object.values(res.data || {})
+        setDocuments(docs)
+      } catch (err) {
+        console.error('Erreur chargement documents', err)
+      }
     }
-  }
-  fetchDocs()
-}, [])
-
-
-
+    fetchDocs()
+  }, [])
 
   if (loading) return <p className="p-4">Chargement...</p>
   if (!data?.profile || !data.profile.firstname) return <Navigate to="/profile/edit" replace />
 
-  const { profile, experiences, prestations, realisations } = data
+  const { profile, experiences = [], prestations = [], realisations = [] } = data
   const address = profile.Address || {}
-  console.log('realFilePaths filtrés :', experiences.filter(e => e.realFilePath).map(e => e.realFilePath))
-
-console.log('realisations récupérées :', realisations)
-console.log('Fichiers de la première réalisation :', realisations[0]?.files)
-
 
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
@@ -97,7 +87,7 @@ console.log('Fichiers de la première réalisation :', realisations[0]?.files)
                 {selectedTab === 'prestations' && 'Mes Prestations'}
               </h1>
               <button
-              onClick={() => navigate(`/profile/edit?tab=${selectedTab}`)}
+                onClick={() => navigate(`/profile/edit?tab=${selectedTab}`)}
                 className="text-sm text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
               >
                 Modifier
@@ -160,45 +150,37 @@ console.log('Fichiers de la première réalisation :', realisations[0]?.files)
                 </ul>
               </Section>
 
-<Section title="Documents">
-  <ul className="list-disc list-inside text-left max-w-xl mx-auto">
-    {documents.length === 0 && (
-      <li className="text-gray-500 italic">Aucun document</li>
-    )}
-{Array.isArray(documents) && documents.map((doc, index) => {
-  if (!doc || typeof doc !== 'object' || !doc.fileName || !doc.type) return null
+              <Section title="Documents">
+                <ul className="list-disc list-inside text-left max-w-xl mx-auto">
+                  {documents.length === 0 && (
+                    <li className="text-gray-500 italic">Aucun document</li>
+                  )}
+                  {Array.isArray(documents) && documents.map((doc, index) => {
+                    if (!doc || typeof doc !== 'object' || !doc.fileName || !doc.type) return null
 
-  const typeLabel = doc.type === 'CV' ? 'CV' : 'Photo'
-  const name = doc.fileName
-  const link = doc.fileName
+                    const typeLabel = doc.type === 'CV' ? 'CV' : 'Photo'
+                    const name = doc.fileName
+                    const link = doc.fileName
 
-  return (
-    <li key={doc.id || index}>
-      <strong>{typeLabel} :</strong>{' '}
-<a
-  href={doc.type === 'CV'
-    ? `https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${doc.fileName}&embedded=true`
-    : `https://res.cloudinary.com/dwwt3sgbw/image/upload/${doc.fileName}`
-  }
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-blue-600 underline"
->
-  {name}
-</a>
-
-
-    </li>
-  )
-})}
-
-
-
-  </ul>
-</Section>
-
-
-
+                    return (
+                      <li key={doc.id || index}>
+                        <strong>{typeLabel} :</strong>{' '}
+                        <a
+                          href={doc.type === 'CV'
+                            ? `https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${doc.fileName}&embedded=true`
+                            : `https://res.cloudinary.com/dwwt3sgbw/image/upload/${doc.fileName}`
+                          }
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 underline"
+                        >
+                          {name}
+                        </a>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </Section>
             </>
           )}
 
@@ -256,45 +238,47 @@ console.log('Fichiers de la première réalisation :', realisations[0]?.files)
 
           {/* RÉALISATIONS */}
           {selectedTab === 'realisations' && (
-  <Section title="Réalisations">
-    <div className="space-y-4 w-full max-w-xl">
-      {realisations && realisations.length > 0 ? (
-        realisations.map((r, i) => (
-          <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
-            <p><strong>Titre :</strong> {r.title || 'Sans titre'}</p>
-<p><strong>Description :</strong> {r.description || 'Aucune description'}</p>
-{r.files && r.files.length > 0 && (
-  <div className="space-y-1">
-    <strong>Documents :</strong>
-    {r.files.map((f, idx) => {
-      console.log('FileName:', f.fileName)
-      return (
-        <div key={idx}>
-          <a
-  href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version}/${f.public_id}.${f.format}`}
-  target="_blank"
-  rel="noopener noreferrer"
-  className="text-blue-600 underline"
->
-  {f.originalName}
-</a>
-
-        </div>
-      )
-    })}
-  </div>
-)}
-
-
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-500 italic">Aucune réalisation renseignée</p>
-      )}
-    </div>
-  </Section>
-)}
-
+            <Section title="Réalisations">
+              <div className="space-y-4 w-full max-w-xl">
+                {realisations && realisations.length > 0 ? (
+                  realisations.map((r, i) => (
+                    <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
+                      <p><strong>Titre :</strong> {r.title || r.realTitle || 'Sans titre'}</p>
+                      <p><strong>Description :</strong> {r.description || r.realDescription || 'Aucune description'}</p>
+                      {(r.techs || r.realTech) && (
+                        <div>
+                          <strong>Technos :</strong>{' '}
+                          {(r.techs || r.realTech || []).map((t, idx) => {
+                            const [name, level] = t.split(':')
+                            return <span key={idx}>{name} ({level}){idx < (r.techs || r.realTech).length - 1 ? ', ' : ''}</span>
+                          })}
+                        </div>
+                      )}
+                      {r.files && r.files.length > 0 && (
+                        <div className="space-y-1">
+                          <strong>Documents :</strong>
+                          {r.files.map((f, idx) => (
+                            <div key={idx}>
+                              <a
+                                href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version}/${f.public_id}.${f.format}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 underline"
+                              >
+                                {f.originalName}
+                              </a>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic">Aucune réalisation renseignée</p>
+                )}
+              </div>
+            </Section>
+          )}
 
           {/* PRESTATIONS */}
           {selectedTab === 'prestations' && (
