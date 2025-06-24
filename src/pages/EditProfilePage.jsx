@@ -362,13 +362,16 @@ realFormData.append('data', JSON.stringify(
 ))
 
 
-realisations.forEach(r => {
+realisations.forEach((r, index) => {
   if (Array.isArray(r.realFiles)) {
-    r.realFiles.forEach(f => {
-      realFormData.append('realFiles', f, sanitizeFileName(f.name))
+    r.realFiles.forEach((f, fileIndex) => {
+      const sanitized = sanitizeFileName(f.name)
+      const prefixedName = `real-${index}-${fileIndex}-${sanitized}`
+      realFormData.append('realFiles', f, prefixedName)
     })
   }
 })
+
 
   try {
     const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
