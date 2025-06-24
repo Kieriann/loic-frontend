@@ -1,7 +1,13 @@
-import { getCloudinaryUrl } from "./utils/cloudinary"
 
 export default function ProfileFiles({ files }) {
   if (!files?.length) return null
+
+  const getCloudinaryUrl = (file) => {
+    const type = file.resourceType === "image" ? "image" : "raw"
+    const ext = file.format && !file.public_id.endsWith(`.${file.format}`) ? `.${file.format}` : ""
+    return `https://res.cloudinary.com/dwwt3sgbw/${type}/upload/v${file.version}/${file.public_id}${ext}`
+  }
+
   return (
     <div>
       <strong>Documents :</strong>
