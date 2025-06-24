@@ -23,12 +23,7 @@ export default function ProfileFiles({ files }) {
         publicId = parts.slice(1).join('/');
       }
 
-      const format = file.format || (file.originalName ? file.originalName.split('.').pop() : "");
-      const formatSuffix = format ? `.${format}` : "";
-
-      return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/` +
-             (version ? `v${version}/` : "") +
-             `${publicId}${formatSuffix}`;
+      return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`;
     } catch (error) {
       console.error("Erreur de construction d'URL:", error, file);
       return null;
@@ -52,10 +47,6 @@ export default function ProfileFiles({ files }) {
                 src={fileUrl}
                 alt="Photo de profil"
                 className="w-32 h-32 object-cover rounded-full border-2 border-gray-200"
-                onError={(e) => {
-                  console.error(`Erreur chargement image: ${fileUrl}`);
-                  e.target.src = "data:image/svg+xml;base64,...";
-                }}
               />
             </a>
             <p className="text-sm text-gray-500">{file.originalName || "Photo"}</p>
