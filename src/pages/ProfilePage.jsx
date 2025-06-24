@@ -266,20 +266,25 @@ console.log('Fichiers de la première réalisation :', realisations[0]?.files)
 {r.files && r.files.length > 0 && (
   <div className="space-y-1">
     <strong>Documents :</strong>
-    {r.files.map((f, idx) => (
-      <div key={idx}>
-        <a
-href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/${f.fileName}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 underline"
-        >
-          {f.originalName}
-        </a>
-      </div>
-    ))}
+    {r.files.map((f, idx) => {
+      console.log('FileName:', f.fileName)
+      return (
+        <div key={idx}>
+          <a
+            href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/${f.fileName}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 underline"
+          >
+            {f.originalName}
+          </a>
+        </div>
+      )
+    })}
   </div>
 )}
+
+
 
 
 
