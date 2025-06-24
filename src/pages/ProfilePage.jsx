@@ -267,7 +267,7 @@ console.log('realisations récupérées :', realisations)
     {r.files.map((f, idx) => (
       <div key={idx}>
         <a
-          href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/${f.fileName}&embedded=true`}
+href={`https://docs.google.com/viewer?url=https://res.cloudinary.com/dwwt3sgbw/raw/upload/v1/${f.fileName}&embedded=true`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 underline"
