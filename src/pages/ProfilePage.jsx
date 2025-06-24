@@ -54,7 +54,6 @@ export default function ProfilePage() {
 
   const { profile, experiences = [], prestations = [], realisations = [] } = data
   const address = profile.Address || {}
-n
 console.log("Documents du profil:", documents);
 console.log("Photo du profil:", documents?.find(doc => doc.type === "ID_PHOTO"));
   return (
