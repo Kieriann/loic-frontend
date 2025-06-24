@@ -29,7 +29,6 @@ export default function EditProfilePage() {
   const [writtenInput, setWrittenInput] = useState('débutant')
   const [oralInput, setOralInput] = useState('débutant')
   const [langList, setLangList] = useState([])
-  const [selectedTab, setSelectedTab] = useState('profil')
   const [address, setAddress] = useState({
     address: '',
     city: '',
@@ -43,6 +42,9 @@ const [realisations, setRealisations] = useState([])
   const [errors, setErrors] = useState({})
   const [popup, setPopup] = useState({ open: false, index: null, type: '' })
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+const initialTab = searchParams.get('tab')
+const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
   const [prestations, setPrestations] = useState([{
   type: '',
   tech: '',
@@ -375,7 +377,7 @@ const handleSubmit = async () => {
       throw new Error(resText)
     }
 
-    navigate('/profile')
+navigate(`/profile?tab=${selectedTab}`)
   } catch (err) {
     alert('Erreur backend : ' + (err.message || 'inconnue'))
   }

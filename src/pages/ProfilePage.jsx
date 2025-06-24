@@ -6,11 +6,15 @@ import React, { useEffect, useState } from 'react'
 import { fetchProfile } from '../api/fetchProfile'
 import { Navigate, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import { useSearchParams } from 'react-router-dom'
+
 
 export default function ProfilePage() {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [selectedTab, setSelectedTab] = useState('profil')
+  const [searchParams] = useSearchParams()
+const initialTab = searchParams.get('tab')
+const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
   const [documents, setDocuments] = useState([])
   const navigate = useNavigate()
 
