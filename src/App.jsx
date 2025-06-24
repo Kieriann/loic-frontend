@@ -148,6 +148,7 @@ function AppRouter({ token, setToken }) {
               element={<SignupSuccess />}
             />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
         </CenteredLayout>
@@ -170,7 +171,6 @@ function AppRouter({ token, setToken }) {
           <>
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/profile/edit" element={<EditProfilePage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
             <Route path="*" element={<Navigate to="/profile" replace />} />
           </>
