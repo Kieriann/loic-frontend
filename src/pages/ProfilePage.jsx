@@ -269,7 +269,7 @@ console.log('Fichiers de la première réalisation :', realisations[0]?.files)
     {r.files.map((f, idx) => (
       <div key={idx}>
         <a
-href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/v1/${f.fileName}`}
+href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/${f.fileName}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 underline"
