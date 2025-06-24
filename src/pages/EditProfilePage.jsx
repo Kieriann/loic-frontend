@@ -145,6 +145,7 @@ const cvDoc = docArray.find(d => d.type === 'CV')
 // Chargement des réalisations
 const realList = res.realisations || []
 setRealisations(realList.map(real => ({
+  id: real.id || '',
   realTitle: real.title || '',
   realDescription: real.description || '',
   realTech: Array.isArray(real.techs) ? real.techs : [],
