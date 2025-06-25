@@ -48,7 +48,8 @@ export default function ProfilePage() {
           headers: { Authorization: `Bearer ${token}` }
         })
         const docs = Array.isArray(res.data) ? res.data : Object.values(res.data || {})
-        setDocuments(docs)
+console.log('Documents reçus:', docs);
+setDocuments(docs);
       } catch (err) {
         console.error('Erreur chargement documents', err)
       }
