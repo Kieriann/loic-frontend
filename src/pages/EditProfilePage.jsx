@@ -133,28 +133,27 @@ export default function EditProfilePage() {
           }])
         }
 
-        // --- CORRECTION : Initialisation des réalisations AVEC fichiers ---
         const realList = res.realisations || []
-setRealisations(realList.length ? realList.map(real => ({
-  id: real.id || '',
-  realTitle: real.title || '',
-  realDescription: real.description || '',
-  realTech: Array.isArray(real.techs) ? real.techs : [],
-  newRealTechInput: '',
-  newRealTechLevel: 'junior',
-  realFiles: (real.files || []).map(f => {
-    const format = f.format ? `.${f.format}` : '';
-    return {
-      id: f.id,
-      url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${f.public_id}${format}`,
-      name: f.originalName || 'Fichier',
-      source: 'cloud',
-      version: f.version,
-      public_id: f.public_id,
-      format: f.format
-    };
-  })
-})) : [{
+        setRealisations(realList.length ? realList.map(real => ({
+          id: real.id || '',
+          realTitle: real.title || '',
+          realDescription: real.description || '',
+          realTech: Array.isArray(real.techs) ? real.techs : [],
+          newRealTechInput: '',
+          newRealTechLevel: 'junior',
+          realFiles: (real.files || []).map(f => {
+            const format = f.format ? `.${f.format}` : '';
+            return {
+              id: f.id,
+              url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${f.public_id}${format}`,
+              name: f.originalName || 'Fichier',
+              source: 'cloud',
+              version: f.version,
+              public_id: f.public_id,
+              format: f.format
+            };
+          })
+        })) : [{
           realTitle: '',
           realDescription: '',
           realTech: [],
@@ -265,7 +264,6 @@ setRealisations(realList.length ? realList.map(real => ({
     setPopup({ open: false, index: null, type: '' })
   }
 
-  // --- CORRECTION : FONCTIONS POUR GÉRER LES FICHIERS DES RÉALISATIONS ---
   const onRealFilesChange = (ri, files) => {
     setRealisations(prev => {
       const updated = [...prev]
@@ -362,7 +360,6 @@ setRealisations(realList.length ? realList.map(real => ({
       formData.append('removeCV', 'true')
     }
 
-    // --- CORRECTION : FormData réalisations AVEC gestion fichiers ---
     const realFormData = new FormData()
     const realisationsPayload = realisations
       .filter(real => real.realTitle || real.realDescription || real.realTech.length)
@@ -440,10 +437,7 @@ setRealisations(realList.length ? realList.map(real => ({
           {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
             <button key={tab} onClick={() => setSelectedTab(tab)}
               className={`px-4 py-2 rounded-xl font-semibold ${selectedTab === tab ? 'bg-blue-100 text-darkBlue' : 'hover:bg-blue-50'}`}>
-              {tab === 'realisations' ? 'Réalisations' :
-                tab === 'experiences' ? 'Experiences' :
-                  tab === 'prestations' ? 'Prestations' :
-                    tab.charAt(0).toUpperCase() + tab.slice(1)}
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
@@ -462,15 +456,12 @@ setRealisations(realList.length ? realList.map(real => ({
                   onChange={e => setLangInput(e.target.value)}
                   placeholder="Langue (ex: français)"
                 />
-
-                <select value={writtenInput}
-                  onChange={e => setWrittenInput(e.target.value)}>
+                <select value={writtenInput} onChange={e => setWrittenInput(e.target.value)}>
                   <option value="débutant">Écrit : Débutant</option>
                   <option value="intermédiaire">Écrit : Intermédiaire</option>
                   <option value="courant">Écrit : Courant</option>
                 </select>
-                <select value={oralInput}
-                  onChange={e => setOralInput(e.target.value)}>
+                <select value={oralInput} onChange={e => setOralInput(e.target.value)}>
                   <option value="débutant">Oral : Débutant</option>
                   <option value="intermédiaire">Oral : Intermédiaire</option>
                   <option value="courant">Oral : Courant</option>
@@ -483,16 +474,8 @@ setRealisations(realList.length ? realList.map(real => ({
                   const [written, oral] = levels.split('/')
                   return (
                     <li key={i} className="flex items-center justify-between">
-                      <span>
-                        {name} — écrit : {written}, oral : {oral}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setLangList(langList.filter((_, idx) => idx !== i))
-                        }}
-                        className="text-red-500 text-xs hover:underline ml-4"
-                      >
+                      <span>{name} — écrit : {written}, oral : {oral}</span>
+                      <button type="button" onClick={() => { setLangList(langList.filter((_, idx) => idx !== i)) }} className="text-red-500 text-xs hover:underline ml-4">
                         Supprimer
                       </button>
                     </li>
@@ -559,6 +542,17 @@ setRealisations(realList.length ? realList.map(real => ({
                 <button onClick={() => setPopup({ open: true, index: i, type: 'expérience' })} className="text-red-600 underline text-sm">Supprimer cette expérience</button>
               </div>
             ))}
+
+            {/* --- MODIFICATION ICI : BOUTON AJOUTÉ --- */}
+            <div className="text-center mt-6">
+              <button 
+                type="button" 
+                onClick={addExperience} 
+                className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
+              >
+                Ajouter une expérience
+              </button>
+            </div>
           </>
         )}
 
@@ -608,11 +602,7 @@ setRealisations(realList.length ? realList.map(real => ({
                     return (
                       <li key={j} className="flex gap-2 items-center">
                         <span>{name} : {level}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeRealTech(i, j)}
-                          className="text-red-500 text-xs hover:underline"
-                        >
+                        <button type="button" onClick={() => removeRealTech(i, j)} className="text-red-500 text-xs hover:underline">
                           Supprimer
                         </button>
                       </li>
@@ -620,24 +610,12 @@ setRealisations(realList.length ? realList.map(real => ({
                   })}
                 </ul>
 
-                {/* Input fichiers multiples */}
-                <input
-                  type="file"
-                  className="hidden"
-                  id={`real-doc-${i}`}
-                  multiple
-                  onChange={e => onRealFilesChange(i, e.target.files)}
-                />
+                <input type="file" className="hidden" id={`real-doc-${i}`} multiple onChange={e => onRealFilesChange(i, e.target.files)} />
 
-                <button
-                  type="button"
-                  className="text-darkBlue underline text-sm"
-                  onClick={() => document.getElementById(`real-doc-${i}`).click()}
-                >
+                <button type="button" className="text-darkBlue underline text-sm" onClick={() => document.getElementById(`real-doc-${i}`).click()}>
                   Ajouter un document
                 </button>
 
-                {/* Affichage des fichiers */}
                 <ul className="text-sm text-gray-600 mt-2">
                   {(real.realFiles || []).map((file, idx) => (
                     <li key={idx} className="flex items-center gap-2">
@@ -645,21 +623,14 @@ setRealisations(realList.length ? realList.map(real => ({
                         ? <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{file.name}</a>
                         : <span>{file.name}</span>
                       }
-                      <button
-                        type="button"
-                        className="ml-2 text-red-600 text-xs"
-                        onClick={() => removeRealFile(i, idx)}
-                      >
+                      <button type="button" className="ml-2 text-red-600 text-xs" onClick={() => removeRealFile(i, idx)}>
                         Supprimer
                       </button>
                     </li>
                   ))}
                 </ul>
 
-                <button
-                  onClick={() => setPopup({ open: true, index: i, type: 'realisation' })}
-                  className="text-red-600 underline text-sm ml-12"
-                >
+                <button onClick={() => setPopup({ open: true, index: i, type: 'realisation' })} className="text-red-600 underline text-sm ml-12">
                   Supprimer cette réalisation
                 </button>
               </div>
