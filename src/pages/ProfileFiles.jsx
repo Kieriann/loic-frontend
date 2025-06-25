@@ -28,7 +28,7 @@ const getFileUrl = (file) => {
     const isPhoto = file.type === "ID_PHOTO";
     const resourceType = isPhoto ? "image" : "raw";
 
-    return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`;
+return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`.replace(/\/{2,}/g, '/');
   } catch (error) {
     console.error("Erreur de construction d'URL:", error, file);
     return null;

@@ -8,22 +8,22 @@ function ProfilePhoto({ photo }) {
     }
     
     // Pour les photos stockées sur Cloudinary
-    try {
-      // Utilise secure_url si disponible, sinon construit l'URL
-      if (document.secure_url) {
-        return document.secure_url;
-      }
-      
-      // Si on a juste le filename stocké (cas probable)
-      const parts = document.fileName.split("/");
-      const version = parts[0].startsWith("v") ? parts[0].substring(1) : "";
-      const publicId = parts.length > 1 ? parts[1] : document.fileName;
-      
-      return `https://res.cloudinary.com/dwwt3sgbw/image/upload/${document.fileName}`;
-    } catch (error) {
-      console.error("Erreur de construction d'URL:", error);
-      return null;
-    }
+// Pour les photos stockées sur Cloudinary
+try {
+  if (document.secure_url) {
+    return document.secure_url;
+  }
+
+  const version = document.version;
+  const publicId = document.public_id;
+  const format = document.format || 'pdf';
+
+  return `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${version}/${publicId}.${format}`;
+} catch (error) {
+  console.error("Erreur de construction d'URL:", error);
+  return null;
+}
+
   };
   
   const photoUrl = getPhotoUrl(photo);
