@@ -1,34 +1,26 @@
 import React from "react";
 
 export default function ProfileFiles({ files }) {
-  // S'il n'y a pas de fichiers, on n'affiche rien.
   if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
 
-  /**
-   * La fonction de construction d'URL, version finale et simplifiée.
-   * C'est la seule partie qui demande de la logique.
-   */
+
   const getFileUrl = (file) => {
-    // Si les informations de base manquent, on ne peut rien faire.
     if (!file?.version || !file?.public_id || !file?.format) {
       return null;
     }
 
-    // On détermine si c'est une image ou un autre type de fichier (PDF, etc.)
-    // en se basant sur le format. C'est plus fiable.
+ 
     const photoFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     const isPhoto = photoFormats.includes(file.format.toLowerCase());
 
     const resourceType = isPhoto ? "image" : "raw";
     let finalPath = file.public_id;
 
-    // Règle N°1: Pour les photos, l'URL DOIT contenir l'extension.
     if (isPhoto) {
       if (!finalPath.endsWith(`.${file.format}`)) {
         finalPath = `${finalPath}.${file.format}`;
       }
     }
-    // Règle N°2: Pour les fichiers "raw" (PDFs), l'URL NE DOIT PAS contenir l'extension.
     else {
       if (finalPath.endsWith(`.${file.format}`)) {
         finalPath = finalPath.slice(0, -(file.format.length + 1));
@@ -40,10 +32,10 @@ export default function ProfileFiles({ files }) {
 
   return (
     <div className="relative space-y-2">
-      {files.map((file, index) => {
+      {files.map((file, index) => 
+      {console.log("DOC", file);
         const fileUrl = getFileUrl(file);
 
-        // Si l'URL n'a pas pu être construite, on affiche une erreur claire.
         if (!fileUrl) {
           return (
             <p key={index} className="text-red-500">
@@ -54,7 +46,6 @@ export default function ProfileFiles({ files }) {
 
         const isPhoto = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(file.format.toLowerCase());
 
-        // Si c'est une photo, on l'affiche.
         if (isPhoto) {
           return (
             <div key={index} className="flex flex-col items-center">
@@ -73,8 +64,8 @@ export default function ProfileFiles({ files }) {
           <div key={index} className="flex items-center gap-2">
             <a
               href={fileUrl}
-              target="_blank" // Ouvre dans un nouvel onglet.
-              rel="noopener noreferrer" // Sécurité pour les nouveaux onglets.
+              target="_blank" 
+              rel="noopener noreferrer" 
               className="text-blue-600 hover:underline flex items-center gap-1"
             >
               <svg
