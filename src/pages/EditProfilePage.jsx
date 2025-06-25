@@ -145,7 +145,7 @@ export default function EditProfilePage() {
             const format = f.format ? `.${f.format}` : '';
             return {
               id: f.id,
-              url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${f.public_id}${format}`,
+            url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${encodeURIComponent(f.public_id)}${format}`;
               name: f.originalName || 'Fichier',
               source: 'cloud',
               version: f.version,
