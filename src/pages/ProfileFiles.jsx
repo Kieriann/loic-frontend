@@ -5,25 +5,25 @@ export default function ProfileFiles({ files }) {
 
   const getFileUrl = (file) => {
     if (!file) return null;
+    if (file.url) return file.url;
+    if (file.fileName?.startsWith("http")) return file.fileName;
 
-    if (file.url) {
-      return file.url;
-    }
-    
-    if (file.fileName?.startsWith("http")) {
-      return file.fileName;
-    }
-
-    // --- CORRECTION DÉFINITIVE ICI ---
     if (file.version && file.public_id && file.format) {
       const isPhoto = file.type === "ID_PHOTO";
       const base = isPhoto ? "image" : "raw";
-
       let finalPath = file.public_id;
 
-      // Logique "pare-balles" : On ajoute l'extension SEULEMENT si elle n'est pas déjà présente.
-      if (!finalPath.endsWith(`.${file.format}`)) {
-        finalPath = `${finalPath}.${file.format}`;
+      // --- LOGIQUE FINALE ET CORRECTE ---
+      // CAS 1: Pour les photos, on s'assure que l'extension est présente.
+      if (isPhoto) {
+        if (!finalPath.endsWith(`.${file.format}`)) {
+          finalPath = `${finalPath}.${file.format}`;
+        }
+      }
+      // CAS 2: Pour les fichiers RAW (PDF, etc.), on s'assure que l'extension N'EST PAS présente.
+      // Le backend semble parfois l'inclure, donc on la retire si besoin.
+      else if (finalPath.endsWith(`.${file.format}`)) {
+        finalPath = finalPath.slice(0, -file.format.length - 1);
       }
 
       return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${finalPath}`;
@@ -34,15 +34,12 @@ export default function ProfileFiles({ files }) {
       const parts = file.fileName?.split("/") || [];
       let version = "";
       let publicId = file.fileName || "";
-
       if (parts.length > 1 && parts[0].startsWith("v")) {
         version = parts[0].substring(1);
         publicId = parts.slice(1).join("/");
       }
-
       const isPhoto = file.type === "ID_PHOTO";
       const resourceType = isPhoto ? "image" : "raw";
-
       return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`;
     } catch (error) {
       console.error("Erreur de construction d'URL:", error, file);
