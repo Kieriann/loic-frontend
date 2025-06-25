@@ -37,12 +37,14 @@ export default function ProfileFiles({ files }) {
         const fileUrl = getFileUrl(file);
 
         if (!fileUrl) {
-          return (
-            <p key={index} className="text-red-500">
-              URL invalide pour le fichier: {file.originalName || "Fichier sans nom"}
-            </p>
-          );
-        }
+  console.warn("URL invalide générée pour :", file);
+  return (
+    <pre key={index} className="text-red-500 text-xs whitespace-pre-wrap">
+      URL invalide pour ce fichier :{"\n" + JSON.stringify(file, null, 2)}
+    </pre>
+  );
+}
+
 
         const isPhoto = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(file.format.toLowerCase());
 
