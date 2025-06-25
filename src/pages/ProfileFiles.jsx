@@ -7,7 +7,7 @@ export default function ProfileFiles({ files }) {
     if (!file) return null;
 
     const isPhoto = file.type === "ID_PHOTO";
-    const resourceType = file.format === 'pdf' ? "raw" : (isPhoto ? "image" : "raw");
+const resourceType = isPhoto ? "image" : "raw";
 
     if (file.fileName && file.fileName.startsWith('http')) {
       return file.fileName;
