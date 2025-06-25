@@ -18,6 +18,13 @@ export default function ProfilePage() {
   const [documents, setDocuments] = useState([])
   const navigate = useNavigate()
 
+  // Ajout de ce useEffect pour plus de robustesse
+  useEffect(() => {
+    if (initialTab) {
+      setSelectedTab(initialTab);
+    }
+  }, [initialTab]);
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -54,8 +61,7 @@ export default function ProfilePage() {
 
   const { profile, experiences = [], prestations = [], realisations = [] } = data
   const address = profile.Address || {}
-console.log("Documents du profil:", documents);
-console.log("Photo du profil:", documents?.find(doc => doc.type === "ID_PHOTO"));
+
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
       <div className="w-full max-w-6xl flex gap-6 items-stretch">
@@ -63,7 +69,8 @@ console.log("Photo du profil:", documents?.find(doc => doc.type === "ID_PHOTO"))
         {/* Onglets */}
         <div className="w-48 bg-white rounded-2xl shadow-md p-6 h-full">
           <div className="flex flex-col gap-3">
-            {['profil', 'competences', 'realisations', 'prestations'].map(tab => (
+            {/* --- CORRECTION ICI --- */}
+            {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
@@ -71,7 +78,8 @@ console.log("Photo du profil:", documents?.find(doc => doc.type === "ID_PHOTO"))
                   selectedTab === tab ? 'bg-blue-100 text-darkBlue' : 'hover:bg-blue-50'
                 }`}
               >
-                {tab === 'competences' ? 'Experiences' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {/* --- CORRECTION ICI --- */}
+                {tab === 'experiences' ? 'Experiences' : tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </div>
@@ -82,8 +90,9 @@ console.log("Photo du profil:", documents?.find(doc => doc.type === "ID_PHOTO"))
           <div className="mb-8">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl text-darkBlue font-bold">
+                {/* --- CORRECTION ICI --- */}
                 {selectedTab === 'profil' && 'Mon Profil'}
-                {selectedTab === 'competences' && 'Mes Experiences'}
+                {selectedTab === 'experiences' && 'Mes Experiences'}
                 {selectedTab === 'realisations' && 'Mes Réalisations'}
                 {selectedTab === 'prestations' && 'Mes Prestations'}
               </h1>
@@ -158,7 +167,8 @@ console.log("Photo du profil:", documents?.find(doc => doc.type === "ID_PHOTO"))
           )}
 
           {/* EXPERIENCES */}
-          {selectedTab === 'competences' && (
+          {/* --- CORRECTION ICI --- */}
+          {selectedTab === 'experiences' && (
             <Section title="Experiences">
               <div className="text-center mb-6">
                 {profile.isEmployed ? (
