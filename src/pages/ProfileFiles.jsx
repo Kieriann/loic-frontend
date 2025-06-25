@@ -14,13 +14,22 @@ export default function ProfileFiles({ files }) {
       return file.fileName;
     }
 
+    // --- CORRECTION DÉFINITIVE ICI ---
     if (file.version && file.public_id && file.format) {
       const isPhoto = file.type === "ID_PHOTO";
       const base = isPhoto ? "image" : "raw";
-      const finalPath = isPhoto ? `${file.public_id}.${file.format}` : file.public_id;
+
+      let finalPath = file.public_id;
+
+      // Logique "pare-balles" : On ajoute l'extension SEULEMENT si elle n'est pas déjà présente.
+      if (!finalPath.endsWith(`.${file.format}`)) {
+        finalPath = `${finalPath}.${file.format}`;
+      }
+
       return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${finalPath}`;
     }
 
+    // Logique de secours (inchangée)
     try {
       const parts = file.fileName?.split("/") || [];
       let version = "";
@@ -82,7 +91,6 @@ export default function ProfileFiles({ files }) {
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
                 fill="none"
-                // --- CORRECTION ICI : "0 24 24" remplacé par "0 0 24 24" ---
                 viewBox="0 0 24 24"
                 stroke="currentColor"
               >
