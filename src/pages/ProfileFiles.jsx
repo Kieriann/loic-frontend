@@ -14,19 +14,13 @@ export default function ProfileFiles({ files }) {
       return file.fileName;
     }
 
-    // --- CORRECTION PRINCIPALE ICI ---
     if (file.version && file.public_id && file.format) {
       const isPhoto = file.type === "ID_PHOTO";
       const base = isPhoto ? "image" : "raw";
-
-      // Si c'est une photo, on ajoute l'extension.
-      // Si c'est un autre type de fichier (PDF), on suppose que le public_id est déjà le nom complet du fichier.
       const finalPath = isPhoto ? `${file.public_id}.${file.format}` : file.public_id;
-
       return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${finalPath}`;
     }
 
-    // Le reste est une logique de secours, on ne la touche pas.
     try {
       const parts = file.fileName?.split("/") || [];
       let version = "";
@@ -88,7 +82,8 @@ export default function ProfileFiles({ files }) {
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
                 fill="none"
-                viewBox="0 24 24"
+                // --- CORRECTION ICI : "0 24 24" remplacé par "0 0 24 24" ---
+                viewBox="0 0 24 24"
                 stroke="currentColor"
               >
                 <path
