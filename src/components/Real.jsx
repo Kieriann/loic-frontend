@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function RealisationUpload ({ data, setData }) {
+export default function Real ({ data, setData }) {
   const handleFileChange = (file) => {
     setData(file)
   }
