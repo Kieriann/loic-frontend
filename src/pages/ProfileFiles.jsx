@@ -27,7 +27,7 @@ export default function ProfileFiles({ files }) {
       }
     }
 
-    return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${file.version}/${finalPath}`;
+ return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${file.version}/${encodeURIComponent(finalPath)}`;
   };
 
   return (
