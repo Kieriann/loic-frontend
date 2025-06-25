@@ -1,38 +1,51 @@
 import React from 'react'
 
-export default function Real ({ data, setData }) {
-  const handleFileChange = (file) => {
-    setData(file)
+export default function Real({ files = [], onFilesChange }) {
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files)
+    // On concatène les nouveaux fichiers aux fichiers existants
+    onFilesChange([
+      ...files,
+      ...selectedFiles.map(f => ({ file: f, name: f.name, source: 'new' }))
+    ])
+  }
+
+  const handleRemoveFile = (idx) => {
+    const newFiles = files.filter((_, i) => i !== idx)
+    onFilesChange(newFiles)
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-xl font-semibold text-darkBlue">Ajouter un document réalisation (.pdf)</h2>
-
+      <h2 className="text-xl font-semibold text-darkBlue">Ajouter des documents réalisation (.pdf)</h2>
       <div className="flex flex-col gap-1">
         <div className="flex items-center gap-4 flex-wrap">
           <label className="bg-darkBlue text-white px-4 py-2 rounded cursor-pointer hover:bg-[#001a5c]">
-            Choisir un fichier
+            Choisir des fichiers
             <input
               type="file"
               accept=".pdf"
-              onChange={(e) => handleFileChange(e.target.files[0])}
+              multiple
+              onChange={handleFileChange}
               className="hidden"
             />
           </label>
           <span className="text-darkBlue text-sm italic">PDF uniquement</span>
         </div>
-
-        {data && (
-          <div className="flex items-center gap-2 ml-1">
-            <span className="text-sm text-gray-700">{data.name || data.fileName}</span>
-            <button
-              type="button"
-              onClick={() => handleFileChange(null)}
-              className="text-red-600 text-sm underline"
-            >
-              Supprimer
-            </button>
+        {files.length > 0 && (
+          <div className="flex flex-col gap-1 ml-1">
+            {files.map((f, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <span className="text-sm text-gray-700">{f.name}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveFile(idx)}
+                  className="text-red-600 text-sm underline"
+                >
+                  Supprimer
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>
