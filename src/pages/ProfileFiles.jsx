@@ -3,13 +3,40 @@ import React from "react";
 export default function ProfileFiles({ files }) {
   if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
 
+  const getFileUrl = (file) => {
+    if (!file) return null;
+
+    if (file.fileName?.startsWith("http")) {
+      return file.fileName;
+    }
+
+    try {
+      const parts = file.fileName?.split("/") || [];
+      let version = "";
+      let publicId = file.fileName || "";
+
+      if (parts.length > 1 && parts[0].startsWith("v")) {
+        version = parts[0].substring(1);
+        publicId = parts.slice(1).join("/");
+      }
+
+      const isPhoto = file.type === "ID_PHOTO";
+      const resourceType = isPhoto ? "image" : "raw";
+
+      return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`;
+    } catch (error) {
+      console.error("Erreur de construction d'URL:", error, file);
+      return null;
+    }
+  };
+
   return (
     <div className="space-y-2">
       {files.map((file, index) => {
+        const fileUrl = getFileUrl(file);
         const isPhoto = file.type === "ID_PHOTO";
-        const fileUrl = file.fileName;
 
-        if (!fileUrl?.startsWith("http")) {
+        if (!fileUrl) {
           return (
             <p key={index} className="text-red-500">
               URL invalide pour {file.originalName || "fichier"}
@@ -26,9 +53,7 @@ export default function ProfileFiles({ files }) {
                 className="w-32 h-32 object-cover rounded-full border-2 border-gray-200"
               />
             </a>
-            <p className="text-sm text-gray-500">
-              {file.originalName || "Photo"}
-            </p>
+            <p className="text-sm text-gray-500">{file.originalName || "Photo"}</p>
           </div>
         ) : (
           <div key={index} className="flex items-center gap-2">
