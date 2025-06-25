@@ -3,38 +3,38 @@ import React from "react";
 export default function ProfileFiles({ files }) {
   if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
 
-  const getFileUrl = (file) => {
-    if (!file) return null;
+const getFileUrl = (file) => {
+  if (!file) return null;
 
-if (file.fileName?.startsWith("http")) {
-  return file.fileName;
-}
+  if (file.fileName?.startsWith("http")) {
+    return file.fileName;
+  }
 
-// ajout spécifique pour les fichiers CV stockés avec version/public_id/format
-if (file.type === "CV" && file.public_id && file.version && file.format) {
-  return `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${file.version}/${file.public_id}.${file.format}`;
-}
+  if (file.version && file.public_id && file.format) {
+    const base = file.type === "ID_PHOTO" ? "image" : "raw";
+    return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${file.public_id}.${file.format}`;
+  }
 
+  try {
+    const parts = file.fileName?.split("/") || [];
+    let version = "";
+    let publicId = file.fileName || "";
 
-    try {
-      const parts = file.fileName?.split("/") || [];
-      let version = "";
-      let publicId = file.fileName || "";
-
-      if (parts.length > 1 && parts[0].startsWith("v")) {
-        version = parts[0].substring(1);
-        publicId = parts.slice(1).join("/");
-      }
-
-      const isPhoto = file.type === "ID_PHOTO";
-      const resourceType = isPhoto ? "image" : "raw";
-
-      return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`;
-    } catch (error) {
-      console.error("Erreur de construction d'URL:", error, file);
-      return null;
+    if (parts.length > 1 && parts[0].startsWith("v")) {
+      version = parts[0].substring(1);
+      publicId = parts.slice(1).join("/");
     }
-  };
+
+    const isPhoto = file.type === "ID_PHOTO";
+    const resourceType = isPhoto ? "image" : "raw";
+
+    return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`;
+  } catch (error) {
+    console.error("Erreur de construction d'URL:", error, file);
+    return null;
+  }
+};
+
 
 return (
   <div className="relative space-y-2">
