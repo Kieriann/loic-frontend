@@ -3,10 +3,15 @@ import React from 'react'
 export default function Real({ files = [], onFilesChange }) {
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files)
-    onFilesChange([
+    const newFiles = [
       ...files,
       ...selectedFiles.map(f => ({ file: f, name: f.name, source: 'new' }))
-    ])
+    ]
+    // Déduplique par nom (et source)
+    const deduped = newFiles.filter(
+      (f, idx, arr) => arr.findIndex(ff => ff.name === f.name && f.source === ff.source) === idx
+    )
+    onFilesChange(deduped)
   }
 
   const handleRemoveFile = (idx) => {
