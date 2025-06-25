@@ -6,7 +6,7 @@ export default function ProfileFiles({ files }) {
   const getFileUrl = (file) => {
     if (!file) return null;
 
-    if (file.url) { // Priorité à une URL déjà construite (venant de la page d'édition)
+    if (file.url) {
       return file.url;
     }
     
@@ -14,13 +14,19 @@ export default function ProfileFiles({ files }) {
       return file.fileName;
     }
 
+    // --- CORRECTION PRINCIPALE ICI ---
     if (file.version && file.public_id && file.format) {
-      // Cette logique est déjà parfaite : elle distingue les images des autres fichiers.
-      const base = file.type === "ID_PHOTO" ? "image" : "raw";
-      return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${file.public_id}.${file.format}`;
+      const isPhoto = file.type === "ID_PHOTO";
+      const base = isPhoto ? "image" : "raw";
+
+      // Si c'est une photo, on ajoute l'extension.
+      // Si c'est un autre type de fichier (PDF), on suppose que le public_id est déjà le nom complet du fichier.
+      const finalPath = isPhoto ? `${file.public_id}.${file.format}` : file.public_id;
+
+      return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${finalPath}`;
     }
 
-    // Logique de secours, on la garde par sécurité.
+    // Le reste est une logique de secours, on ne la touche pas.
     try {
       const parts = file.fileName?.split("/") || [];
       let version = "";
@@ -70,7 +76,6 @@ export default function ProfileFiles({ files }) {
           );
         }
 
-        // Pour tous les autres fichiers (CV, PDF de réalisations, etc.)
         return (
           <div key={index} className="flex items-center gap-2">
             <a
@@ -83,7 +88,7 @@ export default function ProfileFiles({ files }) {
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
                 fill="none"
-                viewBox="0 0 24 24"
+                viewBox="0 24 24"
                 stroke="currentColor"
               >
                 <path
@@ -93,7 +98,6 @@ export default function ProfileFiles({ files }) {
                   d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                 />
               </svg>
-              {/* --- CORRECTION ICI : La logique est maintenant universelle --- */}
               {file.originalName || "Document"}
             </a>
           </div>
