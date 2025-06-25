@@ -61,7 +61,7 @@ export default function EditProfilePage() {
 
         const docArray = Array.isArray(res.documents) ? res.documents : Object.values(res.documents || {})
         const photoDoc = docArray.find(d => d.type === 'ID_PHOTO')
-        const cvDoc = docArray.find(d => d.type === 'cv')
+        const cvDoc = docArray.find(d => d.type === 'CV')
 
         setDocuments({
           photo: photoDoc || null,
