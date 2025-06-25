@@ -175,7 +175,7 @@ setDocuments(docs);
       return (
         <a
           key={doc.id}
-href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${doc.version}/${doc.publicId}.${doc.format || 'pdf'}`}
+href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 underline block mb-2"
