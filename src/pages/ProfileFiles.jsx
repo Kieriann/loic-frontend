@@ -3,50 +3,35 @@ import React from "react";
 export default function ProfileFiles({ files }) {
   if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
 
-
   const getFileUrl = (file) => {
-    if (!file?.version || !file?.public_id || !file?.format) {
+    if (!file?.version || !file?.public_id) {
       return null;
     }
 
- 
     const photoFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    const isPhoto = photoFormats.includes(file.format.toLowerCase());
+    const isPhoto = photoFormats.includes(file.format?.toLowerCase());
+    const resourceType = file.type === 'ID_PHOTO' || isPhoto ? "image" : "raw";
+    const format = file.format ? `.${file.format}` : '';
 
-    const resourceType = isPhoto ? "image" : "raw";
-    let finalPath = file.public_id;
-
-    if (isPhoto) {
-      if (!finalPath.endsWith(`.${file.format}`)) {
-        finalPath = `${finalPath}.${file.format}`;
-      }
-    }
-    else {
-      if (finalPath.endsWith(`.${file.format}`)) {
-        finalPath = finalPath.slice(0, -(file.format.length + 1));
-      }
-    }
-
- return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${file.version}/${encodeURIComponent(finalPath)}`;
+    return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${file.version}/${encodeURIComponent(file.public_id)}${format}`;
   };
 
   return (
     <div className="relative space-y-2">
-      {files.map((file, index) => 
-      {console.log("DOC", file);
+      {files.map((file, index) => {
+        console.log("DOC", file);
         const fileUrl = getFileUrl(file);
 
         if (!fileUrl) {
-  console.warn("URL invalide générée pour :", file);
-  return (
-    <pre key={index} className="text-red-500 text-xs whitespace-pre-wrap">
-      URL invalide pour ce fichier :{"\n" + JSON.stringify(file, null, 2)}
-    </pre>
-  );
-}
+          console.warn("URL invalide générée pour :", file);
+          return (
+            <pre key={index} className="text-red-500 text-xs whitespace-pre-wrap">
+              URL invalide pour ce fichier :{"\n" + JSON.stringify(file, null, 2)}
+            </pre>
+          );
+        }
 
-
-        const isPhoto = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(file.format.toLowerCase());
+        const isPhoto = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(file.format?.toLowerCase());
 
         if (isPhoto) {
           return (
@@ -62,12 +47,13 @@ export default function ProfileFiles({ files }) {
             </div>
           );
         }
+
         return (
           <div key={index} className="flex items-center gap-2">
             <a
               href={fileUrl}
-              target="_blank" 
-              rel="noopener noreferrer" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="text-blue-600 hover:underline flex items-center gap-1"
             >
               <svg
