@@ -3,20 +3,16 @@ import React from 'react'
 export default function Real({ files = [], onFilesChange }) {
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files)
-    const allFiles = [
-      ...files,
-      ...selectedFiles.map(f => ({
+    // Création d'une clé unique par fichier : nom + lastModified (évite tous les doublons possibles)
+    const existingKeys = new Set(files.map(f => `${f.name}_${f.file?.lastModified || ''}`))
+    const newFiles = selectedFiles
+      .filter(f => !existingKeys.has(`${f.name}_${f.lastModified}`))
+      .map(f => ({
         file: f,
         name: f.name,
         source: 'new'
       }))
-    ]
-    // Déduplication stricte sur le nom et source (évite les doublons à l'affichage ET à l'envoi)
-    const deduped = allFiles.filter(
-      (f, idx, arr) =>
-        arr.findIndex(ff => ff.name === f.name && ff.source === f.source) === idx
-    )
-    onFilesChange(deduped)
+    onFilesChange([...files, ...newFiles])
   }
 
   const handleRemoveFile = (idx) => {
