@@ -41,11 +41,8 @@ return (
     
     {files.map((file, index) => {
 
-const fileUrl = file.type === "ID_PHOTO"
-  ? `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/${file.public_id}.${file.format}`
-  : `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${file.version}/${file.public_id}.${file.format}`;
-
-const isPhoto = file.type === "ID_PHOTO";
+        const fileUrl = getFileUrl(file);
+        const isPhoto = file.type === "ID_PHOTO";
 
         if (!fileUrl) {
           return (
