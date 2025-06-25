@@ -23,7 +23,7 @@ const getFileUrl = (file) => {
       publicId = parts.slice(1).join('/');
     }
 
-    return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}.pdf`;
+    return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`;
   } catch (error) {
     console.error("Erreur de construction d'URL:", error, file);
     return null;
