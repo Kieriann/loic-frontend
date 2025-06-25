@@ -111,8 +111,6 @@ export default function EditProfilePage() {
             newRealTechLevel: 'junior',
             realTitle: exp.realTitle || '',
             realDescription: exp.realDescription || '',
-            realFile: null,
-            realFilePath: exp.realFilePath || '',
           })))
         } else {
           setExperiences([{
@@ -128,8 +126,6 @@ export default function EditProfilePage() {
             newRealTechLevel: 'junior',
             realTitle: '',
             realDescription: '',
-            realFile: null,
-            realFilePath: '',
           }])
         }
 
@@ -252,8 +248,6 @@ export default function EditProfilePage() {
       newRealTechLevel: 'junior',
       realTitle: '',
       realDescription: '',
-      realFile: null,
-      realFilePath: '',
     }])
   }
 
