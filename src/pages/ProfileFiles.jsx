@@ -6,15 +6,21 @@ export default function ProfileFiles({ files }) {
   const getFileUrl = (file) => {
     if (!file) return null;
 
+    if (file.url) { // Priorité à une URL déjà construite (venant de la page d'édition)
+      return file.url;
+    }
+    
     if (file.fileName?.startsWith("http")) {
       return file.fileName;
     }
 
     if (file.version && file.public_id && file.format) {
+      // Cette logique est déjà parfaite : elle distingue les images des autres fichiers.
       const base = file.type === "ID_PHOTO" ? "image" : "raw";
       return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${file.public_id}.${file.format}`;
     }
 
+    // Logique de secours, on la garde par sécurité.
     try {
       const parts = file.fileName?.split("/") || [];
       let version = "";
@@ -64,6 +70,7 @@ export default function ProfileFiles({ files }) {
           );
         }
 
+        // Pour tous les autres fichiers (CV, PDF de réalisations, etc.)
         return (
           <div key={index} className="flex items-center gap-2">
             <a
@@ -86,7 +93,8 @@ export default function ProfileFiles({ files }) {
                   d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                 />
               </svg>
-              {file.type === "CV" ? "Consulter le CV" : file.originalName || "Document"}
+              {/* --- CORRECTION ICI : La logique est maintenant universelle --- */}
+              {file.originalName || "Document"}
             </a>
           </div>
         );
