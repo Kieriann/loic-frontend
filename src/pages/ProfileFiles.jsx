@@ -38,18 +38,7 @@ if (file.type === "CV" && file.public_id && file.version && file.format) {
 
 return (
   <div className="relative space-y-2">
-    {files.find(f => f.type === "CV") && (
-      <div className="absolute top-0 left-0 p-2">
-        <a
-          href={getFileUrl(files.find(f => f.type === "CV"))}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-700 underline font-semibold"
-        >
-          CV
-        </a>
-      </div>
-    )}
+    
     {files.map((file, index) => {
 
         const fileUrl = getFileUrl(file);
@@ -96,7 +85,7 @@ return (
                   d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                 />
               </svg>
-              {file.originalName || "Document"}
+{file.type === "CV" ? "Consulter le CV" : (file.originalName || "Document")}
             </a>
           </div>
         );
