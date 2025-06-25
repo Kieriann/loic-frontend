@@ -18,7 +18,7 @@ try {
   const publicId = document.public_id;
   const format = document.format || 'pdf';
 
-return `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${version}/${encodeURIComponent(publicId)}.${format}`;
+return `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${version}/${encodeURIComponent(publicId)}.${format}`;
 } catch (error) {
   console.error("Erreur de construction d'URL:", error);
   return null;
