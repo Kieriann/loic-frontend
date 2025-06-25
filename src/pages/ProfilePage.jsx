@@ -159,34 +159,39 @@ setDocuments(docs);
                 </ul>
               </Section>
 
-              <Section title="Documents">
-  {documents?.map(doc => {
-    if (doc.type === 'ID_PHOTO') {
-      return (
+<Section title="Documents">
+  <div className="grid grid-cols-2 gap-10 items-center">
+
+    <div className="text-center">
+      <h3 className="font-semibold text-darkBlue mb-4">Photo</h3>
+      {documents?.filter(doc => doc.type === 'ID_PHOTO').map(doc => (
         <img
           key={doc.id}
           src={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
           alt="Photo"
-          className="mx-auto rounded-full w-32 h-32 object-cover mb-4"
+          className="mx-auto rounded-full w-32 h-32 object-cover"
         />
-      )
-    }
-    if (doc.type === 'cv') {
-      return (
+      ))}
+    </div>
+
+    <div className="text-center">
+      <h3 className="font-semibold text-darkBlue mb-4">CV</h3>
+      {documents?.filter(doc => doc.type === 'cv').map(doc => (
         <a
           key={doc.id}
-href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
+          href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-blue-600 underline block mb-2"
+          className="text-blue-600 underline block"
         >
           {doc.originalName || 'CV'}
         </a>
-      )
-    }
-    return null
-  })}
+      ))}
+    </div>
+
+  </div>
 </Section>
+
 
             </>
           )}
