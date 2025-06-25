@@ -7,7 +7,7 @@ export default function ProfileFiles({ files }) {
     if (!file) return null;
 
     const isPhoto = file.type === "ID_PHOTO";
-    const resourceType = isPhoto ? "image" : "raw";
+    const resourceType = file.format === 'pdf' ? "raw" : (isPhoto ? "image" : "raw");
 
     if (file.fileName && file.fileName.startsWith('http')) {
       return file.fileName;
@@ -23,7 +23,9 @@ export default function ProfileFiles({ files }) {
         publicId = parts.slice(1).join('/');
       }
 
-      return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`;
+      return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/` +
+             (version ? `v${version}/` : "") +
+             `${publicId}`;
     } catch (error) {
       console.error("Erreur de construction d'URL:", error, file);
       return null;
