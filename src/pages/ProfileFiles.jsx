@@ -5,7 +5,7 @@ export default function ProfileFiles({ files }) {
 
   const getFileUrl = (file) => {
     if (!file) return null;
-    
+
 if (file.fileName?.startsWith("http")) {
   return file.fileName;
 }
@@ -36,9 +36,22 @@ if (file.type === "CV" && file.public_id && file.version && file.format) {
     }
   };
 
-  return (
-    <div className="space-y-2">
-      {files.map((file, index) => {
+return (
+  <div className="relative space-y-2">
+    {files.find(f => f.type === "CV") && (
+      <div className="absolute top-0 left-0 p-2">
+        <a
+          href={getFileUrl(files.find(f => f.type === "CV"))}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-700 underline font-semibold"
+        >
+          CV
+        </a>
+      </div>
+    )}
+    {files.map((file, index) => {
+
         const fileUrl = getFileUrl(file);
         const isPhoto = file.type === "ID_PHOTO";
 
