@@ -3,34 +3,33 @@ import React from "react";
 export default function ProfileFiles({ files }) {
   if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
 
-  const getFileUrl = (file) => {
-    if (!file) return null;
+const getFileUrl = (file) => {
+  if (!file) return null;
 
-    const isPhoto = file.type === "ID_PHOTO";
-const resourceType = isPhoto ? "image" : "raw";
+  const isPhoto = file.type === "ID_PHOTO";
+  const resourceType = isPhoto ? "image" : "raw";
 
-    if (file.fileName && file.fileName.startsWith('http')) {
-      return file.fileName;
+  if (file.fileName && file.fileName.startsWith('http')) {
+    return file.fileName;
+  }
+
+  try {
+    const parts = file.fileName?.split('/') || [];
+    let version = "";
+    let publicId = file.fileName || "";
+
+    if (parts.length > 1 && parts[0].startsWith('v')) {
+      version = parts[0].substring(1);
+      publicId = parts.slice(1).join('/');
     }
 
-    try {
-      const parts = file.fileName?.split('/') || [];
-      let version = "";
-      let publicId = file.fileName || "";
+    return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}.pdf`;
+  } catch (error) {
+    console.error("Erreur de construction d'URL:", error, file);
+    return null;
+  }
+};
 
-      if (parts.length > 1 && parts[0].startsWith('v')) {
-        version = parts[0].substring(1);
-        publicId = parts.slice(1).join('/');
-      }
-
-      return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/` +
-             (version ? `v${version}/` : "") +
-             `${publicId}`;
-    } catch (error) {
-      console.error("Erreur de construction d'URL:", error, file);
-      return null;
-    }
-  };
 
   return (
     <div className="space-y-2">
