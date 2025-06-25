@@ -34,7 +34,9 @@ export default function EditProfilePage() {
     country: '',
   })
   const [experiences, setExperiences] = useState([])
-  const [realisations, setRealisations] = useState([])
+  const [realisations, setRealisations] = useState([
+    { title: '', description: '', techs: [], files: [] }
+  ])
   const [documents, setDocuments] = useState({ photo: null, cv: null, realisationDocument: null })
   const [errors, setErrors] = useState({})
   const [popup, setPopup] = useState({ open: false, index: null, type: '' })
@@ -49,9 +51,7 @@ export default function EditProfilePage() {
   const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
 
   useEffect(() => {
-    if (initialTab) {
-      setSelectedTab(initialTab)
-    }
+    if (initialTab) setSelectedTab(initialTab)
   }, [initialTab])
 
   useEffect(() => {
@@ -126,33 +126,23 @@ export default function EditProfilePage() {
         }
 
         const realList = res.realisations || []
-        setRealisations(realList.length ? realList.map(real => ({
-          id: real.id || '',
-          realTitle: real.title || '',
-          realDescription: real.description || '',
-          realTech: Array.isArray(real.techs) ? real.techs : [],
-          newRealTechInput: '',
-          newRealTechLevel: 'junior',
-          realFiles: (real.files || []).map(f => {
-            const format = f.format ? `.${f.format}` : '';
-            return {
-              id: f.id,
-              url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${encodeURIComponent(f.publicId)}${format}`,
-              name: f.originalName || 'Fichier',
-              source: 'cloud',
-              version: f.version,
-              publicId: f.publicId,
-              format: f.format
-            }
-          })
-        })) : [{
-          realTitle: '',
-          realDescription: '',
-          realTech: [],
-          newRealTechInput: '',
-          newRealTechLevel: 'junior',
-          realFiles: [],
-        }])
+        setRealisations(realList.length
+          ? realList.map(real => ({
+              title: real.title || '',
+              description: real.description || '',
+              techs: Array.isArray(real.techs) ? real.techs : [],
+              files: (real.files || []).map(f => ({
+                id: f.id,
+                url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${encodeURIComponent(f.publicId)}.${f.format || 'pdf'}`,
+                name: f.originalName || 'Fichier',
+                source: 'cloud',
+                version: f.version,
+                publicId: f.publicId,
+                format: f.format
+              }))
+            }))
+          : [{ title: '', description: '', techs: [], files: [] }]
+        )
 
         if (res.prestations?.length) {
           setPrestations(res.prestations.map(p => ({
@@ -175,41 +165,26 @@ export default function EditProfilePage() {
     loadData()
   }, [])
 
-  const validate = () => {
-    const newErrors = {}
-    if (!profile.firstname.trim()) newErrors.firstname = 'Champ obligatoire'
-    if (!profile.lastname.trim()) newErrors.lastname = 'Champ obligatoire'
-    if (!profile.siret.trim()) newErrors.siret = 'Champ obligatoire'
-    if (!profile.bio.trim()) newErrors.bio = 'Champ obligatoire'
-    if (!profile.smallDayRate) newErrors.smallDayRate = 'Champ obligatoire'
-    if (!address.address.trim()) newErrors.address = 'Champ obligatoire'
-    if (!address.city.trim()) newErrors.city = 'Champ obligatoire'
-    if (!address.postalCode.trim()) newErrors.postalCode = 'Champ obligatoire'
-    if (!address.country.trim()) newErrors.country = 'Champ obligatoire'
-    if (!langList.length) newErrors.languages = 'Champ obligatoire'
-    setErrors(newErrors)
+  // Ajout/Suppression réalisations/fichiers
+  const addRealisation = () =>
+    setRealisations([...realisations, { title: '', description: '', techs: [], files: [] }])
 
-    if (Object.keys(newErrors).length > 0) {
-      const firstKey = Object.keys(newErrors)[0]
-      const el = document.querySelector(`[name="${firstKey}"]`)
+  const removeRealisation = (idx) =>
+    setRealisations(realisations.filter((_, i) => i !== idx))
 
-      if (el?.scrollIntoView) el.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      return false
-    }
-    return true
+  const updateRealisation = (idx, field, value) => {
+    const updated = [...realisations]
+    updated[idx][field] = value
+    setRealisations(updated)
   }
 
-  const addLanguage = () => {
-    if (!langInput.trim()) return
-    setLangList([
-      ...langList,
-      `${langInput.trim()}:${writtenInput}/${oralInput}`
-    ])
-    setLangInput('')
-    setWrittenInput('débutant')
-    setOralInput('débutant')
+  const updateRealFiles = (idx, files) => {
+    const updated = [...realisations]
+    updated[idx].files = files
+    setRealisations(updated)
   }
 
+  // Expériences (pour la complétude)
   const updateExperience = (index, field, value) => {
     const updated = [...experiences]
     updated[index][field] = value
@@ -245,85 +220,56 @@ export default function EditProfilePage() {
     }])
   }
 
-  const confirmDelete = () => {
-    if (popup.type === 'expérience') {
-      const copy = [...experiences]
-      copy.splice(popup.index, 1)
-      setExperiences(copy)
-    } else if (popup.type === 'realisation') {
-      const copy = [...realisations]
-      copy.splice(popup.index, 1)
-      setRealisations(copy)
-    }
-    setPopup({ open: false, index: null, type: '' })
+  // Prestation
+  const addPrestation = () =>
+    setPrestations([...prestations, { type: '', tech: '', level: 'junior' }])
+
+  const removePrestation = (i) => {
+    if (prestations.length <= 1) return
+    const copy = [...prestations]
+    copy.splice(i, 1)
+    setPrestations(copy)
   }
 
-  const updateRealisation = (index, field, value) => {
-    const updated = [...realisations]
-    updated[index][field] = value
-    setRealisations(updated)
+  // Langues
+  const addLanguage = () => {
+    if (!langInput.trim()) return
+    setLangList([
+      ...langList,
+      `${langInput.trim()}:${writtenInput}/${oralInput}`
+    ])
+    setLangInput('')
+    setWrittenInput('débutant')
+    setOralInput('débutant')
   }
 
-  const addRealisation = () => {
-    setRealisations([...realisations, {
-      realTitle: '',
-      realDescription: '',
-      realTech: [],
-      newRealTechInput: '',
-      newRealTechLevel: 'junior',
-      realFiles: [],
-    }])
+  // Validation simple (modifie selon tes besoins)
+  const validate = () => {
+    const newErrors = {}
+    if (!profile.firstname.trim()) newErrors.firstname = 'Champ obligatoire'
+    if (!profile.lastname.trim()) newErrors.lastname = 'Champ obligatoire'
+    if (!profile.siret.trim()) newErrors.siret = 'Champ obligatoire'
+    if (!profile.bio.trim()) newErrors.bio = 'Champ obligatoire'
+    if (!profile.smallDayRate) newErrors.smallDayRate = 'Champ obligatoire'
+    if (!address.address.trim()) newErrors.address = 'Champ obligatoire'
+    if (!address.city.trim()) newErrors.city = 'Champ obligatoire'
+    if (!address.postalCode.trim()) newErrors.postalCode = 'Champ obligatoire'
+    if (!address.country.trim()) newErrors.country = 'Champ obligatoire'
+    if (!langList.length) newErrors.languages = 'Champ obligatoire'
+    setErrors(newErrors)
+    if (Object.keys(newErrors).length > 0) return false
+    return true
   }
 
-  const addRealTech = (index) => {
-    const updated = [...realisations]
-    if (!updated[index].newRealTechInput.trim()) return
-    updated[index].realTech.push(`${updated[index].newRealTechInput}:${updated[index].newRealTechLevel}`)
-    updated[index].newRealTechInput = ''
-    updated[index].newRealTechLevel = 'junior'
-    setRealisations(updated)
-  }
-
-  const removeRealTech = (index, techIndex) => {
-    const updated = [...realisations]
-    updated[index].realTech.splice(techIndex, 1)
-    setRealisations(updated)
-  }
-
-  function sanitizeFileName(name) {
-    return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_')
-  }
-
-  // PATCH: Ajout d'une vraie déduplication à l'ajout de fichiers
-  const onRealFilesChange = (ri, files) => {
-    setRealisations(prev => {
-      const updated = [...prev]
-      // On écrase la liste des fichiers pour la réalisation courante avec la nouvelle liste (plus safe)
-      updated[ri].realFiles = files
-      return updated
-    })
-  }
-
-  const removeRealFile = (ri, fileIdx) => {
-    setRealisations(prev => {
-      const updated = [...prev]
-      updated[ri].realFiles = updated[ri].realFiles.filter((_, idx) => idx !== fileIdx)
-      return updated
-    })
-  }
-
+  // Envoi backend
   const handleSubmit = async () => {
     if (!validate()) return
 
     const formData = new FormData()
-
-    if (!profile.availableDate) profile.availableDate = ''
-
     const profilePayload = {
       ...profile,
       languages: langList.join(','),
     }
-
     const formattedExperiences = experiences.map(exp => ({
       title: exp.title,
       client: exp.client,
@@ -331,7 +277,6 @@ export default function EditProfilePage() {
       domains: exp.domains,
       languages: exp.languages,
     }))
-
     formData.append('profile', JSON.stringify(profilePayload))
     formData.append('address', JSON.stringify(address))
     formData.append('experiences', JSON.stringify(formattedExperiences))
@@ -342,37 +287,29 @@ export default function EditProfilePage() {
     } else if (documents.photo === null) {
       formData.append('removePhoto', 'true')
     }
-
     if (documents.cv instanceof File) {
       formData.append('cv', documents.cv)
     } else if (documents.cv === null) {
       formData.append('removeCV', 'true')
     }
-
     if (documents.realisationDocument instanceof File) {
       formData.append('realisationDocument', documents.realisationDocument)
     } else if (documents.realisationDocument === null) {
       formData.append('removeRealisationDocument', 'true')
     }
 
-    // PATCH: On envoie bien tous les fichiers sans doublon
+    // Réalisations : un FormData séparé
     const realFormData = new FormData()
-    const realisationsPayload = realisations
-      .filter(real => real.realTitle || real.realDescription || real.realTech.length)
-      .map((real, idx) => ({
-        ...(real.id ? { id: real.id } : {}),
-        title: real.realTitle,
-        description: real.realDescription,
-        techs: real.realTech,
-        filesToKeep: (real.realFiles || [])
-          .filter(f => f.source === 'cloud')
-          .map(f => f.id)
-      }))
+    const realisationsPayload = realisations.map((real, idx) => ({
+      title: real.title,
+      description: real.description,
+      techs: real.techs,
+    }))
     realFormData.append('data', JSON.stringify(realisationsPayload))
     realisations.forEach((real, realIdx) => {
-      (real.realFiles || []).forEach((f, fileIdx) => {
-        if (f.source === 'new') {
-          const sanitized = sanitizeFileName(f.name)
+      (real.files || []).forEach((f, fileIdx) => {
+        if (f.file) {
+          const sanitized = f.name.replace(/\s+/g, '_')
           const prefixedName = `real-${realIdx}-${fileIdx}-${sanitized}`
           realFormData.append('realFiles', f.file, prefixedName)
         }
@@ -380,6 +317,7 @@ export default function EditProfilePage() {
     })
 
     try {
+      // Envoi profil
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
         method: 'POST',
         headers: {
@@ -388,6 +326,7 @@ export default function EditProfilePage() {
         body: formData,
       })
 
+      // Envoi réalisations
       await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
         method: 'POST',
         headers: {
@@ -413,6 +352,7 @@ export default function EditProfilePage() {
     }
   }
 
+  // Render
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-md p-6 space-y-10 relative">
@@ -421,7 +361,18 @@ export default function EditProfilePage() {
             <div className="bg-white p-6 rounded-xl shadow-xl text-center space-y-4 max-w-sm">
               <p className="text-lg">Voulez-vous supprimer cette {popup.type} ?</p>
               <div className="flex justify-center gap-4">
-                <button onClick={confirmDelete} className="bg-red-600 text-white px-4 py-2 rounded">Oui</button>
+                <button onClick={() => {
+                  if (popup.type === 'expérience') {
+                    const copy = [...experiences]
+                    copy.splice(popup.index, 1)
+                    setExperiences(copy)
+                  } else if (popup.type === 'realisation') {
+                    removeRealisation(popup.index)
+                  } else if (popup.type === 'prestation') {
+                    removePrestation(popup.index)
+                  }
+                  setPopup({ open: false, index: null, type: '' })
+                }} className="bg-red-600 text-white px-4 py-2 rounded">Oui</button>
                 <button onClick={() => setPopup({ open: false, index: null, type: '' })} className="border px-4 py-2 rounded">Non</button>
               </div>
             </div>
@@ -438,6 +389,7 @@ export default function EditProfilePage() {
           ))}
         </div>
 
+        {/* Profil */}
         {selectedTab === 'profil' && (
           <>
             <ProfileInfo data={profile} setData={setProfile} errors={errors} />
@@ -484,6 +436,7 @@ export default function EditProfilePage() {
           </>
         )}
 
+        {/* Expériences */}
         {selectedTab === 'experiences' && (
           <>
             <div className="flex items-center gap-6 mb-4">
@@ -508,7 +461,7 @@ export default function EditProfilePage() {
 
             {experiences.map((exp, i) => (
               <div key={i} className="border rounded p-4 space-y-3">
-                <input type="text" placeholder="Titre de l'expérience (Projet: vie sur Mars)" value={exp.title} onChange={e => updateExperience(i, 'title', e.target.value)} className="border rounded px-3 py-2 w-full" />
+                <input type="text" placeholder="Titre de l'expérience" value={exp.title} onChange={e => updateExperience(i, 'title', e.target.value)} className="border rounded px-3 py-2 w-full" />
                 <input type="text" placeholder="Client" value={exp.client || ''} onChange={e => updateExperience(i, 'client', e.target.value)} className="border rounded px-3 py-2 w-full" />
                 <input type="text" placeholder="Domaines" value={exp.domains} onChange={e => updateExperience(i, 'domains', e.target.value)} className="border rounded px-3 py-2 w-full" />
                 <textarea placeholder="Description" value={exp.description} onChange={e => updateExperience(i, 'description', e.target.value)} className="border rounded px-3 py-2 w-full min-h-[120px]" />
@@ -551,103 +504,58 @@ export default function EditProfilePage() {
           </>
         )}
 
+        {/* Réalisations */}
         {selectedTab === 'realisations' && (
           <>
+            <h2 className="text-xl font-bold text-darkBlue mb-3">Mes réalisations</h2>
             {realisations.map((real, i) => (
-              <div key={i} className="border rounded p-4 space-y-3">
+              <div key={i} className="border rounded p-4 my-3 bg-blue-50">
                 <input
                   type="text"
-                  placeholder="Titre de la réalisation"
-                  value={real.realTitle}
-                  onChange={e => updateRealisation(i, 'realTitle', e.target.value)}
-                  className="border rounded px-3 py-2 w-full"
+                  placeholder="Titre"
+                  value={real.title}
+                  onChange={e => updateRealisation(i, 'title', e.target.value)}
+                  className="border rounded px-2 py-1 w-full mb-2"
                 />
                 <textarea
                   placeholder="Description"
-                  value={real.realDescription}
-                  onChange={e => updateRealisation(i, 'realDescription', e.target.value)}
-                  className="border rounded px-3 py-2 w-full min-h-[100px]"
+                  value={real.description}
+                  onChange={e => updateRealisation(i, 'description', e.target.value)}
+                  className="border rounded px-2 py-1 w-full mb-2"
                 />
-
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    placeholder="Langages et logiciels"
-                    value={real.newRealTechInput}
-                    onChange={e => updateRealisation(i, 'newRealTechInput', e.target.value)}
-                    className="border rounded px-2 py-1 flex-1"
-                  />
-                  <select
-                    value={real.newRealTechLevel}
-                    onChange={e => updateRealisation(i, 'newRealTechLevel', e.target.value)}
-                    className="border rounded px-2 py-1"
-                  >
-                    <option value="junior">Junior</option>
-                    <option value="intermédiaire">Intermédiaire</option>
-                    <option value="senior">Senior</option>
-                  </select>
-                  <button onClick={() => addRealTech(i)} className="bg-darkBlue text-white px-3 py-1 rounded">
-                    Ajouter
-                  </button>
-                </div>
-
-                <ul className="text-sm text-gray-700 space-y-1">
-                  {real.realTech.map((t, j) => {
-                    const [name, level] = t.split(':')
-                    return (
-                      <li key={j} className="flex gap-2 items-center">
-                        <span>{name} : {level}</span>
-                        <button type="button" onClick={() => removeRealTech(i, j)} className="text-red-500 text-xs hover:underline">
-                          Supprimer
-                        </button>
-                      </li>
-                    )
-                  })}
-                </ul>
-
-                {/* Le composant Real pour upload fichiers (UN SEUL ICI) */}
+                <input
+                  type="text"
+                  placeholder="Technologies (séparées par une virgule)"
+                  value={real.techs.join(', ')}
+                  onChange={e => updateRealisation(i, 'techs', e.target.value.split(',').map(t => t.trim()).filter(Boolean))}
+                  className="border rounded px-2 py-1 w-full mb-2"
+                />
                 <Real
-                  files={real.realFiles || []}
-                  onFilesChange={newFiles => onRealFilesChange(i, newFiles)}
+                  files={real.files}
+                  onFilesChange={files => updateRealFiles(i, files)}
                 />
-
-                <ul className="text-sm text-gray-600 mt-2">
-                  {(real.realFiles || []).map((file, idx) => (
-                    <li key={idx} className="flex items-center gap-2">
-                      {file.source === 'cloud'
-                        ? <a href={file.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">{file.name}</a>
-                        : <span>{file.name}</span>
-                      }
-                      <button type="button" className="ml-2 text-red-600 text-xs" onClick={() => removeRealFile(i, idx)}>
-                        Supprimer
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-
                 <button
+                  type="button"
+                  className="text-red-600 underline text-sm mt-2"
                   onClick={() => setPopup({ open: true, index: i, type: 'realisation' })}
-                  className="text-red-600 underline text-sm ml-12"
-                >
-                  Supprimer cette réalisation
-                </button>
+                  disabled={realisations.length <= 1}
+                >Supprimer cette réalisation</button>
               </div>
             ))}
-            <div className="text-center mt-6">
-              <button
-                type="button"
-                onClick={addRealisation}
-                className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
-              >
-                Ajouter une réalisation
-              </button>
-            </div>
+            <button
+              type="button"
+              className="border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white mt-3"
+              onClick={addRealisation}
+            >
+              Ajouter une réalisation
+            </button>
           </>
         )}
 
+        {/* Prestations */}
         {selectedTab === 'prestations' && (
           <>
-            {(prestations.length ? prestations : [{}]).map((p, i) => (
+            {prestations.map((p, i) => (
               <div key={i} className="border rounded p-4 space-y-3">
                 <p className="font-medium text-darkBlue">Je suis capable d'assurer</p>
                 <select
@@ -693,11 +601,7 @@ export default function EditProfilePage() {
                 </select>
                 <button
                   type="button"
-                  onClick={() => {
-                    const copy = [...prestations]
-                    copy.splice(i, 1)
-                    setPrestations(copy)
-                  }}
+                  onClick={() => setPopup({ open: true, index: i, type: 'prestation' })}
                   disabled={prestations.length <= 1}
                   className="text-red-600 underline text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -708,7 +612,7 @@ export default function EditProfilePage() {
             <div className="text-center mt-4">
               <button
                 type="button"
-                onClick={() => setPrestations([...prestations, { type: '', tech: '', level: 'junior' }])}
+                onClick={addPrestation}
                 className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
               >
                 Ajouter une prestation
@@ -717,7 +621,7 @@ export default function EditProfilePage() {
           </>
         )}
 
-        <div className="text-center">
+        <div className="text-center mt-8">
           <button onClick={handleSubmit} className="bg-darkBlue text-white px-6 py-3 rounded-xl hover:bg-[#001a5c] transition">
             Enregistrer le profil
           </button>
