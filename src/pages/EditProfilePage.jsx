@@ -270,29 +270,6 @@ export default function EditProfilePage() {
     setPopup({ open: false, index: null, type: '' })
   }
 
-  const onRealFilesChange = (ri, files) => {
-    setRealisations(prev => {
-      const updated = [...prev]
-      updated[ri].realFiles = [
-        ...(updated[ri].realFiles || []),
-        ...Array.from(files).map(f => ({
-          file: f,
-          name: f.name,
-          source: 'new'
-        }))
-      ]
-      return updated
-    })
-  }
-
-  const removeRealFile = (ri, fileIdx) => {
-    setRealisations(prev => {
-      const updated = [...prev]
-      updated[ri].realFiles = updated[ri].realFiles.filter((_, idx) => idx !== fileIdx)
-      return updated
-    })
-  }
-
   const updateRealisation = (index, field, value) => {
     const updated = [...realisations]
     updated[index][field] = value
@@ -327,6 +304,30 @@ export default function EditProfilePage() {
 
   function sanitizeFileName(name) {
     return name.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, '_')
+  }
+
+  // PATCH: Ajout d'une vraie déduplication à l'ajout de fichiers
+  const onRealFilesChange = (ri, files) => {
+    setRealisations(prev => {
+      const updated = [...prev]
+      // Fichiers existants (cloud ou new)
+      const existing = updated[ri].realFiles || []
+      // Fusionne, puis déduplique sur nom+source
+      const allFiles = [
+        ...existing,
+        ...files.filter(f => !existing.some(ef => ef.name === f.name && ef.source === f.source))
+      ]
+      updated[ri].realFiles = allFiles
+      return updated
+    })
+  }
+
+  const removeRealFile = (ri, fileIdx) => {
+    setRealisations(prev => {
+      const updated = [...prev]
+      updated[ri].realFiles = updated[ri].realFiles.filter((_, idx) => idx !== fileIdx)
+      return updated
+    })
   }
 
   const handleSubmit = async () => {
@@ -372,6 +373,7 @@ export default function EditProfilePage() {
       formData.append('removeRealisationDocument', 'true')
     }
 
+    // PATCH: On envoie bien tous les fichiers sans doublon
     const realFormData = new FormData()
     const realisationsPayload = realisations
       .filter(real => real.realTitle || real.realDescription || real.realTech.length)
@@ -621,9 +623,11 @@ export default function EditProfilePage() {
                   })}
                 </ul>
 
+                {/* Le composant Real pour upload fichiers */}
                 <Real
                   files={real.realFiles || []}
                   onFilesChange={newFiles => {
+                    // Nouvelle stratégie : déduplication stricte dans Real.jsx
                     const updated = [...realisations]
                     updated[i].realFiles = newFiles
                     setRealisations(updated)
