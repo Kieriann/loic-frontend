@@ -61,11 +61,12 @@ export default function EditProfilePage() {
 
         const docArray = Array.isArray(res.documents) ? res.documents : Object.values(res.documents || {})
         const photoDoc = docArray.find(d => d.type === 'ID_PHOTO')
-        const cvDoc = docArray.find(d => d.type === 'CV')
+        const cvDoc = docArray.find(d => d.type.toLowerCase() === 'CV');
+setDocuments({
+  photo: photoDoc || null,
+  cv: cvDoc ? { fileName: cvDoc.originalName || 'CV' } : null,
 
-        setDocuments({
-          photo: photoDoc || null,
-          cv: cvDoc || null
+
         })
 
         if (res.profile) {
@@ -366,7 +367,7 @@ setRealisations(realList.length ? realList.map(real => ({
     }
 
     if (documents.cv instanceof File) {
-      formData.append('CV', documents.cv);
+      formData.append('cv', documents.cv);
     } else if (documents.cv === null) {
       formData.append('removeCV', 'true');
     }
