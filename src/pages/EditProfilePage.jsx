@@ -257,12 +257,20 @@ export default function EditProfilePage() {
     }])
   }
 
+  // --- CORRECTION ICI : La fonction est maintenant plus intelligente ---
   const confirmDelete = () => {
-    const copy = [...experiences]
-    copy.splice(popup.index, 1)
-    setExperiences(copy)
-    setPopup({ open: false, index: null, type: '' })
-  }
+    if (popup.type === 'expérience') {
+      const copy = [...experiences];
+      copy.splice(popup.index, 1);
+      setExperiences(copy);
+    } else if (popup.type === 'realisation') {
+      const copy = [...realisations];
+      copy.splice(popup.index, 1);
+      setRealisations(copy);
+    }
+    // On ferme la popup dans tous les cas
+    setPopup({ open: false, index: null, type: '' });
+  };
 
   const onRealFilesChange = (ri, files) => {
     setRealisations(prev => {
@@ -543,7 +551,6 @@ export default function EditProfilePage() {
               </div>
             ))}
 
-            {/* --- MODIFICATION ICI : BOUTON AJOUTÉ --- */}
             <div className="text-center mt-6">
               <button 
                 type="button" 
@@ -630,7 +637,10 @@ export default function EditProfilePage() {
                   ))}
                 </ul>
 
-                <button onClick={() => setPopup({ open: true, index: i, type: 'realisation' })} className="text-red-600 underline text-sm ml-12">
+                <button
+                  onClick={() => setPopup({ open: true, index: i, type: 'realisation' })}
+                  className="text-red-600 underline text-sm ml-12"
+                >
                   Supprimer cette réalisation
                 </button>
               </div>
