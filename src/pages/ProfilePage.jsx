@@ -1,5 +1,5 @@
 //
-// ─── Page : affichage du profil utilisateur connecté ──────────────
+// ─── Page : affichage du profil utilisateur connecté (Corrigé) ──────────────
 //
 
 import React, { useEffect, useState } from 'react'
@@ -18,7 +18,7 @@ export default function ProfilePage() {
   const [documents, setDocuments] = useState([])
   const navigate = useNavigate()
 
-  // Ajout de ce useEffect pour plus de robustesse
+  // Ce `useEffect` garantit que l'onglet se met à jour si l'URL change.
   useEffect(() => {
     if (initialTab) {
       setSelectedTab(initialTab);
@@ -69,7 +69,7 @@ export default function ProfilePage() {
         {/* Onglets */}
         <div className="w-48 bg-white rounded-2xl shadow-md p-6 h-full">
           <div className="flex flex-col gap-3">
-            {/* --- CORRECTION ICI --- */}
+            {/* CORRECTION : 'competences' a été remplacé par 'experiences' */}
             {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
               <button
                 key={tab}
@@ -78,8 +78,7 @@ export default function ProfilePage() {
                   selectedTab === tab ? 'bg-blue-100 text-darkBlue' : 'hover:bg-blue-50'
                 }`}
               >
-                {/* --- CORRECTION ICI --- */}
-                {tab === 'experiences' ? 'Experiences' : tab.charAt(0).toUpperCase() + tab.slice(1)}
+                {tab.charAt(0).toUpperCase() + tab.slice(1)}
               </button>
             ))}
           </div>
@@ -90,7 +89,7 @@ export default function ProfilePage() {
           <div className="mb-8">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl text-darkBlue font-bold">
-                {/* --- CORRECTION ICI --- */}
+                {/* CORRECTION : La condition utilise maintenant 'experiences' */}
                 {selectedTab === 'profil' && 'Mon Profil'}
                 {selectedTab === 'experiences' && 'Mes Experiences'}
                 {selectedTab === 'realisations' && 'Mes Réalisations'}
@@ -167,7 +166,7 @@ export default function ProfilePage() {
           )}
 
           {/* EXPERIENCES */}
-          {/* --- CORRECTION ICI --- */}
+          {/* CORRECTION : La condition utilise maintenant 'experiences' */}
           {selectedTab === 'experiences' && (
             <Section title="Experiences">
               <div className="text-center mb-6">
