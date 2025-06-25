@@ -3,27 +3,14 @@ import React from "react";
 export default function ProfileFiles({ files }) {
   if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
 
-  const getFileUrl = (file) => {
-    if (!file?.version || !file?.public_id || !file?.format) return null;
+const getFileUrl = (file) => {
+  if (!file?.version || !file?.public_id || !file?.format) return null;
 
-    const photoFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-    const isPhoto = photoFormats.includes(file.format.toLowerCase());
-    const resourceType = file.type === 'ID_PHOTO' || isPhoto ? "image" : "raw";
+  return `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/${encodeURIComponent(file.public_id)}.${file.format}`;
+};
 
-    let finalPath = file.public_id;
 
-    if (isPhoto) {
-      if (!finalPath.endsWith(`.${file.format}`)) {
-        finalPath = `${finalPath}.${file.format}`;
-      }
-    } else {
-      if (finalPath.endsWith(`.${file.format}`)) {
-        finalPath = finalPath.slice(0, -(file.format.length + 1));
-      }
-    }
-
-    return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${file.version}/${encodeURIComponent(finalPath)}`;
-  };
+   
 
   return (
     <div className="relative space-y-2">
