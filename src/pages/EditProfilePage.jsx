@@ -109,8 +109,6 @@ export default function EditProfilePage() {
             realTech: Array.isArray(exp.realTech) ? exp.realTech : [],
             newRealTechInput: '',
             newRealTechLevel: 'junior',
-            realTitle: exp.realTitle || '',
-            realDescription: exp.realDescription || '',
           })))
         } else {
           setExperiences([{
@@ -124,8 +122,6 @@ export default function EditProfilePage() {
             realTech: [],
             newRealTechInput: '',
             newRealTechLevel: 'junior',
-            realTitle: '',
-            realDescription: '',
           }])
         }
 
@@ -246,8 +242,6 @@ export default function EditProfilePage() {
       realTech: [],
       newRealTechInput: '',
       newRealTechLevel: 'junior',
-      realTitle: '',
-      realDescription: '',
     }])
   }
 
@@ -304,14 +298,8 @@ export default function EditProfilePage() {
   const onRealFilesChange = (ri, files) => {
     setRealisations(prev => {
       const updated = [...prev]
-      // Fichiers existants (cloud ou new)
-      const existing = updated[ri].realFiles || []
-      // Fusionne, puis déduplique sur nom+source
-      const allFiles = [
-        ...existing,
-        ...files.filter(f => !existing.some(ef => ef.name === f.name && ef.source === f.source))
-      ]
-      updated[ri].realFiles = allFiles
+      // On écrase la liste des fichiers pour la réalisation courante avec la nouvelle liste (plus safe)
+      updated[ri].realFiles = files
       return updated
     })
   }
@@ -617,15 +605,10 @@ export default function EditProfilePage() {
                   })}
                 </ul>
 
-                {/* Le composant Real pour upload fichiers */}
+                {/* Le composant Real pour upload fichiers (UN SEUL ICI) */}
                 <Real
                   files={real.realFiles || []}
-                  onFilesChange={newFiles => {
-                    // Nouvelle stratégie : déduplication stricte dans Real.jsx
-                    const updated = [...realisations]
-                    updated[i].realFiles = newFiles
-                    setRealisations(updated)
-                  }}
+                  onFilesChange={newFiles => onRealFilesChange(i, newFiles)}
                 />
 
                 <ul className="text-sm text-gray-600 mt-2">
