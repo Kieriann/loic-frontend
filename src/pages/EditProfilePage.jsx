@@ -354,27 +354,22 @@ export default function EditProfilePage() {
     formData.append('experiences', JSON.stringify(formattedExperiences))
     formData.append('prestations', JSON.stringify(prestations))
 
-    // --- CORRECTION DU BUG ICI ---
-    // On gère l'envoi de la photo
-    if (documents.photo) {
-      // On envoie le fichier SEULEMENT si c'est un nouveau fichier (de type File)
-      if (documents.photo instanceof File) {
-        formData.append('photo', documents.photo);
-      }
-    } else {
-      // Si documents.photo est null, c'est que l'utilisateur veut la supprimer.
+    // --- SOLUTION DÉFINITIVE ---
+    // On ne traite que les vrais fichiers. Si un fichier n'a pas été modifié,
+    // on n'envoie rien, et le serveur gardera l'ancien.
+    if (documents.photo instanceof File) {
+      formData.append('photo', documents.photo);
+    } else if (documents.photo === null) {
+      // Si la photo est 'null', ça signifie qu'on veut la supprimer.
       formData.append('removePhoto', 'true');
     }
 
-    // On gère l'envoi du CV avec la même logique
-    if (documents.cv) {
-      if (documents.cv instanceof File) {
-        formData.append('cv', documents.cv);
-      }
-    } else {
+    if (documents.cv instanceof File) {
+      formData.append('cv', documents.cv);
+    } else if (documents.cv === null) {
       formData.append('removeCV', 'true');
     }
-    // --- FIN DE LA CORRECTION ---
+    // --- FIN DE LA SOLUTION ---
 
     const realFormData = new FormData()
     const realisationsPayload = realisations
