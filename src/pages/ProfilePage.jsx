@@ -70,7 +70,6 @@ setDocuments(docs);
         {/* Onglets */}
         <div className="w-48 bg-white rounded-2xl shadow-md p-6 h-full">
           <div className="flex flex-col gap-3">
-            {/* CORRECTION : 'competences' a été remplacé par 'experiences' */}
             {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
               <button
                 key={tab}
@@ -160,14 +159,24 @@ setDocuments(docs);
                 </ul>
               </Section>
 
-              <Section title="Documents">
-                <ProfileFiles files={documents} />
-              </Section>
+<Section title="Documents">
+  {documents?.map(doc => doc.type === 'cv' && (
+    <a
+      key={doc.id}
+      href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${doc.version}/${doc.publicId}.${doc.format || 'pdf'}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 underline"
+    >
+      {doc.originalName || 'CV'}
+    </a>
+  ))}
+</Section>
+
             </>
           )}
 
           {/* EXPERIENCES */}
-          {/* CORRECTION : La condition utilise maintenant 'experiences' */}
           {selectedTab === 'experiences' && (
             <Section title="Experiences">
               <div className="text-center mb-6">
