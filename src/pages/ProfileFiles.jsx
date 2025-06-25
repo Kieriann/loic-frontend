@@ -1,52 +1,60 @@
 import React from "react";
 
 export default function ProfileFiles({ files }) {
+  // S'il n'y a pas de fichiers, on n'affiche rien.
   if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
 
+  /**
+   * La fonction de construction d'URL, version finale et simplifiée.
+   * C'est la seule partie qui demande de la logique.
+   */
   const getFileUrl = (file) => {
-    // S'il n'y a pas les informations de base, on ne peut rien faire.
+    // Si les informations de base manquent, on ne peut rien faire.
     if (!file?.version || !file?.public_id || !file?.format) {
-      // On vérifie si une URL complète est déjà fournie (par sécurité)
-      if (file?.url?.startsWith("http")) return file.url;
-      if (file?.fileName?.startsWith("http")) return file.fileName;
-      return null; // Impossible de construire l'URL
+      return null;
     }
 
-    const isPhoto = file.type === "ID_PHOTO";
-    const base = isPhoto ? "image" : "raw";
+    // On détermine si c'est une image ou un autre type de fichier (PDF, etc.)
+    // en se basant sur le format. C'est plus fiable.
+    const photoFormats = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    const isPhoto = photoFormats.includes(file.format.toLowerCase());
+
+    const resourceType = isPhoto ? "image" : "raw";
     let finalPath = file.public_id;
 
-    // RÈGLE N°1 : Pour les photos, on s'assure que l'URL se termine par l'extension.
+    // Règle N°1: Pour les photos, l'URL DOIT contenir l'extension.
     if (isPhoto) {
       if (!finalPath.endsWith(`.${file.format}`)) {
         finalPath = `${finalPath}.${file.format}`;
       }
-    } 
-    // RÈGLE N°2 : Pour les fichiers RAW (PDF), on s'assure que l'URL NE se termine PAS par l'extension.
-    // On retire l'extension si le backend l'a accidentellement incluse dans le public_id.
+    }
+    // Règle N°2: Pour les fichiers "raw" (PDFs), l'URL NE DOIT PAS contenir l'extension.
     else {
       if (finalPath.endsWith(`.${file.format}`)) {
         finalPath = finalPath.slice(0, -(file.format.length + 1));
       }
     }
 
-    return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${finalPath}`;
+    return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${file.version}/${finalPath}`;
   };
 
   return (
     <div className="relative space-y-2">
       {files.map((file, index) => {
         const fileUrl = getFileUrl(file);
-        const isPhoto = file.type === "ID_PHOTO";
 
+        // Si l'URL n'a pas pu être construite, on affiche une erreur claire.
         if (!fileUrl) {
           return (
             <p key={index} className="text-red-500">
-              URL invalide pour {file.originalName || "fichier"}
+              URL invalide pour le fichier: {file.originalName || "Fichier sans nom"}
             </p>
           );
         }
 
+        const isPhoto = ['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(file.format.toLowerCase());
+
+        // Si c'est une photo, on l'affiche.
         if (isPhoto) {
           return (
             <div key={index} className="flex flex-col items-center">
@@ -61,13 +69,12 @@ export default function ProfileFiles({ files }) {
             </div>
           );
         }
-
         return (
           <div key={index} className="flex items-center gap-2">
             <a
               href={fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
+              target="_blank" // Ouvre dans un nouvel onglet.
+              rel="noopener noreferrer" // Sécurité pour les nouveaux onglets.
               className="text-blue-600 hover:underline flex items-center gap-1"
             >
               <svg
