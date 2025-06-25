@@ -47,11 +47,13 @@ export default function RealisationFiles({ files }) {
         return (
           <div key={index} className="flex items-center gap-2">
             <a
-              href={fileUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 hover:underline flex items-center gap-1"
-            >
+  href={fileUrl}
+  target="_blank"
+  rel="noopener noreferrer"
+  download
+  className="text-blue-600 hover:underline flex items-center gap-1"
+>
+
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="h-5 w-5"
