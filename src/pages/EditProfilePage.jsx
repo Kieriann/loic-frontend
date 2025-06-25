@@ -14,12 +14,12 @@ export default function EditProfilePage() {
     siret: '',
     bio: '',
     smallDayRate: '',
-    mediumDayRate: '', 
+    mediumDayRate: '',
     highDayRate: '',
     languages: '',
     isEmployed: false,
     availableDate: null,
-    teleworkDays: 0, 
+    teleworkDays: 0,
   })
 
   const [langInput, setLangInput] = useState('')
@@ -556,9 +556,9 @@ export default function EditProfilePage() {
             ))}
 
             <div className="text-center mt-6">
-              <button 
-                type="button" 
-                onClick={addExperience} 
+              <button
+                type="button"
+                onClick={addExperience}
                 className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
               >
                 Ajouter une expérience
@@ -575,13 +575,13 @@ export default function EditProfilePage() {
                   type="text"
                   placeholder="Titre de la réalisation"
                   value={real.realTitle}
-                  onChange={(e) => updateRealisation(i, 'realTitle', e.target.value)}
+                  onChange={e => updateRealisation(i, 'realTitle', e.target.value)}
                   className="border rounded px-3 py-2 w-full"
                 />
                 <textarea
                   placeholder="Description"
                   value={real.realDescription}
-                  onChange={(e) => updateRealisation(i, 'realDescription', e.target.value)}
+                  onChange={e => updateRealisation(i, 'realDescription', e.target.value)}
                   className="border rounded px-3 py-2 w-full min-h-[100px]"
                 />
 
@@ -621,18 +621,14 @@ export default function EditProfilePage() {
                   })}
                 </ul>
 
-                {/* Remplacer input file et bouton par Real  */}
-<Real
-  data={real.realFiles?.find(f => f.source === 'new') || null}
-  setData={(file) => {
-    const updated = [...realisations]
-    updated[i].realFiles = (updated[i].realFiles || []).filter(f => f.source !== 'new')
-    if (file) {
-      updated[i].realFiles.push({ file, name: file.name, source: 'new' })
-    }
-    setRealisations(updated)
-  }}
-/>
+                <Real
+                  files={real.realFiles || []}
+                  onFilesChange={newFiles => {
+                    const updated = [...realisations]
+                    updated[i].realFiles = newFiles
+                    setRealisations(updated)
+                  }}
+                />
 
                 <ul className="text-sm text-gray-600 mt-2">
                   {(real.realFiles || []).map((file, idx) => (
@@ -688,7 +684,6 @@ export default function EditProfilePage() {
                   <option value="la maintenance">la maintenance</option>
                   <option value="le développement">le développement</option>
                 </select>
-
                 <p className="font-medium text-darkBlue">pour</p>
                 <input
                   type="text"
@@ -701,7 +696,6 @@ export default function EditProfilePage() {
                   }}
                   className="border rounded px-2 py-1 w-full"
                 />
-
                 <p className="font-medium text-darkBlue">à un niveau</p>
                 <select
                   value={p.level || 'junior'}
@@ -716,7 +710,6 @@ export default function EditProfilePage() {
                   <option value="intermédiaire">intermédiaire</option>
                   <option value="expert">expert</option>
                 </select>
-
                 <button
                   type="button"
                   onClick={() => {
@@ -731,7 +724,6 @@ export default function EditProfilePage() {
                 </button>
               </div>
             ))}
-
             <div className="text-center mt-4">
               <button
                 type="button"

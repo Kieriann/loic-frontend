@@ -3,7 +3,6 @@ import React from 'react'
 export default function Real({ files = [], onFilesChange }) {
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files)
-    // On concatène les nouveaux fichiers aux fichiers existants
     onFilesChange([
       ...files,
       ...selectedFiles.map(f => ({ file: f, name: f.name, source: 'new' }))
