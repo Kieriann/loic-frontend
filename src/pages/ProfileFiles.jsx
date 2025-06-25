@@ -5,10 +5,16 @@ export default function ProfileFiles({ files }) {
 
   const getFileUrl = (file) => {
     if (!file) return null;
+    
+if (file.fileName?.startsWith("http")) {
+  return file.fileName;
+}
 
-    if (file.fileName?.startsWith("http")) {
-      return file.fileName;
-    }
+// ajout spécifique pour les fichiers CV stockés avec version/public_id/format
+if (file.type === "CV" && file.public_id && file.version && file.format) {
+  return `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${file.version}/${file.public_id}.${file.format}`;
+}
+
 
     try {
       const parts = file.fileName?.split("/") || [];
