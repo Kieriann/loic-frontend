@@ -257,7 +257,6 @@ export default function EditProfilePage() {
     }])
   }
 
-  // --- CORRECTION ICI : La fonction est maintenant plus intelligente ---
   const confirmDelete = () => {
     if (popup.type === 'expérience') {
       const copy = [...experiences];
@@ -268,7 +267,6 @@ export default function EditProfilePage() {
       copy.splice(popup.index, 1);
       setRealisations(copy);
     }
-    // On ferme la popup dans tous les cas
     setPopup({ open: false, index: null, type: '' });
   };
 
@@ -356,17 +354,27 @@ export default function EditProfilePage() {
     formData.append('experiences', JSON.stringify(formattedExperiences))
     formData.append('prestations', JSON.stringify(prestations))
 
+    // --- CORRECTION DU BUG ICI ---
+    // On gère l'envoi de la photo
     if (documents.photo) {
-      formData.append('photo', documents.photo)
+      // On envoie le fichier SEULEMENT si c'est un nouveau fichier (de type File)
+      if (documents.photo instanceof File) {
+        formData.append('photo', documents.photo);
+      }
     } else {
-      formData.append('removePhoto', 'true')
+      // Si documents.photo est null, c'est que l'utilisateur veut la supprimer.
+      formData.append('removePhoto', 'true');
     }
 
+    // On gère l'envoi du CV avec la même logique
     if (documents.cv) {
-      formData.append('cv', documents.cv)
+      if (documents.cv instanceof File) {
+        formData.append('cv', documents.cv);
+      }
     } else {
-      formData.append('removeCV', 'true')
+      formData.append('removeCV', 'true');
     }
+    // --- FIN DE LA CORRECTION ---
 
     const realFormData = new FormData()
     const realisationsPayload = realisations
