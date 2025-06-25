@@ -20,8 +20,8 @@ export default function DocumentUpload({ data, setData }) {
       />
       <FileInput
         label="CV (.pdf)"
-        file={data.cv}
-        onChange={(file) => handleFileChange('cv', file)}
+        file={data.CV}
+        onChange={(file) => handleFileChange('CV', file)}
       />
     </div>
   )

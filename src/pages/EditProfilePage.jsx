@@ -34,7 +34,7 @@ export default function EditProfilePage() {
   })
   const [experiences, setExperiences] = useState([])
   const [realisations, setRealisations] = useState([])
-  const [documents, setDocuments] = useState({ photo: null, cv: null })
+  const [documents, setDocuments] = useState({ photo: null, CV: null })
   const [errors, setErrors] = useState({})
   const [popup, setPopup] = useState({ open: false, index: null, type: '' })
   const navigate = useNavigate()
@@ -366,8 +366,8 @@ setRealisations(realList.length ? realList.map(real => ({
     }
 
     if (documents.cv instanceof File) {
-      formData.append('cv', documents.cv);
-    } else if (documents.cv === null) {
+      formData.append('CV', documents.CV);
+    } else if (documents.CV === null) {
       formData.append('removeCV', 'true');
     }
     // --- FIN DE LA SOLUTION ---
