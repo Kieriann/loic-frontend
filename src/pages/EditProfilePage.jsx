@@ -14,7 +14,7 @@ export default function EditProfilePage() {
     siret: '',
     bio: '',
     smallDayRate: '',
-    mediumDayRate: '',
+    mediumDayRate: '', 
     highDayRate: '',
     languages: '',
     isEmployed: false,
