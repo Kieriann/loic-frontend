@@ -4,7 +4,7 @@ import AddressInfo from '../components/sections/AddressInfo'
 import DocumentUpload from '../components/sections/DocumentUpload'
 import { fetchProfile } from '../api/fetchProfile'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import RealisationUpload  from '../components/sections/RealisationUpload'
+import RealisationUpload from '../components/sections/RealisationUpload'
 
 export default function EditProfilePage() {
   const [profile, setProfile] = useState({
