@@ -4,6 +4,7 @@ import AddressInfo from '../components/sections/AddressInfo'
 import DocumentUpload from '../components/sections/DocumentUpload'
 import { fetchProfile } from '../api/fetchProfile'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import RealisationDocumentUpload from '../components/sections/RealisationDocumentUpload'
 
 export default function EditProfilePage() {
   const [profile, setProfile] = useState({
@@ -61,12 +62,10 @@ export default function EditProfilePage() {
 
         const docArray = Array.isArray(res.documents) ? res.documents : Object.values(res.documents || {})
         const photoDoc = docArray.find(d => d.type === 'ID_PHOTO')
-        const cvDoc = docArray.find(d => d.type.toLowerCase() === 'CV');
-setDocuments({
-  photo: photoDoc || null,
-  cv: cvDoc ? { fileName: cvDoc.originalName || 'CV' } : null,
-
-
+        const cvDoc = docArray.find(d => d.type && d.type.toLowerCase() === 'cv')
+        setDocuments({
+          photo: photoDoc || null,
+          cv: cvDoc ? { fileName: cvDoc.originalName || 'CV' } : null,
         })
 
         if (res.profile) {
@@ -134,35 +133,34 @@ setDocuments({
           }])
         }
 
-const realList = res.realisations || []
-setRealisations(realList.length ? realList.map(real => ({
-  id: real.id || '',
-  realTitle: real.title || '',
-  realDescription: real.description || '',
-  realTech: Array.isArray(real.techs) ? real.techs : [],
-  newRealTechInput: '',
-  newRealTechLevel: 'junior',
-  realFiles: (real.files || []).map(f => {
-    const format = f.format ? `.${f.format}` : '';
-    return {
-      id: f.id,
-      url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${encodeURIComponent(f.publicId)}${format}`,
-      name: f.originalName || 'Fichier',
-      source: 'cloud',
-      version: f.version,
-      publicId: f.publicId,
-      format: f.format
-    };
-  })
-})) : [{
-  realTitle: '',
-  realDescription: '',
-  realTech: [],
-  newRealTechInput: '',
-  newRealTechLevel: 'junior',
-  realFiles: [],
-}])
-
+        const realList = res.realisations || []
+        setRealisations(realList.length ? realList.map(real => ({
+          id: real.id || '',
+          realTitle: real.title || '',
+          realDescription: real.description || '',
+          realTech: Array.isArray(real.techs) ? real.techs : [],
+          newRealTechInput: '',
+          newRealTechLevel: 'junior',
+          realFiles: (real.files || []).map(f => {
+            const format = f.format ? `.${f.format}` : '';
+            return {
+              id: f.id,
+              url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${encodeURIComponent(f.publicId)}${format}`,
+              name: f.originalName || 'Fichier',
+              source: 'cloud',
+              version: f.version,
+              publicId: f.publicId,
+              format: f.format
+            }
+          })
+        })) : [{
+          realTitle: '',
+          realDescription: '',
+          realTech: [],
+          newRealTechInput: '',
+          newRealTechLevel: 'junior',
+          realFiles: [],
+        }])
 
         if (res.prestations?.length) {
           setPrestations(res.prestations.map(p => ({
@@ -261,16 +259,16 @@ setRealisations(realList.length ? realList.map(real => ({
 
   const confirmDelete = () => {
     if (popup.type === 'expérience') {
-      const copy = [...experiences];
-      copy.splice(popup.index, 1);
-      setExperiences(copy);
+      const copy = [...experiences]
+      copy.splice(popup.index, 1)
+      setExperiences(copy)
     } else if (popup.type === 'realisation') {
-      const copy = [...realisations];
-      copy.splice(popup.index, 1);
-      setRealisations(copy);
+      const copy = [...realisations]
+      copy.splice(popup.index, 1)
+      setRealisations(copy)
     }
-    setPopup({ open: false, index: null, type: '' });
-  };
+    setPopup({ open: false, index: null, type: '' })
+  }
 
   const onRealFilesChange = (ri, files) => {
     setRealisations(prev => {
@@ -356,24 +354,23 @@ setRealisations(realList.length ? realList.map(real => ({
     formData.append('experiences', JSON.stringify(formattedExperiences))
     formData.append('prestations', JSON.stringify(prestations))
 
-
     if (documents.photo instanceof File) {
-      formData.append('photo', documents.photo);
+      formData.append('photo', documents.photo)
     } else if (documents.photo === null) {
-      formData.append('removePhoto', 'true');
+      formData.append('removePhoto', 'true')
     }
 
     if (documents.cv instanceof File) {
-      formData.append('cv', documents.cv);
+      formData.append('cv', documents.cv)
     } else if (documents.cv === null) {
-      formData.append('removeCV', 'true');
+      formData.append('removeCV', 'true')
     }
 
-if (documents.realisationDocument instanceof File) {
-  formData.append('realisationDocument', documents.realisationDocument);
-} else if (documents.realisationDocument === null) {
-  formData.append('removeRealisationDocument', 'true');
-}
+    if (documents.realisationDocument instanceof File) {
+      formData.append('realisationDocument', documents.realisationDocument)
+    } else if (documents.realisationDocument === null) {
+      formData.append('removeRealisationDocument', 'true')
+    }
 
     const realFormData = new FormData()
     const realisationsPayload = realisations
@@ -612,7 +609,7 @@ if (documents.realisationDocument instanceof File) {
 
                 <ul className="text-sm text-gray-700 space-y-1">
                   {real.realTech.map((t, j) => {
-                    const [name, level] = t.split(':');
+                    const [name, level] = t.split(':')
                     return (
                       <li key={j} className="flex gap-2 items-center">
                         <span>{name} : {level}</span>
@@ -620,15 +617,19 @@ if (documents.realisationDocument instanceof File) {
                           Supprimer
                         </button>
                       </li>
-                    );
+                    )
                   })}
                 </ul>
 
-                <input type="file" className="hidden" id={`real-doc-${i}`} multiple onChange={e => onRealFilesChange(i, e.target.files)} />
-
-                <button type="button" className="text-darkBlue underline text-sm" onClick={() => document.getElementById(`real-doc-${i}`).click()}>
-                  Ajouter un document
-                </button>
+                {/* Remplacer input file et bouton par RealisationDocumentUpload */}
+                <RealisationDocumentUpload
+                  data={real.realDocument || null}
+                  setData={(file) => {
+                    const updated = [...realisations]
+                    updated[i].realDocument = file
+                    setRealisations(updated)
+                  }}
+                />
 
                 <ul className="text-sm text-gray-600 mt-2">
                   {(real.realFiles || []).map((file, idx) => (
@@ -652,9 +653,12 @@ if (documents.realisationDocument instanceof File) {
                 </button>
               </div>
             ))}
-
-            <div className="text-center mt-4">
-              <button type="button" onClick={addRealisation} className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition">
+            <div className="text-center mt-6">
+              <button
+                type="button"
+                onClick={addRealisation}
+                className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
+              >
                 Ajouter une réalisation
               </button>
             </div>
