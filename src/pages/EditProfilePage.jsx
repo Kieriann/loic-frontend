@@ -145,11 +145,11 @@ setRealisations(realList.length ? realList.map(real => ({
     const format = f.format ? `.${f.format}` : '';
     return {
       id: f.id,
-      url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${encodeURIComponent(f.public_id)}${format}`,
+      url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${encodeURIComponent(f.publicId)}${format}`,
       name: f.originalName || 'Fichier',
       source: 'cloud',
       version: f.version,
-      public_id: f.public_id,
+      publicId: f.publicId,
       format: f.format
     };
   })

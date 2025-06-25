@@ -15,7 +15,7 @@ try {
   }
 
   const version = document.version;
-  const publicId = document.public_id;
+  const publicId = document.publicId;
   const format = document.format || 'pdf';
 
 return `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${version}/${encodeURIComponent(publicId)}.${format}`;

@@ -4,9 +4,9 @@ export default function ProfileFiles({ files }) {
   if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
 
 const getFileUrl = (file) => {
-  if (!file?.version || !file?.public_id || !file?.format) return null;
+  if (!file?.version || !file?.publicId || !file?.format) return null;
 
-  return `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/${encodeURIComponent(file.public_id)}.${file.format}`;
+  return `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/${encodeURIComponent(file.publicId)}.${file.format}`;
 };
 
 
