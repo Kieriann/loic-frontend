@@ -356,22 +356,18 @@ setRealisations(realList.length ? realList.map(real => ({
     formData.append('experiences', JSON.stringify(formattedExperiences))
     formData.append('prestations', JSON.stringify(prestations))
 
-    // --- SOLUTION DÉFINITIVE ---
-    // On ne traite que les vrais fichiers. Si un fichier n'a pas été modifié,
-    // on n'envoie rien, et le serveur gardera l'ancien.
+
     if (documents.photo instanceof File) {
       formData.append('photo', documents.photo);
     } else if (documents.photo === null) {
-      // Si la photo est 'null', ça signifie qu'on veut la supprimer.
       formData.append('removePhoto', 'true');
     }
 
     if (documents.cv instanceof File) {
-      formData.append('cv', documents.cv);
+      formData.append('CV', documents.cv);
     } else if (documents.cv === null) {
       formData.append('removeCV', 'true');
     }
-    // --- FIN DE LA SOLUTION ---
 
     const realFormData = new FormData()
     const realisationsPayload = realisations
