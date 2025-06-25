@@ -34,7 +34,7 @@ export default function EditProfilePage() {
   })
   const [experiences, setExperiences] = useState([])
   const [realisations, setRealisations] = useState([])
-  const [documents, setDocuments] = useState({ photo: null, cv: null })
+  const [documents, setDocuments] = useState({ photo: null, cv: null, realisationDocument: null })
   const [errors, setErrors] = useState({})
   const [popup, setPopup] = useState({ open: false, index: null, type: '' })
   const navigate = useNavigate()
@@ -368,6 +368,12 @@ setRealisations(realList.length ? realList.map(real => ({
     } else if (documents.cv === null) {
       formData.append('removeCV', 'true');
     }
+
+if (documents.realisationDocument instanceof File) {
+  formData.append('realisationDocument', documents.realisationDocument);
+} else if (documents.realisationDocument === null) {
+  formData.append('removeRealisationDocument', 'true');
+}
 
     const realFormData = new FormData()
     const realisationsPayload = realisations
