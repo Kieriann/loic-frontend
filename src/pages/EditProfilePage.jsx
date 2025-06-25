@@ -19,7 +19,7 @@ export default function EditProfilePage() {
     languages: '',
     isEmployed: false,
     availableDate: null,
-    teleworkDays: 0,
+    teleworkDays: 0, 
   })
 
   const [langInput, setLangInput] = useState('')
