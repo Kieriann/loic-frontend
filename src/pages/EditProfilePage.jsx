@@ -366,9 +366,9 @@ setRealisations(realList.length ? realList.map(real => ({
     }
 
     if (documents.cv instanceof File) {
-      formData.append('cv', documents.cv);
+      formData.append('CV', documents.cv);
     } else if (documents.cv === null) {
-      formData.append('removecv', 'true');
+      formData.append('removeCV', 'true');
     }
     // --- FIN DE LA SOLUTION ---
 
