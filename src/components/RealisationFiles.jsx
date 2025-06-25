@@ -1,7 +1,7 @@
 import React from "react";
 
-export default function ProfileFiles({ files }) {
-  if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
+export default function RealisationFiles({ files }) {
+  if (!files?.length) return <p className="text-gray-500">Aucun fichier</p>;
 
   const getFileUrl = (file) => {
     if (!file) return null;
@@ -11,8 +11,7 @@ export default function ProfileFiles({ files }) {
     }
 
     if (file.version && file.public_id && file.format) {
-      const base = file.type === "ID_PHOTO" ? "image" : "raw";
-      return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${file.public_id}.${file.format}`;
+      return `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${file.version}/${file.public_id}.${file.format}`;
     }
 
     try {
@@ -25,10 +24,7 @@ export default function ProfileFiles({ files }) {
         publicId = parts.slice(1).join("/");
       }
 
-      const isPhoto = file.type === "ID_PHOTO";
-      const resourceType = isPhoto ? "image" : "raw";
-
-      return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`;
+      return `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${version}/${publicId}`;
     } catch (error) {
       console.error("Erreur de construction d'URL:", error, file);
       return null;
@@ -36,31 +32,15 @@ export default function ProfileFiles({ files }) {
   };
 
   return (
-    <div className="relative space-y-2">
+    <div className="space-y-2">
       {files.map((file, index) => {
         const fileUrl = getFileUrl(file);
-        const isPhoto = file.type === "ID_PHOTO";
 
         if (!fileUrl) {
           return (
             <p key={index} className="text-red-500">
               URL invalide pour {file.originalName || "fichier"}
             </p>
-          );
-        }
-
-        if (isPhoto) {
-          return (
-            <div key={index} className="flex flex-col items-center">
-              <a href={fileUrl} target="_blank" rel="noopener noreferrer">
-                <img
-                  src={fileUrl}
-                  alt="Photo de profil"
-                  className="w-32 h-32 object-cover rounded-full border-2 border-gray-200"
-                />
-              </a>
-              <p className="text-sm text-gray-500">{file.originalName || "Photo"}</p>
-            </div>
           );
         }
 
@@ -86,7 +66,7 @@ export default function ProfileFiles({ files }) {
                   d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
                 />
               </svg>
-              {file.type === "CV" ? "Consulter le CV" : file.originalName || "Document"}
+              {file.originalName || "Fichier"}
             </a>
           </div>
         );
