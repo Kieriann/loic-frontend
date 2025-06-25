@@ -159,18 +159,33 @@ setDocuments(docs);
                 </ul>
               </Section>
 
-<Section title="Documents">
-  {documents?.map(doc => doc.type === 'cv' && (
-    <a
-      key={doc.id}
-      href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${doc.version}/${doc.publicId}.${doc.format || 'pdf'}`}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="text-blue-600 underline"
-    >
-      {doc.originalName || 'CV'}
-    </a>
-  ))}
+              <Section title="Documents">
+  {documents?.map(doc => {
+    if (doc.type === 'ID_PHOTO') {
+      return (
+        <img
+          key={doc.id}
+          src={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
+          alt="Photo"
+          className="mx-auto rounded-full w-32 h-32 object-cover mb-4"
+        />
+      )
+    }
+    if (doc.type === 'cv') {
+      return (
+        <a
+          key={doc.id}
+          href={`https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${doc.version}/${doc.publicId}.${doc.format || 'pdf'}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline block mb-2"
+        >
+          {doc.originalName || 'CV'}
+        </a>
+      )
+    }
+    return null
+  })}
 </Section>
 
             </>
