@@ -4,7 +4,7 @@ import AddressInfo from '../components/sections/AddressInfo'
 import DocumentUpload from '../components/sections/DocumentUpload'
 import { fetchProfile } from '../api/fetchProfile'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import RealisationDocumentUpload from '../components/sections/RealisationDocumentUpload'
+import RealisationUpload  from '../components/sections/RealisationUpload '
 
 export default function EditProfilePage() {
   const [profile, setProfile] = useState({
@@ -621,8 +621,8 @@ export default function EditProfilePage() {
                   })}
                 </ul>
 
-                {/* Remplacer input file et bouton par RealisationDocumentUpload */}
-                <RealisationDocumentUpload
+                {/* Remplacer input file et bouton par RealisationUpload  */}
+                <RealisationUpload 
                   data={real.realDocument || null}
                   setData={(file) => {
                     const updated = [...realisations]
