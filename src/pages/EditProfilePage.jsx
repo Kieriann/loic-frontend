@@ -622,14 +622,17 @@ export default function EditProfilePage() {
                 </ul>
 
                 {/* Remplacer input file et bouton par Real  */}
-                <Real
-                  data={real.realDocument || null}
-                  setData={(file) => {
-                    const updated = [...realisations]
-                    updated[i].realDocument = file
-                    setRealisations(updated)
-                  }}
-                />
+<Real
+  data={real.realFiles?.find(f => f.source === 'new') || null}
+  setData={(file) => {
+    const updated = [...realisations]
+    updated[i].realFiles = (updated[i].realFiles || []).filter(f => f.source !== 'new')
+    if (file) {
+      updated[i].realFiles.push({ file, name: file.name, source: 'new' })
+    }
+    setRealisations(updated)
+  }}
+/>
 
                 <ul className="text-sm text-gray-600 mt-2">
                   {(real.realFiles || []).map((file, idx) => (
