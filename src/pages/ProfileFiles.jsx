@@ -4,47 +4,33 @@ export default function ProfileFiles({ files }) {
   if (!files?.length) return <p className="text-gray-500">Aucun document</p>;
 
   const getFileUrl = (file) => {
-    if (!file) return null;
-    if (file.url) return file.url;
-    if (file.fileName?.startsWith("http")) return file.fileName;
-
-    if (file.version && file.public_id && file.format) {
-      const isPhoto = file.type === "ID_PHOTO";
-      const base = isPhoto ? "image" : "raw";
-      let finalPath = file.public_id;
-
-      // --- LOGIQUE FINALE ET CORRECTE ---
-      // CAS 1: Pour les photos, on s'assure que l'extension est présente.
-      if (isPhoto) {
-        if (!finalPath.endsWith(`.${file.format}`)) {
-          finalPath = `${finalPath}.${file.format}`;
-        }
-      }
-      // CAS 2: Pour les fichiers RAW (PDF, etc.), on s'assure que l'extension N'EST PAS présente.
-      // Le backend semble parfois l'inclure, donc on la retire si besoin.
-      else if (finalPath.endsWith(`.${file.format}`)) {
-        finalPath = finalPath.slice(0, -file.format.length - 1);
-      }
-
-      return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${finalPath}`;
+    // S'il n'y a pas les informations de base, on ne peut rien faire.
+    if (!file?.version || !file?.public_id || !file?.format) {
+      // On vérifie si une URL complète est déjà fournie (par sécurité)
+      if (file?.url?.startsWith("http")) return file.url;
+      if (file?.fileName?.startsWith("http")) return file.fileName;
+      return null; // Impossible de construire l'URL
     }
 
-    // Logique de secours (inchangée)
-    try {
-      const parts = file.fileName?.split("/") || [];
-      let version = "";
-      let publicId = file.fileName || "";
-      if (parts.length > 1 && parts[0].startsWith("v")) {
-        version = parts[0].substring(1);
-        publicId = parts.slice(1).join("/");
+    const isPhoto = file.type === "ID_PHOTO";
+    const base = isPhoto ? "image" : "raw";
+    let finalPath = file.public_id;
+
+    // RÈGLE N°1 : Pour les photos, on s'assure que l'URL se termine par l'extension.
+    if (isPhoto) {
+      if (!finalPath.endsWith(`.${file.format}`)) {
+        finalPath = `${finalPath}.${file.format}`;
       }
-      const isPhoto = file.type === "ID_PHOTO";
-      const resourceType = isPhoto ? "image" : "raw";
-      return `https://res.cloudinary.com/dwwt3sgbw/${resourceType}/upload/v${version}/${publicId}`;
-    } catch (error) {
-      console.error("Erreur de construction d'URL:", error, file);
-      return null;
+    } 
+    // RÈGLE N°2 : Pour les fichiers RAW (PDF), on s'assure que l'URL NE se termine PAS par l'extension.
+    // On retire l'extension si le backend l'a accidentellement incluse dans le public_id.
+    else {
+      if (finalPath.endsWith(`.${file.format}`)) {
+        finalPath = finalPath.slice(0, -(file.format.length + 1));
+      }
     }
+
+    return `https://res.cloudinary.com/dwwt3sgbw/${base}/upload/v${file.version}/${finalPath}`;
   };
 
   return (
