@@ -266,21 +266,24 @@ setDocuments(docs);
               </div>
             )}
             {r.files && r.files.length > 0 ? (
-              <div>
-                {r.files.map(file => (
-                  console.log(file)
-                  <a
-                    key={file.id}
-                    href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/${file.publicId}.${file.format}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline block mb-2"
-                  >
-                    {file.originalName || 'Document'}
-                  </a>
-                ))}
-              </div>
-            ) : null}
+  <div>
+    {r.files.map(file => {
+      console.log(file)
+      return (
+        <a
+          key={file.id}
+          href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/${file.publicId}.${file.format}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 underline block mb-2"
+        >
+          {file.originalName || 'Document'}
+        </a>
+      )
+    })}
+  </div>
+) : null}
+
           </div>
         ))
       ) : (
