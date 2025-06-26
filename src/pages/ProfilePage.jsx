@@ -255,15 +255,20 @@ setDocuments(docs);
           <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
             <p><strong>Titre :</strong> {r.title || r.realTitle || 'Sans titre'}</p>
             <p><strong>Description :</strong> {r.description || r.realDescription || 'Aucune description'}</p>
-            {(r.techs || r.realTech) && (
-              <div>
-                <strong>Technos :</strong>{' '}
-                {(r.techs || r.realTech || []).map((t, idx) => {
-                  const [name, level] = t.split(':')
-                  return <span key={idx}>{name} ({level}){idx < (r.techs || r.realTech).length - 1 ? ', ' : ''}</span>
-                })}
-              </div>
-            )}
+           {(r.techs || r.realTech || r.technos) && (
+  <div>
+    <strong>Technos :</strong>{' '}
+    {(r.techs || r.realTech || r.technos || []).map((t, idx, arr) => {
+      const [name, level] = typeof t === 'string' ? t.split(':') : [t.name, t.level]
+      return (
+        <span key={idx}>
+          {name} ({level}){idx < arr.length - 1 ? ', ' : ''}
+        </span>
+      )
+    })}
+  </div>
+)}
+
             {r.files && r.files.length > 0 ? (
   <div>
     {r.files.map((file, idx) => {
