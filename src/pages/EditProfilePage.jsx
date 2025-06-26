@@ -283,6 +283,8 @@ setRealisations([...realisations, { title: '', description: '', techs: [{ name: 
     formData.append('address', JSON.stringify(address))
     formData.append('experiences', JSON.stringify(formattedExperiences))
     formData.append('prestations', JSON.stringify(prestations))
+    formData.append('realisations', JSON.stringify(realisations));
+
 
     if (documents.photo instanceof File) {
       formData.append('photo', documents.photo)
