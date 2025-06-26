@@ -255,19 +255,24 @@ setDocuments(docs);
           <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
             <p><strong>Titre :</strong> {r.title || r.realTitle || 'Sans titre'}</p>
             <p><strong>Description :</strong> {r.description || r.realDescription || 'Aucune description'}</p>
-           {(r.techs || r.realTech || r.technos) && (
-  <div>
-    <strong>Technos :</strong>{' '}
-{(r.techs || []).length > 0 && (
-  <div>
-    <strong>Technos :</strong>{' '}
-    {r.techs.map((t, idx) => (
-      <span key={idx}>
-        {t.name} ({t.level})
-        {idx < r.techs.length - 1 ? ', ' : ''}
-      </span>
-    ))}
-  </div>
+            {(r.techs || []).length > 0 && (
+              <div>
+                <strong>Technos :</strong>{' '}
+                {r.techs.map((t, idx) => (
+                  <span key={idx}>
+                    {t.name} ({t.level})
+                    {idx < r.techs.length - 1 ? ', ' : ''}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500 italic">Aucune réalisation renseignée</p>
+      )}
+    </div>
+  </Section>
 )}
 
 
