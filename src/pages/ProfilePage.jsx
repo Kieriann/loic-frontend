@@ -43,7 +43,7 @@ export default function ProfilePage() {
     const fetchDocs = async () => {
       try {
         const token = localStorage.getItem('token')
-        const res = await axios.get(`${import.meta.env.VITE_API_URL}/api/documents/me`, {
+        const res = await axios.get("${import.meta.env.VITE_API_URL}/api/documents/me", {
           headers: { Authorization: `Bearer ${token}` }
         })
         const docs = Array.isArray(res.data) ? res.data : Object.values(res.data || {})
@@ -166,7 +166,7 @@ setDocuments(docs);
       {documents?.filter(doc => doc.type === 'ID_PHOTO').map(doc => (
         <img
           key={doc.id}
-          src={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
+          src={"https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}"}
           alt="Photo"
           className="mx-auto rounded-full w-32 h-32 object-cover"
         />
@@ -178,7 +178,7 @@ setDocuments(docs);
       {documents?.filter(doc => doc.type === 'cv').map(doc => (
         <a
           key={doc.id}
-          href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
+          href={"https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}"}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 underline block"
@@ -270,7 +270,7 @@ setDocuments(docs);
       return (
         <a
           key={file.id}
-href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/${file.publicId}.${file.format}`}
+href={"https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/${file.publicId}.${file.format}"}
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-600 underline block mb-2"
