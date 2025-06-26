@@ -237,7 +237,7 @@ setDocuments(docs);
                     <strong>Langages :</strong>{' '}
                     {Array.isArray(exp.languages)
                       ? exp.languages.map((l, j) => {
-                         const [name, level] = l.split(':')
+                        const [name, level] = l.split(':')
                           return <span key={j}>{name} ({level}){j < exp.languages.length - 1 ? ', ' : ''}</span>
                         })
                       : 'Aucun'}
