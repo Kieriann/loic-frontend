@@ -514,98 +514,102 @@ setRealisations([...realisations, { title: '', description: '', techs: [{ name: 
           </>
         )}
 
-        {/* Réalisations */}
-        {selectedTab === 'realisations' && (
-          <>
-            <h2 className="text-xl font-bold text-darkBlue mb-3">Mes réalisations</h2>
-            {realisations.map((real, i) => (
-              <div key={i} className="border rounded p-4 my-3 bg-blue-50">
-                <input
-                  type="text"
-                  placeholder="Titre"
-                  value={real.title}
-                  onChange={e => updateRealisation(i, 'title', e.target.value)}
-                  className="border rounded px-2 py-1 w-full mb-2"
-                />
-                <textarea
-                  placeholder="Description"
-                  value={real.description}
-                  onChange={e => updateRealisation(i, 'description', e.target.value)}
-                  className="border rounded px-2 py-1 w-full mb-2"
-                />
-                {real.techs.map((tech, j) => (
-  <div key={j} className="flex items-center gap-2 mb-2">
-    <input
-      type="text"
-      placeholder="Technologie"
-      value={tech.name}
-      onChange={e => {
-        const updated = [...real.techs]
-        updated[j].name = e.target.value
-        updateRealisation(i, 'techs', updated)
-      }}
-      className="border rounded px-2 py-1 flex-1"
-    />
-    <select
-      value={tech.level}
-      onChange={e => {
-        const updated = [...real.techs]
-        updated[j].level = e.target.value
-        updateRealisation(i, 'techs', updated)
-      }}
-      className="border rounded px-2 py-1"
-    >
-      <option value="">Niveau</option>
-      <option value="junior">Junior</option>
-      <option value="intermédiaire">Intermédiaire</option>
-      <option value="senior">Senior</option>
-    </select>
-    <button
-      type="button"
-      onClick={() => {
-        const updated = real.techs.filter((_, idx) => idx !== j)
-        updateRealisation(i, 'techs', updated)
-      }}
-      className="text-red-600 underline text-sm"
-    >
-      Supprimer
-    </button>
-  </div>
-))}
-<button
-  type="button"
-  onClick={() => {
-    const updated = [...real.techs, { name: '', level: '' }]
-    updateRealisation(i, 'techs', updated)
-  }}
-  className="text-blue-600 underline text-sm mb-2"
->
-  Ajouter une techno
-</button>
+{/* Réalisations */}
+{selectedTab === 'realisations' && (
+  <>
+    <h2 className="text-xl font-bold text-darkBlue mb-3">Mes réalisations</h2>
+    {realisations.map((real, i) => (
+      <div key={i} className="border rounded p-4 my-3 bg-blue-50">
+        <input
+          type="text"
+          placeholder="Titre"
+          value={real.title}
+          onChange={e => updateRealisation(i, 'title', e.target.value)}
+          className="border rounded px-2 py-1 w-full mb-2"
+        />
+        <textarea
+          placeholder="Description"
+          value={real.description}
+          onChange={e => updateRealisation(i, 'description', e.target.value)}
+          className="border rounded px-2 py-1 w-full mb-2"
+        />
+        {real.techs.length === 0 && updateRealisation(i, 'techs', [{ name: '', level: '' }])}
 
-                <Real
-                  files={real.files}
-                  onFilesChange={files => updateRealFiles(i, files)}
-                />
-                <button
-                  type="button"
-                  className="text-red-600 underline text-sm mt-2"
-                  onClick={() => setPopup({ open: true, index: i, type: 'realisation' })}
-                  disabled={realisations.length <= 1}
-                >
-                  Supprimer cette réalisation
-                </button>
-              </div>
-            ))}
+        {real.techs.map((tech, j) => (
+          <div key={j} className="flex items-center gap-2 mb-2">
+            <input
+              type="text"
+              placeholder="Technologie"
+              value={tech.name}
+              onChange={e => {
+                const updated = [...real.techs]
+                updated[j].name = e.target.value
+                updateRealisation(i, 'techs', updated)
+              }}
+              className="border rounded px-2 py-1 flex-1"
+            />
+            <select
+              value={tech.level}
+              onChange={e => {
+                const updated = [...real.techs]
+                updated[j].level = e.target.value
+                updateRealisation(i, 'techs', updated)
+              }}
+              className="border rounded px-2 py-1"
+            >
+              <option value="">Niveau</option>
+              <option value="junior">Junior</option>
+              <option value="intermédiaire">Intermédiaire</option>
+              <option value="senior">Senior</option>
+            </select>
             <button
               type="button"
-              className="border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white mt-3"
-              onClick={addRealisation}
+              onClick={() => {
+                const updated = real.techs.filter((_, idx) => idx !== j)
+                updateRealisation(i, 'techs', updated)
+              }}
+              className="text-red-600 underline text-sm"
             >
-              Ajouter une réalisation
+              Supprimer
             </button>
-          </>
-        )}
+          </div>
+        ))}
+
+        <button
+          type="button"
+          onClick={() => {
+            const updated = [...real.techs, { name: '', level: '' }]
+            updateRealisation(i, 'techs', updated)
+          }}
+          className="text-blue-600 underline text-sm mb-2"
+        >
+          Ajouter une techno
+        </button>
+
+        <Real
+          files={real.files}
+          onFilesChange={files => updateRealFiles(i, files)}
+        />
+        <button
+          type="button"
+          className="text-red-600 underline text-sm mt-2"
+          onClick={() => setPopup({ open: true, index: i, type: 'realisation' })}
+          disabled={realisations.length <= 1}
+        >
+          Supprimer cette réalisation
+        </button>
+      </div>
+    ))}
+    <button
+      type="button"
+      className="border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white mt-3"
+      onClick={addRealisation}
+    >
+      Ajouter une réalisation
+    </button>
+  </>
+)}
+
 
         {/* Prestations */}
         {selectedTab === 'prestations' && (
