@@ -304,7 +304,7 @@ url: `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/realisatio
     const realisationsPayload = realisations.map((real, idx) => ({
       title: real.title,
       description: real.description,
-      techs: real.techs,
+      techs: real.techs.map(t => t.name),
     }))
     realFormData.append('data', JSON.stringify(realisationsPayload))
     realisations.forEach((real, realIdx) => {
