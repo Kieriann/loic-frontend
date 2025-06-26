@@ -528,17 +528,56 @@ url: `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/realisatio
                   onChange={e => updateRealisation(i, 'description', e.target.value)}
                   className="border rounded px-2 py-1 w-full mb-2"
                 />
-                <input
-                  type="text"
-                  placeholder="Technologies (séparées par une virgule)"
-                  value={real.techs.join(', ')}
-                  onChange={e => updateRealisation(
-                    i,
-                    'techs',
-                    e.target.value.split(',').map(t => t.trim()).filter(Boolean)
-                  )}
-                  className="border rounded px-2 py-1 w-full mb-2"
-                />
+                {real.techs.map((tech, j) => (
+  <div key={j} className="flex items-center gap-2 mb-2">
+    <input
+      type="text"
+      placeholder="Technologie"
+      value={tech.name}
+      onChange={e => {
+        const updated = [...real.techs]
+        updated[j].name = e.target.value
+        updateRealisation(i, 'techs', updated)
+      }}
+      className="border rounded px-2 py-1 flex-1"
+    />
+    <select
+      value={tech.level}
+      onChange={e => {
+        const updated = [...real.techs]
+        updated[j].level = e.target.value
+        updateRealisation(i, 'techs', updated)
+      }}
+      className="border rounded px-2 py-1"
+    >
+      <option value="">Niveau</option>
+      <option value="junior">Junior</option>
+      <option value="intermédiaire">Intermédiaire</option>
+      <option value="senior">Senior</option>
+    </select>
+    <button
+      type="button"
+      onClick={() => {
+        const updated = real.techs.filter((_, idx) => idx !== j)
+        updateRealisation(i, 'techs', updated)
+      }}
+      className="text-red-600 underline text-sm"
+    >
+      Supprimer
+    </button>
+  </div>
+))}
+<button
+  type="button"
+  onClick={() => {
+    const updated = [...real.techs, { name: '', level: '' }]
+    updateRealisation(i, 'techs', updated)
+  }}
+  className="text-blue-600 underline text-sm mb-2"
+>
+  Ajouter une techno
+</button>
+
                 <Real
                   files={real.files}
                   onFilesChange={files => updateRealFiles(i, files)}
