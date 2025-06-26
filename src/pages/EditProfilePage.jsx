@@ -330,6 +330,23 @@ setRealisations([...realisations, { title: '', description: '', techs: [{ name: 
     })
 
     try {
+    realFormData.append('data', JSON.stringify(realisationsPayload))
+    realisations.forEach((real, realIdx) => {
+      (real.files || []).forEach((f, fileIdx) => {
+  if (f.file && f.source === 'new') {
+
+          const sanitized = f.name.replace(/\s+/g, '_')
+          const appendedFile = new File([f.file], `real-${realIdx}-${fileIdx}-${sanitized}`, {
+            type: f.file.type,
+            lastModified: f.file.lastModified
+          })
+          appendedFile.originalname = `real-${realIdx}-${fileIdx}-${sanitized}`
+          realFormData.append(`realFiles_${realIdx}`, appendedFile, appendedFile.originalname)
+        }
+      })
+    })
+
+    try {
       // Envoi profil
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
         method: 'POST',
@@ -340,13 +357,46 @@ setRealisations([...realisations, { title: '', description: '', techs: [{ name: 
       })
 
       // Envoi réalisations
-      await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-        },
-        body: realFormData,
-      })
+const token = localStorage.getItem('token')
+const res = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+  method: 'POST',
+  headers: { Authorization: `Bearer ${token}` },
+  body: formData,
+})
+
+if (res.ok) {
+  const newData = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then(r => r.json())
+  setRealisations(newData)
+}
+
+
+      if (!res.ok) {
+        const resText = await res.text()
+        try {
+          const json = JSON.parse(resText)
+          console.error('Erreur backend complète :', json)
+        } catch {
+          console.error('Erreur backend brute :', resText)
+        }
+        throw new Error(resText)
+      }
+
+      navigate(`/profile?tab=${selectedTab}`)
+    } catch (err) {
+      alert('Erreur backend : ' + (err.message || 'inconnue'))
+    }
+  }
+
+
+if (res.ok) {
+  const newData = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+    headers: { Authorization: `Bearer ${token}` },
+  }).then(r => r.json())
+  setRealisations(newData)
+}
+
 
       if (!res.ok) {
         const resText = await res.text()
