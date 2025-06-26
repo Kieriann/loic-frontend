@@ -267,7 +267,6 @@ setDocuments(docs);
             {r.files && r.files.length > 0 ? (
   <div>
     {r.files.map(file => {
-      console.log(file)
       return (
         <a
           key={file.id}
