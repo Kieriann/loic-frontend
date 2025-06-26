@@ -35,8 +35,9 @@ export default function EditProfilePage() {
   })
   const [experiences, setExperiences] = useState([])
   const [realisations, setRealisations] = useState([
-    { title: '', description: '', techs: [], files: [] }
-  ])
+  { title: '', description: '', techs: [{ name: '', level: '' }], files: [] }
+])
+
   const [documents, setDocuments] = useState({ photo: null, cv: null, realisationDocument: null })
   const [errors, setErrors] = useState({})
   const [popup, setPopup] = useState({ open: false, index: null, type: '' })
@@ -167,7 +168,7 @@ url: `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/realisatio
 
   // Ajout/Suppression réalisations/fichiers
   const addRealisation = () =>
-    setRealisations([...realisations, { title: '', description: '', techs: [], files: [] }])
+setRealisations([...realisations, { title: '', description: '', techs: [{ name: '', level: '' }], files: [] }])
 
   const removeRealisation = (idx) =>
     setRealisations(realisations.filter((_, i) => i !== idx))
