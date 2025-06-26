@@ -329,20 +329,7 @@ setRealisations([...realisations, { title: '', description: '', techs: [{ name: 
       })
     })
 try {
-  realFormData.append('data', JSON.stringify(realisationsPayload))
-  realisations.forEach((real, realIdx) => {
-    (real.files || []).forEach((f, fileIdx) => {
-      if (f.file && f.source === 'new') {
-        const sanitized = f.name.replace(/\s+/g, '_')
-        const appendedFile = new File([f.file], `real-${realIdx}-${fileIdx}-${sanitized}`, {
-          type: f.file.type,
-          lastModified: f.file.lastModified
-        })
-        appendedFile.originalname = `real-${realIdx}-${fileIdx}-${sanitized}`
-        realFormData.append(`realFiles_${realIdx}`, appendedFile, appendedFile.originalname)
-      }
-    })
-  })
+
 
   const token = localStorage.getItem('token')
 
@@ -384,7 +371,8 @@ try {
 } catch (err) {
   alert('Erreur backend : ' + (err.message || 'inconnue'))
 }
-
+  }
+  
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-md p-6 space-y-10 relative">
