@@ -133,7 +133,7 @@ export default function EditProfilePage() {
               techs: Array.isArray(real.techs) ? real.techs : [],
               files: (real.files || []).map(f => ({
                 id: f.id,
-                url: `https://res.cloudinary.com/dwwt3sgbw/raw/upload/v${f.version || ''}/${encodeURIComponent(f.publicId)}.${f.format || 'pdf'}`,
+url: `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/${f.publicId}.${f.format}`,
                 name: f.originalName || 'Fichier',
                 source: 'cloud',
                 version: f.version,
