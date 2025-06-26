@@ -7,7 +7,6 @@ import { fetchProfile } from '../api/fetchProfile'
 import { Navigate, useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { useSearchParams } from 'react-router-dom'
-import ProfileFiles from './ProfileFiles'
 
 export default function ProfilePage() {
   const [data, setData] = useState(null)
