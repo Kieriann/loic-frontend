@@ -248,44 +248,47 @@ setDocuments(docs);
             </Section>
           )}
 
-          {/* RÉALISATIONS */}
-          {selectedTab === 'realisations' && (
-            <Section title="Réalisations">
-              <div className="space-y-4 w-full max-w-xl">
-                {realisations && realisations.length > 0 ? (
-                  realisations.map((r, i) => (
-                    <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
-                      <p><strong>Titre :</strong> {r.title || r.realTitle || 'Sans titre'}</p>
-                      <p><strong>Description :</strong> {r.description || r.realDescription || 'Aucune description'}</p>
-                      {(r.techs || r.realTech) && (
-                        <div>
-                          <strong>Technos :</strong>{' '}
-                          {(r.techs || r.realTech || []).map((t, idx) => {
-                            const [name, level] = t.split(':')
-                            return <span key={idx}>{name} ({level}){idx < (r.techs || r.realTech).length - 1 ? ', ' : ''}</span>
-                          })}
-                        </div>
-                      )}
-                      {r.files && r.files.length > 0 && r.files.map(file => (
-                      <a
-                        key={file.id}
-                        href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 underline block mb-2"
-                      >
-                        {file.originalName || 'Document'}
-                      </a>
-                    ))}
-
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 italic">Aucune réalisation renseignée</p>
-                )}
+{selectedTab === 'realisations' && (
+  <Section title="Réalisations">
+    <div className="space-y-4 w-full max-w-xl">
+      {realisations && realisations.length > 0 ? (
+        realisations.map((r, i) => (
+          <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
+            <p><strong>Titre :</strong> {r.title || r.realTitle || 'Sans titre'}</p>
+            <p><strong>Description :</strong> {r.description || r.realDescription || 'Aucune description'}</p>
+            {(r.techs || r.realTech) && (
+              <div>
+                <strong>Technos :</strong>{' '}
+                {(r.techs || r.realTech || []).map((t, idx) => {
+                  const [name, level] = t.split(':')
+                  return <span key={idx}>{name} ({level}){idx < (r.techs || r.realTech).length - 1 ? ', ' : ''}</span>
+                })}
               </div>
-            </Section>
-          )}
+            )}
+            {r.files && r.files.length > 0 ? (
+              <div>
+                {r.files.map(file => (
+                  <a
+                    key={file.id}
+                    href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/${file.publicId}.${file.format}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline block mb-2"
+                  >
+                    {file.originalName || 'Document'}
+                  </a>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ))
+      ) : (
+        <p className="text-gray-500 italic">Aucune réalisation renseignée</p>
+      )}
+    </div>
+  </Section>
+)}
+
 
           {/* PRESTATIONS */}
           {selectedTab === 'prestations' && (
