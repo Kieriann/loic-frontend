@@ -301,11 +301,15 @@ url: `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/realisatio
 
     // FormData séparé pour les réalisations
     const realFormData = new FormData()
-    const realisationsPayload = realisations.map((real, idx) => ({
+        const realisationsPayload = realisations.map((real, idx) => ({
       title: real.title,
       description: real.description,
-      techs: real.techs.map(t => t.name),
+      techs: (real.techs || []).map(t => ({
+        name: typeof t === 'string' ? t : t.name,
+        level: typeof t === 'string' ? 'non précisé' : t.level,
+      })),
     }))
+
     realFormData.append('data', JSON.stringify(realisationsPayload))
     realisations.forEach((real, realIdx) => {
       (real.files || []).forEach((f, fileIdx) => {
