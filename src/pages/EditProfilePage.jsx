@@ -179,7 +179,6 @@ export default function EditProfilePage() {
   }
 
   const updateRealFiles = (idx, files) => {
-    // Optional console.log for debug
     console.log('updateRealFiles called for realisation index =', idx, 'with files:', files)
     const updated = [...realisations]
     updated[idx].files = files
@@ -300,7 +299,7 @@ export default function EditProfilePage() {
       formData.append('removeRealisationDocument', 'true')
     }
 
-    // Réalisations : un FormData séparé
+    // FormData séparé pour les réalisations
     const realFormData = new FormData()
     const realisationsPayload = realisations.map((real, idx) => ({
       title: real.title,
@@ -312,8 +311,11 @@ export default function EditProfilePage() {
       (real.files || []).forEach((f, fileIdx) => {
         if (f.file) {
           const sanitized = f.name.replace(/\s+/g, '_')
-          const prefixedName = `real-${realIdx}-${fileIdx}-${sanitized}`
-          realFormData.append('realFiles', f.file, prefixedName)
+          const appendedFile = new File([f.file], `real-${realIdx}-${fileIdx}-${sanitized}`, {
+            type: f.file.type,
+            lastModified: f.file.lastModified
+          })
+          realFormData.append('realFiles', appendedFile)
         }
       })
     })
