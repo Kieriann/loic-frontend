@@ -1,6 +1,4 @@
-//
 // ─── Page : affichage du profil utilisateur connecté (Corrigé) ──────────────
-//
 
 import React, { useEffect, useState } from 'react'
 import { fetchProfile } from '../api/fetchProfile'
@@ -16,13 +14,11 @@ export default function ProfilePage() {
   const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
   const [documents, setDocuments] = useState([])
   const navigate = useNavigate()
+  const [realFromApi, setRealFromApi] = useState([])
 
-  // Ce `useEffect` garantit que l'onglet se met à jour si l'URL change.
   useEffect(() => {
-    if (initialTab) {
-      setSelectedTab(initialTab);
-    }
-  }, [initialTab]);
+    if (initialTab) setSelectedTab(initialTab)
+  }, [initialTab])
 
   useEffect(() => {
     const load = async () => {
@@ -40,6 +36,23 @@ export default function ProfilePage() {
   }, [])
 
   useEffect(() => {
+    const fetchRealisations = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+          },
+        })
+        const data = await res.json()
+        setRealFromApi(data)
+      } catch (err) {
+        console.error('Erreur chargement réalisations :', err)
+      }
+    }
+    fetchRealisations()
+  }, [])
+
+  useEffect(() => {
     const fetchDocs = async () => {
       try {
         const token = localStorage.getItem('token')
@@ -47,8 +60,7 @@ export default function ProfilePage() {
           headers: { Authorization: `Bearer ${token}` }
         })
         const docs = Array.isArray(res.data) ? res.data : Object.values(res.data || {})
-console.log('Documents reçus:', docs);
-setDocuments(docs);
+        setDocuments(docs)
       } catch (err) {
         console.error('Erreur chargement documents', err)
       }
@@ -59,7 +71,7 @@ setDocuments(docs);
   if (loading) return <p className="p-4">Chargement...</p>
   if (!data?.profile || !data.profile.firstname) return <Navigate to="/profile/edit" replace />
 
-  const { profile, experiences = [], prestations = [], realisations = [] } = data
+  const { profile, experiences = [], prestations = [] } = data
   const address = profile.Address || {}
 
   return (
@@ -88,7 +100,6 @@ setDocuments(docs);
           <div className="mb-8">
             <div className="flex justify-between items-center">
               <h1 className="text-2xl text-darkBlue font-bold">
-                {/* CORRECTION : La condition utilise maintenant 'experiences' */}
                 {selectedTab === 'profil' && 'Mon Profil'}
                 {selectedTab === 'experiences' && 'Mes Experiences'}
                 {selectedTab === 'realisations' && 'Mes Réalisations'}
@@ -137,9 +148,7 @@ setDocuments(docs);
               <div className="text-center">
                 <Section title="Télétravail">
                   <p>
-                    Je souhaite télétravailler{' '}
-                    <strong>{profile.teleworkDays}</strong>{' '}
-                    jour{profile.teleworkDays > 1 ? 's' : ''} sur 5 jours travaillés.
+                    Je souhaite télétravailler <strong>{profile.teleworkDays}</strong> jour{profile.teleworkDays > 1 ? 's' : ''} sur 5 jours travaillés.
                   </p>
                 </Section>
               </div>
@@ -158,40 +167,36 @@ setDocuments(docs);
                 </ul>
               </Section>
 
-<Section title="Documents">
-  <div className="grid grid-cols-2 gap-10 items-center">
+              <Section title="Documents">
+                <div className="grid grid-cols-2 gap-10 items-center">
+                  <div className="text-center">
+                    <h3 className="font-semibold text-darkBlue mb-4">Photo</h3>
+                    {documents?.filter(doc => doc.type === 'ID_PHOTO').map(doc => (
+                      <img
+                        key={doc.id}
+                        src={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
+                        alt="Photo"
+                        className="mx-auto rounded-full w-32 h-32 object-cover"
+                      />
+                    ))}
+                  </div>
 
-    <div className="text-center">
-      <h3 className="font-semibold text-darkBlue mb-4">Photo</h3>
-      {documents?.filter(doc => doc.type === 'ID_PHOTO').map(doc => (
-        <img
-          key={doc.id}
-          src={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
-          alt="Photo"
-          className="mx-auto rounded-full w-32 h-32 object-cover"
-        />
-      ))}
-    </div>
-
-    <div className="text-center">
-      <h3 className="font-semibold text-darkBlue mb-4">CV</h3>
-      {documents?.filter(doc => doc.type === 'cv').map(doc => (
-        <a
-          key={doc.id}
-          href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 underline block"
-        >
-          {doc.originalName || 'CV'}
-        </a>
-      ))}
-    </div>
-
-  </div>
-</Section>
-
-
+                  <div className="text-center">
+                    <h3 className="font-semibold text-darkBlue mb-4">CV</h3>
+                    {documents?.filter(doc => doc.type === 'cv').map(doc => (
+                      <a
+                        key={doc.id}
+                        href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 underline block"
+                      >
+                        {doc.originalName || 'CV'}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </Section>
             </>
           )}
 
@@ -204,11 +209,7 @@ setDocuments(docs);
                     Je serai disponible à partir du :{' '}
                     {profile.availableDate ? (
                       <strong>
-                        {new Date(profile.availableDate).toLocaleDateString('fr-FR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric'
-                        })}
+                        {new Date(profile.availableDate).toLocaleDateString('fr-FR')}
                       </strong>
                     ) : (
                       <em className="text-gray-500">non précisée</em>
@@ -237,7 +238,7 @@ setDocuments(docs);
                     <strong>Langages :</strong>{' '}
                     {Array.isArray(exp.languages)
                       ? exp.languages.map((l, j) => {
-                        const [name, level] = l.split(':')
+                          const [name, level] = l.split(':')
                           return <span key={j}>{name} ({level}){j < exp.languages.length - 1 ? ', ' : ''}</span>
                         })
                       : 'Aucun'}
@@ -247,50 +248,51 @@ setDocuments(docs);
             </Section>
           )}
 
-{selectedTab === 'realisations' && (
-  <Section title="Réalisations">
-    <div className="space-y-4 w-full max-w-xl">
-      {realisations && realisations.length > 0 ? (
-        realisations.map((r, i) => (
-          <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
-            <p><strong>Titre :</strong> {r.title || r.realTitle || 'Sans titre'}</p>
-            <p><strong>Description :</strong> {r.description || r.realDescription || 'Aucune description'}</p>
+          {/* REALISATIONS */}
+          {selectedTab === 'realisations' && (
+            <Section title="Réalisations">
+              <div className="space-y-4 w-full max-w-xl">
+                {realFromApi.length > 0 ? (
+                  realFromApi.map((r, i) => (
+                    <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
+                      <p><strong>Titre :</strong> {r.title || r.realTitle || 'Sans titre'}</p>
+                      <p><strong>Description :</strong> {r.description || r.realDescription || 'Aucune description'}</p>
 
-            {(r.techs || []).length > 0 && (
-              <div>
-                <strong>Technos :</strong>{' '}
-                {r.techs.map((t, idx) => (
-                  <span key={idx}>
-                    {t.name} ({t.level})
-                    {idx < r.techs.length - 1 ? ', ' : ''}
-                  </span>
-                ))}
-              </div>
-            )}
+                      {(r.techs || []).length > 0 && (
+                        <div>
+                          <strong>Technos :</strong>{' '}
+                          {r.techs.map((t, idx) => (
+                            <span key={idx}>
+                              {t.name} ({t.level})
+                              {idx < r.techs.length - 1 ? ', ' : ''}
+                            </span>
+                          ))}
+                        </div>
+                      )}
 
-            {r.files && r.files.length > 0 && (
-              <div>
-                {r.files.map((file, idx) => (
-                  <a
-                    key={file.id || idx}
-                    href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/realisations/${file.publicId}.${file.format}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-blue-600 underline block mb-2"
-                  >
-                    {file.originalName || 'Document'}
-                  </a>
-                ))}
+                      {r.files && r.files.length > 0 && (
+                        <div>
+                          {r.files.map((file, idx) => (
+                            <a
+                              key={file.id || idx}
+                              href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/realisations/${file.publicId}.${file.format}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-blue-600 underline block mb-2"
+                            >
+                              {file.originalName || 'Document'}
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 italic">Aucune réalisation renseignée</p>
+                )}
               </div>
-            )}
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-500 italic">Aucune réalisation renseignée</p>
-      )}
-    </div>
-  </Section>
-)}
+            </Section>
+          )}
 
           {/* PRESTATIONS */}
           {selectedTab === 'prestations' && (
