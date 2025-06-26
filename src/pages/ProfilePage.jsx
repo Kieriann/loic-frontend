@@ -258,16 +258,18 @@ setDocuments(docs);
            {(r.techs || r.realTech || r.technos) && (
   <div>
     <strong>Technos :</strong>{' '}
-    {(r.techs || r.realTech || r.technos || []).map((t, idx, arr) => {
-      const [name, level] = typeof t === 'string' ? t.split(':') : [t.name, t.level]
-      return (
-        <span key={idx}>
-          {name} ({level}){idx < arr.length - 1 ? ', ' : ''}
-        </span>
-      )
-    })}
+{(r.techs || []).length > 0 && (
+  <div>
+    <strong>Technos :</strong>{' '}
+    {r.techs.map((t, idx) => (
+      <span key={idx}>
+        {t.name} ({t.level})
+        {idx < r.techs.length - 1 ? ', ' : ''}
+      </span>
+    ))}
   </div>
 )}
+
 
             {r.files && r.files.length > 0 ? (
   <div>
