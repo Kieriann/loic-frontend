@@ -266,7 +266,7 @@ setDocuments(docs);
             )}
             {r.files && r.files.length > 0 ? (
   <div>
-    {r.files.map(file, idx => {
+    {r.files.map((file, idx) => {
       console.log(file)
       return (
         <a
