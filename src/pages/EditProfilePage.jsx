@@ -309,7 +309,8 @@ url: `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/${file.
     realFormData.append('data', JSON.stringify(realisationsPayload))
     realisations.forEach((real, realIdx) => {
       (real.files || []).forEach((f, fileIdx) => {
-        if (f.file) {
+  if (f.file && f.source === 'new') {
+
           const sanitized = f.name.replace(/\s+/g, '_')
           const appendedFile = new File([f.file], `real-${realIdx}-${fileIdx}-${sanitized}`, {
             type: f.file.type,
