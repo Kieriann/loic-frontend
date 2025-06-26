@@ -14,7 +14,8 @@ export default function ProfilePage() {
   const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
   const [documents, setDocuments] = useState([])
   const navigate = useNavigate()
-  const [realFromApi, setRealFromApi] = useState([])
+  const [realisations, setRealisations] = useState([])
+
 
   useEffect(() => {
     if (initialTab) setSelectedTab(initialTab)
@@ -36,21 +37,22 @@ export default function ProfilePage() {
   }, [])
 
   useEffect(() => {
-    const fetchRealisations = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-          },
-        })
-        const data = await res.json()
-        setRealFromApi(data)
-      } catch (err) {
-        console.error('Erreur chargement réalisations :', err)
-      }
+  const fetchRealisations = async () => {
+    try {
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+        },
+      })
+      const data = await res.json()
+      setRealisations(data)
+    } catch (err) {
+      console.error('Erreur chargement réalisations :', err)
     }
-    fetchRealisations()
-  }, [])
+  }
+
+  fetchRealisations()
+}, [])
 
   useEffect(() => {
     const fetchDocs = async () => {
@@ -252,8 +254,8 @@ export default function ProfilePage() {
           {selectedTab === 'realisations' && (
             <Section title="Réalisations">
               <div className="space-y-4 w-full max-w-xl">
-                {realFromApi.length > 0 ? (
-                  realFromApi.map((r, i) => (
+                {realisations.length > 0 ? (
+                  realisations.map((r, i) => (
                     <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
                       <p><strong>Titre :</strong> {r.title || r.realTitle || 'Sans titre'}</p>
                       <p><strong>Description :</strong> {r.description || r.realDescription || 'Aucune description'}</p>
