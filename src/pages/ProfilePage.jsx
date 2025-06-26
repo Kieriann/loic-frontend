@@ -255,6 +255,7 @@ setDocuments(docs);
           <div key={i} className="border rounded p-4 bg-[#f8fbff] space-y-2">
             <p><strong>Titre :</strong> {r.title || r.realTitle || 'Sans titre'}</p>
             <p><strong>Description :</strong> {r.description || r.realDescription || 'Aucune description'}</p>
+
             {(r.techs || []).length > 0 && (
               <div>
                 <strong>Technos :</strong>{' '}
@@ -266,6 +267,22 @@ setDocuments(docs);
                 ))}
               </div>
             )}
+
+            {r.files && r.files.length > 0 && (
+              <div>
+                {r.files.map((file, idx) => (
+                  <a
+                    key={file.id || idx}
+                    href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/realisations/${file.publicId}.${file.format}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 underline block mb-2"
+                  >
+                    {file.originalName || 'Document'}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         ))
       ) : (
@@ -274,38 +291,6 @@ setDocuments(docs);
     </div>
   </Section>
 )}
-
-
-            {r.files && r.files.length > 0 ? (
-  <div>
-    {r.files.map((file, idx) => {
-      console.log(file)
-      return (
-        <a
-          key={file.id || idx}
-href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${file.version}/realisations/${file.publicId}.${file.format}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 underline block mb-2"
-        >
-          {file.originalName || 'Document'}
-        </a>
-      )
-    })}
-  </div>
-) : null}
-
-          </div>
-        ))
-      ) : (
-        <p className="text-gray-500 italic">Aucune réalisation renseignée</p>
-      )}
-    </div>
-  </Section>
-)}
-
-
-
 
           {/* PRESTATIONS */}
           {selectedTab === 'prestations' && (
