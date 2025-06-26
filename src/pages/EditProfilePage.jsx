@@ -179,12 +179,14 @@ export default function EditProfilePage() {
   }
 
   const updateRealFiles = (idx, files) => {
+    // Optional console.log for debug
+    console.log('updateRealFiles called for realisation index =', idx, 'with files:', files)
     const updated = [...realisations]
     updated[idx].files = files
     setRealisations(updated)
   }
 
-  // Expériences (pour la complétude)
+  // Expériences
   const updateExperience = (index, field, value) => {
     const updated = [...experiences]
     updated[index][field] = value
@@ -243,7 +245,7 @@ export default function EditProfilePage() {
     setOralInput('débutant')
   }
 
-  // Validation simple (modifie selon tes besoins)
+  // Validation
   const validate = () => {
     const newErrors = {}
     if (!profile.firstname.trim()) newErrors.firstname = 'Champ obligatoire'
@@ -352,7 +354,6 @@ export default function EditProfilePage() {
     }
   }
 
-  // Render
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-md p-6 space-y-10 relative">
@@ -527,7 +528,11 @@ export default function EditProfilePage() {
                   type="text"
                   placeholder="Technologies (séparées par une virgule)"
                   value={real.techs.join(', ')}
-                  onChange={e => updateRealisation(i, 'techs', e.target.value.split(',').map(t => t.trim()).filter(Boolean))}
+                  onChange={e => updateRealisation(
+                    i,
+                    'techs',
+                    e.target.value.split(',').map(t => t.trim()).filter(Boolean)
+                  )}
                   className="border rounded px-2 py-1 w-full mb-2"
                 />
                 <Real
@@ -539,7 +544,9 @@ export default function EditProfilePage() {
                   className="text-red-600 underline text-sm mt-2"
                   onClick={() => setPopup({ open: true, index: i, type: 'realisation' })}
                   disabled={realisations.length <= 1}
-                >Supprimer cette réalisation</button>
+                >
+                  Supprimer cette réalisation
+                </button>
               </div>
             ))}
             <button

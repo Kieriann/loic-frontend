@@ -3,8 +3,11 @@ import React from 'react'
 export default function Real({ files = [], onFilesChange }) {
   // Ajout de fichiers sans doublon (même nom + lastModified)
   const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files)
+    console.log('handleFileChange called')
+    const selectedFiles = Array.from(e.target.files) || []
     const existingKeys = new Set(files.map(f => `${f.name}_${f.file?.lastModified || ''}`))
+
+    // Filtre pour exclure tout fichier déjà présent
     const newFiles = selectedFiles
       .filter(f => !existingKeys.has(`${f.name}_${f.lastModified}`))
       .map(f => ({
@@ -12,8 +15,15 @@ export default function Real({ files = [], onFilesChange }) {
         name: f.name,
         source: 'new'
       }))
+
+    if (newFiles.length) {
+      console.log('Nouveaux fichiers:', newFiles.map(nf => nf.name))
+    } else {
+      console.log('Aucun nouveau fichier ajouté.')
+    }
+
     onFilesChange([...files, ...newFiles])
-    e.target.value = '' // Reset input pour permettre de réajouter le même fichier si supprimé
+    e.target.value = '' // Reset input pour pouvoir réuploader le même fichier si supprimé
   }
 
   const handleRemoveFile = (idx) => {
@@ -46,7 +56,9 @@ export default function Real({ files = [], onFilesChange }) {
                 type="button"
                 onClick={() => handleRemoveFile(idx)}
                 className="text-red-600 underline"
-              >Supprimer</button>
+              >
+                Supprimer
+              </button>
             </li>
           ))}
         </ul>
