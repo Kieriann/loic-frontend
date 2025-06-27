@@ -67,6 +67,7 @@ export default function EditProfilePage() {
         setDocuments({
           photo: photoDoc || null,
           cv: cvDoc ? { fileName: cvDoc.originalName || 'CV' } : null,
+          
         })
 
         if (res.profile) {
@@ -125,6 +126,7 @@ export default function EditProfilePage() {
             newRealTechLevel: 'junior',
           }])
         }
+        
 
         const realList = res.realisations || []
         setRealisations(realList.length

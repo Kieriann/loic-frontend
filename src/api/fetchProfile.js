@@ -3,11 +3,22 @@
 const API = import.meta.env.VITE_API_URL
 
 export async function fetchProfile(token) {
-  const res = await fetch(`${API}/api/profile/profil`, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-  if (!res.ok) throw new Error('Erreur récupération profil')
-  return res.json()
+  const [profileRes, realRes] = await Promise.all([
+    fetch(`${API}/api/profile/profil`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+    fetch(`${API}/api/realisations`, {
+      headers: { Authorization: `Bearer ${token}` }
+    }),
+  ])
+
+  if (!profileRes.ok) throw new Error('Erreur récupération profil')
+  if (!realRes.ok) throw new Error('Erreur récupération réalisations')
+
+  const profile = await profileRes.json()
+  const realisations = await realRes.json()
+
+  return { ...profile, realisations }
 }
 
 export async function signup(credentials) {
