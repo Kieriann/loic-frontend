@@ -374,7 +374,7 @@ try {
     const resText = await (profilRes.ok ? realRes.text() : profilRes.text())
     try {
       const json = JSON.parse(resText)
-      console.error('Erreur backend complète :', json)
+       console.error('Erreur backend complète :', json)
     } catch {
       console.error('Erreur backend brute :', resText)
     }
