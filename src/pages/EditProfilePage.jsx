@@ -305,15 +305,18 @@ setRealisations([...realisations, { title: '', description: '', techs: [{ name: 
     }
 
     // FormData séparé pour les réalisations
-    const realFormData = new FormData()
-        const realisationsPayload = realisations.map((real, idx) => ({
-      title: real.title,
-      description: real.description,
-      techs: (real.techs || []).map(t => ({
-        name: typeof t === 'string' ? t : t.name,
-        level: typeof t === 'string' ? 'non précisé' : t.level,
-      })),
-    }))
+const realisationsPayload = realisations.map((real, idx) => ({
+  title: real.title,
+  description: real.description,
+  techs: (real.techs || []).map(t => ({
+    name: typeof t === 'string' ? t : t.name,
+    level: typeof t === 'string' ? 'non précisé' : t.level,
+  })),
+  files: (real.files || []).filter(f => f.source === 'cloud').map(f => ({
+    id: f.id,
+  }))
+}))
+
 
     realFormData.append('data', JSON.stringify(realisationsPayload))
     realisations.forEach((real, realIdx) => {
