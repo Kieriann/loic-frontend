@@ -181,12 +181,18 @@ setRealisations([...realisations, { title: '', description: '', techs: [{ name: 
     setRealisations(updated)
   }
 
-  const updateRealFiles = (idx, files) => {
-    console.log('updateRealFiles called for realisation index =', idx, 'with files:', files)
-    const updated = [...realisations]
-    updated[idx].files = files
-    setRealisations(updated)
+const updateRealFiles = (idx, files) => {
+  const updated = [...realisations]
+  updated[idx] = {
+    ...updated[idx],
+    files: files.map(f => ({
+      ...f,
+      source: f.source || (f.file ? 'new' : 'cloud'),
+    })),
   }
+  setRealisations(updated)
+}
+
 
   // Expériences
   const updateExperience = (index, field, value) => {
@@ -307,7 +313,7 @@ setRealisations([...realisations, { title: '', description: '', techs: [{ name: 
     // FormData séparé pour les réalisations
 
 const realFormData = new FormData()
-    
+
 const realisationsPayload = realisations.map((real, idx) => ({
   title: real.title,
   description: real.description,
