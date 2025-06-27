@@ -128,70 +128,88 @@ export default function EditProfilePage() {
         }
         
 
-        const realList = res.realisations || []
-        setRealisations(realList.length
-          ? realList.map(real => ({
-              title: real.title || '',
-              description: real.description || '',
-              techs: Array.isArray(real.techs) ? real.techs : [],
-              files: (real.files || []).map(f => ({
-                id: f.id,
-url: `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/realisations/${f.publicId}.${f.format}`,
-                name: f.originalName || 'Fichier',
-                source: 'cloud',
-                version: f.version,
-                publicId: f.publicId,
-                format: f.format
-              }))
-            }))
-          : [{ title: '', description: '', techs: [], files: [] }]
-        )
+    const realList = res.realisations || [];
+setRealisations(
+  realList.length
+    ? realList.map(real => ({
+        id: real.id,
+        title: real.title || '',
+        description: real.description || '',
+        techs: Array.isArray(real.techs) ? real.techs : [],
+        files: (real.files || []).map(f => ({
+          id: f.id,
+          url: `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/realisations/${f.publicId}.${f.format}`,
+          name: f.originalName || 'Fichier',
+          source: 'cloud',          // ← ligne essentielle
+          version: f.version,
+          publicId: f.publicId,
+          format: f.format,
+        })),
+      }))
+    : [
+        {
+          id: undefined,
+          title: '',
+          description: '',
+          techs: [],
+          files: [],
+        },
+      ]
+);
 
-        if (res.prestations?.length) {
-          setPrestations(res.prestations.map(p => ({
-            type: p.type || '',
-            tech: p.tech || '',
-            level: p.level || '',
-          })))
-        } else {
-          setPrestations([{
-            type: '',
-            tech: '',
-            level: 'junior',
-          }])
-        }
-      } catch (err) {
-        console.error('Erreur chargement profil', err)
-      }
-    }
 
-    loadData()
-  }, [])
+if (res.prestations?.length) {
+  setPrestations(
+    res.prestations.map(p => ({
+      type: p.type || '',
+      tech: p.tech || '',
+      level: p.level || '',
+    }))
+  );
+} else {
+  setPrestations([{ type: '', tech: '', level: 'junior' }]);
+}
 
-  // Ajout/Suppression réalisations/fichiers
-  const addRealisation = () =>
-setRealisations([...realisations, { title: '', description: '', techs: [{ name: '', level: '' }], files: [] }])
+} catch (err) {
+ console.error('Erreur chargement profil', err);
+ }
+};
+loadData();
+}, []);
 
-  const removeRealisation = (idx) =>
-    setRealisations(realisations.filter((_, i) => i !== idx))
+/* ---------------- helpers réalisations ---------------- */
+const addRealisation = () =>
+  setRealisations([
+    ...realisations,
+    {
+      id: undefined,
+      title: '',
+      description: '',
+      techs: [{ name: '', level: '' }],
+      files: [],
+    },
+  ]);
 
-  const updateRealisation = (idx, field, value) => {
-    const updated = [...realisations]
-    updated[idx][field] = value
-    setRealisations(updated)
-  }
+const removeRealisation = idx =>
+  setRealisations(realisations.filter((_, i) => i !== idx));
+
+const updateRealisation = (idx, field, value) => {
+  const updated = [...realisations];
+  updated[idx] = { ...updated[idx], [field]: value };
+  setRealisations(updated);
+};
 
 const updateRealFiles = (idx, files) => {
-  const updated = [...realisations]
+  const updated = [...realisations];
   updated[idx] = {
     ...updated[idx],
     files: files.map(f => ({
       ...f,
       source: f.source || (f.file ? 'new' : 'cloud'),
     })),
-  }
-  setRealisations(updated)
-}
+  };
+  setRealisations(updated);
+};
 
 
   // Expériences
@@ -271,121 +289,138 @@ const updateRealFiles = (idx, files) => {
     return true
   }
 
-  // Envoi backend
-  const handleSubmit = async () => {
-    if (!validate()) return
+// Envoi backend
+const handleSubmit = async () => {
+  if (!validate()) return
 
-    const formData = new FormData()
-    const profilePayload = {
-      ...profile,
-      languages: langList.join(','),
-    }
-    const formattedExperiences = experiences.map(exp => ({
-      title: exp.title,
-      client: exp.client,
-      description: exp.description,
-      domains: exp.domains,
-      languages: exp.languages,
-    }))
-    formData.append('profile', JSON.stringify(profilePayload))
-    formData.append('address', JSON.stringify(address))
-    formData.append('experiences', JSON.stringify(formattedExperiences))
-    formData.append('prestations', JSON.stringify(prestations))
-    formData.append('realisations', JSON.stringify(realisations));
-
-
-    if (documents.photo instanceof File) {
-      formData.append('photo', documents.photo)
-    } else if (documents.photo === null) {
-      formData.append('removePhoto', 'true')
-    }
-    if (documents.cv instanceof File) {
-      formData.append('cv', documents.cv)
-    } else if (documents.cv === null) {
-      formData.append('removeCV', 'true')
-    }
-    if (documents.realisationDocument instanceof File) {
-      formData.append('realisationDocument', documents.realisationDocument)
-    } else if (documents.realisationDocument === null) {
-      formData.append('removeRealisationDocument', 'true')
-    }
-
-    // FormData séparé pour les réalisations
-
-const realFormData = new FormData()
-
-const realisationsPayload = realisations.map((real, idx) => ({
-  title: real.title,
-  description: real.description,
-  techs: (real.techs || []).map(t => ({
-    name: typeof t === 'string' ? t : t.name,
-    level: typeof t === 'string' ? 'non précisé' : t.level,
-  })),
-  files: (real.files || []).filter(f => f.source === 'cloud').map(f => ({
-    id: f.id,
+  const formData = new FormData()
+  const profilePayload = {
+    ...profile,
+    languages: langList.join(','),
+  }
+  const formattedExperiences = experiences.map(exp => ({
+    title: exp.title,
+    client: exp.client,
+    description: exp.description,
+    domains: exp.domains,
+    languages: exp.languages,
   }))
-}))
+  formData.append('profile', JSON.stringify(profilePayload))
+  formData.append('address', JSON.stringify(address))
+  formData.append('experiences', JSON.stringify(formattedExperiences))
+  formData.append('prestations', JSON.stringify(prestations))
+  //formData.append('realisations', JSON.stringify(realisations));
+
+  if (documents.photo instanceof File) {
+    formData.append('photo', documents.photo)
+  } else if (documents.photo === null) {
+    formData.append('removePhoto', 'true')
+  }
+  if (documents.cv instanceof File) {
+    formData.append('cv', documents.cv)
+  } else if (documents.cv === null) {
+    formData.append('removeCV', 'true')
+  }
+  if (documents.realisationDocument instanceof File) {
+    formData.append('realisationDocument', documents.realisationDocument)
+  } else if (documents.realisationDocument === null) {
+    formData.append('removeRealisationDocument', 'true')
+  }
+
+  // FormData séparé pour les réalisations
+  const realFormData = new FormData()
+
+  // Ne garder que les réalisations non vides
+  const realisationsToSend = realisations.filter(real =>
+    real.title?.trim() ||
+    real.description?.trim() ||
+    (real.techs && real.techs.length && real.techs.some(t => t.name?.trim())) ||
+    (real.files && real.files.length)
+  )
 
 
-    realFormData.append('data', JSON.stringify(realisationsPayload))
-    realisations.forEach((real, realIdx) => {
-      (real.files || []).forEach((f, fileIdx) => {
-  if (f.file && f.source === 'new') {
+  const realisationsPayload = realisationsToSend.map((real, idx) => ({
+    id: real.id,
+    title: real.title,
+    description: real.description,
+    techs: (real.techs || []).map(t => ({
+      name: typeof t === 'string' ? t : t.name,
+      level: typeof t === 'string' ? 'non précisé' : t.level,
+    })),
+    files: (real.files || [])
+    .filter(f => f.id)
+    .map(f => ({ id: f.id })),
+  }))
 
-          const sanitized = f.name.replace(/\s+/g, '_')
-          const appendedFile = new File([f.file], `real-${realIdx}-${fileIdx}-${sanitized}`, {
-            type: f.file.type,
-            lastModified: f.file.lastModified
-          })
-          appendedFile.originalname = `real-${realIdx}-${fileIdx}-${sanitized}`
-          realFormData.append(`realFiles_${realIdx}`, appendedFile, appendedFile.originalname)
-        }
-      })
+  console.log('Payload envoyé ➜',
+  JSON.stringify(realisationsPayload, null, 2));
+
+
+
+  realFormData.append('data', JSON.stringify(realisationsPayload))
+  realisationsToSend.forEach((real, realIdx) => {
+    (real.files || []).forEach((f, fileIdx) => {
+      if (f.file && f.source === 'new') {
+        const sanitized = f.name.replace(/\s+/g, '_')
+        const appendedFile = new File([f.file], `real-${realIdx}-${fileIdx}-${sanitized}`, {
+          type: f.file.type,
+          lastModified: f.file.lastModified
+        })
+        appendedFile.originalname = `real-${realIdx}-${fileIdx}-${sanitized}`
+        realFormData.append(`realFiles_${realIdx}`, appendedFile, appendedFile.originalname)
+      }
     })
-try {
-
-
-  const token = localStorage.getItem('token')
-
-  // Envoi profil
-  const profilRes = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${token || ''}`,
-    },
-    body: formData,
   })
+console.log(
+  "Vérification fichiers à garder :",
+  realisationsPayload.map(r => r.files)
+)
 
-  // Envoi réalisations
-  const realRes = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}` },
-    body: realFormData,
-  })
+  console.log("REALS envoyées au backend:", realisationsToSend)
 
-  if (realRes.ok) {
-    const newData = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+  try {
+    const token = localStorage.getItem('token')
+
+    // Envoi profil
+    const profilRes = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token || ''}`,
+      },
+      body: formData,
+    })
+
+    // Envoi réalisations
+    const realRes = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+      method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-    }).then(r => r.json())
-    setRealisations(newData)
-  }
+      body: realFormData,
+    })
 
-  if (!profilRes.ok || !realRes.ok) {
-    const resText = await (profilRes.ok ? realRes.text() : profilRes.text())
-    try {
-      const json = JSON.parse(resText)
-       console.error('Erreur backend complète :', json)
-    } catch {
-      console.error('Erreur backend brute :', resText)
+    if (realRes.ok) {
+      const newData = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
+        headers: { Authorization: `Bearer ${token}` },
+      }).then(r => r.json())
+      setRealisations(newData)
     }
-    throw new Error(resText)
-  }
 
-  navigate(`/profile?tab=${selectedTab}`)
-} catch (err) {
-  alert('Erreur backend : ' + (err.message || 'inconnue'))
-}
+    if (!profilRes.ok || !realRes.ok) {
+      const resText = await (profilRes.ok ? realRes.text() : profilRes.text())
+      try {
+        const json = JSON.parse(resText)
+        console.error('Erreur backend complète :', json)
+      } catch {
+        console.error('Erreur backend brute :', resText)
+      }
+      throw new Error(resText)
+    }
+
+    navigate(`/profile?tab=${selectedTab}`)
+  } catch (err) {
+    alert('Erreur backend : ' + (err.message || 'inconnue'))
   }
+}
+
   
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
@@ -557,7 +592,6 @@ try {
           onChange={e => updateRealisation(i, 'description', e.target.value)}
           className="border rounded px-2 py-1 w-full mb-2"
         />
-        {real.techs.length === 0 && updateRealisation(i, 'techs', [{ name: '', level: '' }])}
 
         {real.techs.map((tech, j) => (
           <div key={j} className="flex items-center gap-2 mb-2">
