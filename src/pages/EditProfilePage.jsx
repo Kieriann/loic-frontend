@@ -305,6 +305,9 @@ setRealisations([...realisations, { title: '', description: '', techs: [{ name: 
     }
 
     // FormData séparé pour les réalisations
+
+const realFormData = new FormData()
+    
 const realisationsPayload = realisations.map((real, idx) => ({
   title: real.title,
   description: real.description,
