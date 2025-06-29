@@ -70,8 +70,7 @@ export default function ProfilePage() {
   if (!data?.profile || !data.profile.firstname)
     return <Navigate to="/profile/edit" replace />;
 
-  const { profile, experiences = [], prestations = [] } = data; // NB : plus de realisations ici
-  const address = profile.address || {};
+  const { profile, address = {}, experiences = [], prestations = [] } = data; // NB : plus de realisations ici
 
   /* ------------------------------------------------------------------ */
   /* Rendu                                                              */

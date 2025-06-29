@@ -6,6 +6,7 @@ import { fetchProfile } from '../api/fetchProfile'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import RealisationsEditor from '../components/RealisationsEditor'
 
+
 export default function EditProfilePage() {
   /* ──────────────────────────────── STATE ─────────────────────────── */
   const [profile, setProfile] = useState({
@@ -27,6 +28,8 @@ export default function EditProfilePage() {
   const [writtenInput,setWrittenInput]= useState('débutant')
   const [oralInput,   setOralInput]   = useState('débutant')
   const [langList,    setLangList]    = useState([])
+  const [loading, setLoading] = useState(false);
+
 
   const [address, setAddress] = useState({
     address   : '',
@@ -48,6 +51,7 @@ export default function EditProfilePage() {
 
   const [documents, setDocuments] = useState({ photo: null, cv: null })
   const [errors,    setErrors   ] = useState({})
+  const [error, setError] = useState(null)
   const [popup,     setPopup    ] = useState({ open: false, index: null, type: '' })
 
   const navigate                = useNavigate()
@@ -62,6 +66,7 @@ export default function EditProfilePage() {
 
   useEffect(() => {
     const loadData = async () => {
+      setLoading(true);
       try {
         const token = localStorage.getItem('token')
         const res   = await fetchProfile(token)
@@ -150,7 +155,7 @@ export default function EditProfilePage() {
         }
       }catch (err) {
   console.error(err);
-  setError(err);          // <- afficher un message d’erreur
+setError(err.message);
 } finally {
   setLoading(false);      // <- garanti d’être exécuté
 }
@@ -326,12 +331,13 @@ const handleSubmit = async () => {
     if (!realRes.ok) throw new Error(await realRes.text());
 
     /* ---------- 5. succès → retour au profil ------------------------- */
-    navigate('/profile?tab=realisations');
+navigate(`/profile?tab=${selectedTab}`, { replace: true });
   } catch (err) {
     alert('Erreur backend : ' + (err.message || 'inconnue'));
   }
 }; 
 
+if (error) return <p className="text-red-500 p-4">Erreur : {error}</p>;
 
   /* ───────────────────────────── RENDER ───────────────────────────── */
 return (
