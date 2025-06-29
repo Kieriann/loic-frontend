@@ -95,8 +95,8 @@ export default function EditProfilePage() {
           setLangList((languages || '').split(','))
 
           /* adresse */
-          if (res.profile.address) {
-            const { address, city, postalCode, state, country } = res.profile.address
+          if (res.profile.Address) {
+            const { address, city, postalCode, state, country } = res.profile.Address
             setAddress({ address, city, postalCode, state, country })
           }
         }

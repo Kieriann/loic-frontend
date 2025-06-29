@@ -283,19 +283,20 @@ export default function ProfilePage() {
                         )}
                       </p>
                     )}
+{r.files?.length > 0 &&
+  r.files.map(f => (
+    <a
+      key={f.id}
+      href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/${f.publicId}.${f.format}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="text-blue-600 underline block"
+    >
+      {f.originalName || 'Document'}
+    </a>
+  ))}
 
-                    {r.files?.length > 0 &&
-                      r.files.map(f => (
-                        <a
-                          key={f.id}
-                          href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/realisations/${f.publicId}.${f.format}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 underline block"
-                        >
-                          {f.originalName || 'Document'}
-                        </a>
-                      ))}
+
                   </div>
                 ))
               ) : (
