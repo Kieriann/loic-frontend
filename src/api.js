@@ -1,7 +1,7 @@
 // src/api.js
 
-const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
-const AUTH_URL = `${baseURL}/api/auth`
+const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000'
+const AUTH_URL = `${BASE_URL}/api/auth`
 
 export const signup = async (data) => {
   const res = await fetch(`${AUTH_URL}/signup`, {
@@ -29,14 +29,21 @@ export const login = async (data) => {
   return json
 }
 
+
 export const fetchProfile = async (token) => {
-  const res = await fetch(`${baseURL}/api/profile/profil`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-    },
-  })
-  if (!res.ok) throw new Error('Unauthorized')
-  return res.json()
-}
+  const res = await fetch(`${BASE_URL}/api/profile/profil`, {
+    headers: { Authorization: `Bearer ${token}` },
+    credentials: 'include',
+  });
+
+  console.log('[fetchProfile] status', res.status);
+
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(
+      `Profil : ${res.status} ${res.statusText} – ${txt || 'aucune donnée'}`
+    );
+  }
+
+  return res.json();
+};

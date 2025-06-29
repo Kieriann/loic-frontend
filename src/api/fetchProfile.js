@@ -1,33 +1,36 @@
 // src/api/fetchProfile.js
+const API = import.meta.env.VITE_API_URL;
 
-const API = import.meta.env.VITE_API_URL
-
+/* ──────────────── PROFIL DE L’UTILISATEUR + RÉALISATIONS ──────────────── */
 export async function fetchProfile(token) {
+  // profil et réalisations en parallèle
   const [profileRes, realRes] = await Promise.all([
     fetch(`${API}/api/profile/profil`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     }),
     fetch(`${API}/api/realisations`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: { Authorization: `Bearer ${token}` },
     }),
-  ])
+  ]);
 
-  if (!profileRes.ok) throw new Error('Erreur récupération profil')
-  if (!realRes.ok) throw new Error('Erreur récupération réalisations')
+  if (!profileRes.ok) throw new Error('Erreur récupération profil');
+  if (!realRes.ok)   throw new Error('Erreur récupération réalisations');
 
-  const profile = await profileRes.json()
-  const realisations = await realRes.json()
+  const profile      = await profileRes.json();
+  const realisations = await realRes.json();
 
-  return { ...profile, realisations }
+  // on renvoie un objet combiné
+  return { ...profile, realisations };
 }
 
+/* ──────────────── AUTH ──────────────── */
 export async function signup(credentials) {
   const res = await fetch(`${API}/api/auth/signup`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(credentials),
-  })
-  return res.json()
+  });
+  return res.json();
 }
 
 export async function login(credentials) {
@@ -35,12 +38,12 @@ export async function login(credentials) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(credentials),
-  })
-  if (!res.ok) throw new Error(`Login failed: ${res.status}`)
-  return res.json()
+  });
+  if (!res.ok) throw new Error(`Login failed: ${res.status}`);
+  return res.json();
 }
 
 export async function confirmEmail(token) {
-  const res = await fetch(`${API}/api/auth/confirm-email?token=${token}`)
-  return res.json()
+  const res = await fetch(`${API}/api/auth/confirm-email?token=${token}`);
+  return res.json();
 }

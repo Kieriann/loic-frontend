@@ -1,56 +1,61 @@
 import React, { useState, useEffect } from 'react'
-import ProfileInfo from '../components/sections/ProfileInfo'
-import AddressInfo from '../components/sections/AddressInfo'
-import DocumentUpload from '../components/sections/DocumentUpload'
+import ProfileInfo      from '../components/sections/ProfileInfo'
+import AddressInfo      from '../components/sections/AddressInfo'
+import DocumentUpload   from '../components/sections/DocumentUpload'
 import { fetchProfile } from '../api/fetchProfile'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import Real from '../components/Real'
+import RealisationsEditor from '../components/RealisationsEditor'
 
 export default function EditProfilePage() {
+  /* ──────────────────────────────── STATE ─────────────────────────── */
   const [profile, setProfile] = useState({
     firstname: '',
-    lastname: '',
-    phone: '',
-    siret: '',
-    bio: '',
-    smallDayRate: '',
+    lastname : '',
+    phone    : '',
+    siret    : '',
+    bio      : '',
+    smallDayRate : '',
     mediumDayRate: '',
-    highDayRate: '',
-    languages: '',
-    isEmployed: false,
+    highDayRate  : '',
+    languages    : '',
+    isEmployed   : false,
     availableDate: null,
-    teleworkDays: 0,
+    teleworkDays : 0,
   })
 
-  const [langInput, setLangInput] = useState('')
-  const [writtenInput, setWrittenInput] = useState('débutant')
-  const [oralInput, setOralInput] = useState('débutant')
-  const [langList, setLangList] = useState([])
+  const [langInput,   setLangInput]   = useState('')
+  const [writtenInput,setWrittenInput]= useState('débutant')
+  const [oralInput,   setOralInput]   = useState('débutant')
+  const [langList,    setLangList]    = useState([])
+
   const [address, setAddress] = useState({
-    address: '',
-    city: '',
+    address   : '',
+    city      : '',
     postalCode: '',
-    state: '',
-    country: '',
+    state     : '',
+    country   : '',
   })
-  const [experiences, setExperiences] = useState([])
-  const [realisations, setRealisations] = useState([
-  { title: '', description: '', techs: [{ name: '', level: '' }], files: [] }
-])
 
-  const [documents, setDocuments] = useState({ photo: null, cv: null, realisationDocument: null })
-  const [errors, setErrors] = useState({})
-  const [popup, setPopup] = useState({ open: false, index: null, type: '' })
-  const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
-  const initialTab = searchParams.get('tab')
+  const [experiences, setExperiences] = useState([])
   const [prestations, setPrestations] = useState([{
-    type: '',
-    tech: '',
+    type : '',
+    tech : '',
     level: 'junior',
   }])
-  const [selectedTab, setSelectedTab] = useState(initialTab || 'profil')
+  const [realisations, setRealisations] = useState([
+    { title:'', description:'', technos:[], files:[] }
+  ])
 
+  const [documents, setDocuments] = useState({ photo: null, cv: null })
+  const [errors,    setErrors   ] = useState({})
+  const [popup,     setPopup    ] = useState({ open: false, index: null, type: '' })
+
+  const navigate                = useNavigate()
+  const [searchParams]          = useSearchParams()
+  const initialTab              = searchParams.get('tab')
+  const [selectedTab,setSelectedTab] = useState(initialTab || 'profil')
+
+  /* ─────────────────────── INITIALISATION DONNÉES ─────────────────── */
   useEffect(() => {
     if (initialTab) setSelectedTab(initialTab)
   }, [initialTab])
@@ -59,691 +64,655 @@ export default function EditProfilePage() {
     const loadData = async () => {
       try {
         const token = localStorage.getItem('token')
-        const res = await fetchProfile(token)
+        const res   = await fetchProfile(token)
 
-        const docArray = Array.isArray(res.documents) ? res.documents : Object.values(res.documents || {})
+        /* documents */
+        const docArray = Array.isArray(res.documents)
+          ? res.documents
+          : Object.values(res.documents || {})
         const photoDoc = docArray.find(d => d.type === 'ID_PHOTO')
-        const cvDoc = docArray.find(d => d.type && d.type.toLowerCase() === 'cv')
+        const cvDoc    = docArray.find(d => d.type && d.type.toLowerCase() === 'cv')
         setDocuments({
           photo: photoDoc || null,
-          cv: cvDoc ? { fileName: cvDoc.originalName || 'CV' } : null,
-          
+          cv   : cvDoc    ? { fileName: cvDoc.originalName || 'CV' } : null,
         })
 
+        /* profil  ---------------------------------------------------- */
         if (res.profile) {
           const {
             firstname, lastname, phone, siret, bio,
             smallDayRate, mediumDayRate, highDayRate,
-            languages, isEmployed, availableDate
+            languages, isEmployed, availableDate,
           } = res.profile
 
           setProfile({
-            firstname,
-            lastname,
-            phone,
-            siret,
-            bio,
-            smallDayRate,
-            mediumDayRate,
-            highDayRate,
-            languages,
-            isEmployed,
+            firstname, lastname, phone, siret, bio,
+            smallDayRate, mediumDayRate, highDayRate,
+            languages, isEmployed,
             availableDate: availableDate || '',
           })
 
           setLangList((languages || '').split(','))
 
-          if (res.profile.Address) {
-            const { address, city, postalCode, state, country } = res.profile.Address
+          /* adresse */
+          if (res.profile.address) {
+            const { address, city, postalCode, state, country } = res.profile.address
             setAddress({ address, city, postalCode, state, country })
           }
         }
 
+        /* expériences ------------------------------------------------- */
         if (res.experiences?.length) {
           setExperiences(res.experiences.map(exp => ({
-            title: exp.title,
+            title : exp.title,
             client: exp.client || '',
             description: exp.description,
-            domains: exp.domains,
-            languages: Array.isArray(exp.languages) ? exp.languages : [],
-            newLangInput: '',
-            newLangLevel: 'junior',
-            realTech: Array.isArray(exp.realTech) ? exp.realTech : [],
-            newRealTechInput: '',
-            newRealTechLevel: 'junior',
+            domains    : exp.domains,
+            languages  : Array.isArray(exp.languages) ? exp.languages : [],
+            newLangInput : '',
+            newLangLevel : 'junior',
           })))
         } else {
           setExperiences([{
-            title: '',
-            client: '',
-            description: '',
-            domains: '',
-            languages: [],
-            newLangInput: '',
-            newLangLevel: 'junior',
-            realTech: [],
-            newRealTechInput: '',
-            newRealTechLevel: 'junior',
+            title: '', client: '', description: '', domains: '',
+            languages: [], newLangInput: '', newLangLevel: 'junior',
           }])
         }
-        
 
+         /* réalisations -------------------------------------------------- */
     const realList = res.realisations || [];
-setRealisations(
-  realList.length
-    ? realList.map(real => ({
-        id: real.id,
-        title: real.title || '',
-        description: real.description || '',
-        techs: Array.isArray(real.techs) ? real.techs : [],
-        files: (real.files || []).map(f => ({
-          id: f.id,
-          url: `https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/realisations/${f.publicId}.${f.format}`,
-          name: f.originalName || 'Fichier',
-          source: 'cloud',          // ← ligne essentielle
-          version: f.version,
-          publicId: f.publicId,
-          format: f.format,
-        })),
-      }))
-    : [
-        {
-          id: undefined,
-          title: '',
-          description: '',
-          techs: [],
-          files: [],
-        },
-      ]
-);
+    setRealisations(
+      realList.length
+        ? realList.map(r => ({
+            id   : r.id,
+            title: r.title,
+            description: r.description,
+            technos: r.technos || [],
+            files: (r.files || []).map(f => ({
+              id     : f.id,
+              name   : f.originalName,
+              source : 'cloud',
+              version: f.version,
+              publicId: f.publicId,
+              format : f.format,
+            })),
+          }))
+        : [{ title:'', description:'', technos:[], files:[] }]
+    );
 
-
-if (res.prestations?.length) {
-  setPrestations(
-    res.prestations.map(p => ({
-      type: p.type || '',
-      tech: p.tech || '',
-      level: p.level || '',
-    }))
-  );
-} else {
-  setPrestations([{ type: '', tech: '', level: 'junior' }]);
+        /* prestations ------------------------------------------------- */
+        if (res.prestations?.length) {
+          setPrestations(res.prestations.map(p => ({
+            type : p.type  || '',
+            tech : p.tech  || '',
+            level: p.level || '',
+          })))
+        }
+      }catch (err) {
+  console.error(err);
+  setError(err);          // <- afficher un message d’erreur
+} finally {
+  setLoading(false);      // <- garanti d’être exécuté
 }
+    }
+    loadData()
+  }, [])
 
-} catch (err) {
- console.error('Erreur chargement profil', err);
- }
-};
-loadData();
-}, []);
-
-/* ---------------- helpers réalisations ---------------- */
-const addRealisation = () =>
-  setRealisations([
-    ...realisations,
-    {
-      id: undefined,
-      title: '',
-      description: '',
-      techs: [{ name: '', level: '' }],
-      files: [],
-    },
-  ]);
-
-const removeRealisation = idx =>
-  setRealisations(realisations.filter((_, i) => i !== idx));
-
-const updateRealisation = (idx, field, value) => {
-  const updated = [...realisations];
-  updated[idx] = { ...updated[idx], [field]: value };
-  setRealisations(updated);
-};
-
-const updateRealFiles = (idx, files) => {
-  const updated = [...realisations];
-  updated[idx] = {
-    ...updated[idx],
-    files: files.map(f => ({
-      ...f,
-      source: f.source || (f.file ? 'new' : 'cloud'),
-    })),
-  };
-  setRealisations(updated);
-};
-
-
-  // Expériences
+  /* ─────────────────────────── EXPÉRIENCES ────────────────────────── */
   const updateExperience = (index, field, value) => {
-    const updated = [...experiences]
+    const updated       = [...experiences]
     updated[index][field] = value
     setExperiences(updated)
   }
 
-  const addExperienceLanguage = (index) => {
+  const addExperienceLanguage = index => {
     const updated = [...experiences]
-    updated[index].languages.push(`${updated[index].newLangInput}:${updated[index].newLangLevel}`)
+    updated[index].languages.push(
+      `${updated[index].newLangInput}:${updated[index].newLangLevel}`
+    )
     updated[index].newLangInput = ''
     updated[index].newLangLevel = 'junior'
     setExperiences(updated)
   }
 
-  const removeExperienceLanguage = (expIndex, langIndex) => {
+  const removeExperienceLanguage = (expIdx, langIdx) => {
     const updated = [...experiences]
-    updated[expIndex].languages.splice(langIndex, 1)
+    updated[expIdx].languages.splice(langIdx, 1)
     setExperiences(updated)
   }
 
-  const addExperience = () => {
+  const addExperience = () =>
     setExperiences([...experiences, {
-      title: '',
-      client: '',
-      description: '',
-      domains: '',
-      languages: [],
-      newLangInput: '',
-      newLangLevel: 'junior',
-      realTech: [],
-      newRealTechInput: '',
-      newRealTechLevel: 'junior',
+      title: '', client: '', description: '', domains: '',
+      languages: [], newLangInput: '', newLangLevel: 'junior',
     }])
-  }
 
-  // Prestation
-  const addPrestation = () =>
-    setPrestations([...prestations, { type: '', tech: '', level: 'junior' }])
+  /* ─────────────────────────── REALISATIONS ────────────────────────── */
+const addRealisation = () =>
+  setRealisations([...realisations,
+    { title:'', description:'', technos:[], files:[] }])
 
-  const removePrestation = (i) => {
+const updateReal = (idx, newData) => {
+  const copy = [...realisations]
+  copy[idx]  = newData
+  setRealisations(copy)
+}
+const removeReal = idx =>
+  setRealisations(realisations.filter((_,i)=>i!==idx))
+
+  /* ─────────────────────────── PRESTATIONS ────────────────────────── */
+  const addPrestation    = () => setPrestations([...prestations, { type:'', tech:'', level:'junior' }])
+  const removePrestation = i => {
     if (prestations.length <= 1) return
     const copy = [...prestations]
-    copy.splice(i, 1)
+    copy.splice(i,1)
     setPrestations(copy)
   }
 
-  // Langues
+  /* ─────────────────────────────── LANGUES ────────────────────────── */
   const addLanguage = () => {
     if (!langInput.trim()) return
     setLangList([
       ...langList,
-      `${langInput.trim()}:${writtenInput}/${oralInput}`
+      `${langInput.trim()}:${writtenInput}/${oralInput}`,
     ])
     setLangInput('')
     setWrittenInput('débutant')
     setOralInput('débutant')
   }
 
-  // Validation
+  /* ───────────────────────── VALIDATION FORM ──────────────────────── */
   const validate = () => {
-    const newErrors = {}
-    if (!profile.firstname.trim()) newErrors.firstname = 'Champ obligatoire'
-    if (!profile.lastname.trim()) newErrors.lastname = 'Champ obligatoire'
-    if (!profile.siret.trim()) newErrors.siret = 'Champ obligatoire'
-    if (!profile.bio.trim()) newErrors.bio = 'Champ obligatoire'
-    if (!profile.smallDayRate) newErrors.smallDayRate = 'Champ obligatoire'
-    if (!address.address.trim()) newErrors.address = 'Champ obligatoire'
-    if (!address.city.trim()) newErrors.city = 'Champ obligatoire'
-    if (!address.postalCode.trim()) newErrors.postalCode = 'Champ obligatoire'
-    if (!address.country.trim()) newErrors.country = 'Champ obligatoire'
-    if (!langList.length) newErrors.languages = 'Champ obligatoire'
-    setErrors(newErrors)
-    if (Object.keys(newErrors).length > 0) return false
-    return true
+    const e = {}
+    if (!profile.firstname.trim())    e.firstname    = 'Champ obligatoire'
+    if (!profile.lastname.trim())     e.lastname     = 'Champ obligatoire'
+    if (!profile.siret.trim())        e.siret        = 'Champ obligatoire'
+    if (!profile.bio.trim())          e.bio          = 'Champ obligatoire'
+    if (!profile.smallDayRate)        e.smallDayRate = 'Champ obligatoire'
+    if (!address.address.trim())      e.address      = 'Champ obligatoire'
+    if (!address.city.trim())         e.city         = 'Champ obligatoire'
+    if (!address.postalCode.trim())   e.postalCode   = 'Champ obligatoire'
+    if (!address.country.trim())      e.country      = 'Champ obligatoire'
+    if (!langList.length)             e.languages    = 'Champ obligatoire'
+    setErrors(e)
+    return Object.keys(e).length === 0
   }
 
-// Envoi backend
+/* ───────────────────────────── SUBMIT ───────────────────────────── */
 const handleSubmit = async () => {
-  if (!validate()) return
+  if (!validate()) return;
 
-  const formData = new FormData()
-  const profilePayload = {
-    ...profile,
-    languages: langList.join(','),
-  }
-  const formattedExperiences = experiences.map(exp => ({
-    title: exp.title,
-    client: exp.client,
-    description: exp.description,
-    domains: exp.domains,
-    languages: exp.languages,
-  }))
-  formData.append('profile', JSON.stringify(profilePayload))
-  formData.append('address', JSON.stringify(address))
-  formData.append('experiences', JSON.stringify(formattedExperiences))
-  formData.append('prestations', JSON.stringify(prestations))
-  //formData.append('realisations', JSON.stringify(realisations));
+  /* ---------- 1. FormData “profil” (+ expériences, prestations, docs) */
+  const formData = new FormData();
 
-  if (documents.photo instanceof File) {
-    formData.append('photo', documents.photo)
-  } else if (documents.photo === null) {
-    formData.append('removePhoto', 'true')
-  }
-  if (documents.cv instanceof File) {
-    formData.append('cv', documents.cv)
-  } else if (documents.cv === null) {
-    formData.append('removeCV', 'true')
-  }
-  if (documents.realisationDocument instanceof File) {
-    formData.append('realisationDocument', documents.realisationDocument)
-  } else if (documents.realisationDocument === null) {
-    formData.append('removeRealisationDocument', 'true')
-  }
+  // profil + adresse
+  formData.append(
+    'profile',
+    JSON.stringify({ ...profile, languages: langList.join(',') })
+  );
+  formData.append('address', JSON.stringify(address));
 
-  // FormData séparé pour les réalisations
-  const realFormData = new FormData()
+  // expériences
+  const formattedExperiences = experiences.map(
+    ({ newLangInput, newLangLevel, ...rest }) => rest
+  );
+  formData.append('experiences', JSON.stringify(formattedExperiences));
 
-  // Ne garder que les réalisations non vides
-  const realisationsToSend = realisations.filter(real =>
-    real.title?.trim() ||
-    real.description?.trim() ||
-    (real.techs && real.techs.length && real.techs.some(t => t.name?.trim())) ||
-    (real.files && real.files.length)
-  )
+  // prestations
+  formData.append('prestations', JSON.stringify(prestations));
 
+  // documents (photo / cv)
+  if (documents.photo instanceof File) formData.append('photo', documents.photo);
+  else if (documents.photo === null)   formData.append('removePhoto', 'true');
 
-  const realisationsPayload = realisationsToSend.map((real, idx) => ({
-    id: real.id,
-    title: real.title,
-    description: real.description,
-    techs: (real.techs || []).map(t => ({
-      name: typeof t === 'string' ? t : t.name,
-      level: typeof t === 'string' ? 'non précisé' : t.level,
-    })),
-    files: (real.files || [])
-    .filter(f => f.id)
-    .map(f => ({ id: f.id })),
-  }))
+  if (documents.cv   instanceof File) formData.append('cv', documents.cv);
+  else if (documents.cv === null)     formData.append('removeCV', 'true');
 
-  console.log('Payload envoyé ➜',
-  JSON.stringify(realisationsPayload, null, 2));
+  /* ---------- 2. FormData “réalisations” (+ PDF) */
+  const realFormData = new FormData();
 
+  // payload JSON des réals
+  const realJSON = realisations.map(r => ({
+    id         : r.id,
+    title      : r.title,
+    description: r.description,
+    technos      : r.technos,                   // [{ name, level }, …]
+    files      : r.files
+                  .filter(f => f.id)        // fichiers déjà existants
+                  .map(f => ({ id: f.id })),
+  }));
+  realFormData.append('data', JSON.stringify(realJSON));
 
-
-  realFormData.append('data', JSON.stringify(realisationsPayload))
-  realisationsToSend.forEach((real, realIdx) => {
-    (real.files || []).forEach((f, fileIdx) => {
-      if (f.file && f.source === 'new') {
-        const sanitized = f.name.replace(/\s+/g, '_')
-        const appendedFile = new File([f.file], `real-${realIdx}-${fileIdx}-${sanitized}`, {
-          type: f.file.type,
-          lastModified: f.file.lastModified
-        })
-        appendedFile.originalname = `real-${realIdx}-${fileIdx}-${sanitized}`
-        realFormData.append(`realFiles_${realIdx}`, appendedFile, appendedFile.originalname)
+  // fichiers PDF nouvellement ajoutés
+  realisations.forEach((r, rIdx) => {
+    r.files.forEach((f, fIdx) => {
+      if (f.source === 'new' && f.file) {
+        const cleanName = f.file.name.replace(/\s+/g, '_');
+        realFormData.append(
+          `realFiles_${rIdx}`,
+          f.file,
+          `real-${rIdx}-${fIdx}-${cleanName}`
+        );
       }
-    })
-  })
-console.log(
-  "Vérification fichiers à garder :",
-  realisationsPayload.map(r => r.files)
-)
+    });
+  });
 
-  console.log("REALS envoyées au backend:", realisationsToSend)
+  /* ---------- 3. DEBUG (facultatif) ---------------------------------- */
+  console.log('--- DEBUG FormData profil ---');
+  for (const [k, v] of formData.entries()) {
+    console.log(k, v instanceof File ? `[File] ${v.name}` : v);
+  }
+  console.log('--- DEBUG FormData réals ---');
+  for (const [k, v] of realFormData.entries()) {
+    console.log(k, v instanceof File ? `[File] ${v.name}` : v);
+  }
 
+  /* ---------- 4. appels backend ------------------------------------- */
   try {
-    const token = localStorage.getItem('token')
+    const token = localStorage.getItem('token');
 
-    // Envoi profil
-    const profilRes = await fetch(`${import.meta.env.VITE_API_URL}/api/profile/profil`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token || ''}`,
-      },
-      body: formData,
-    })
+    // 4-a : profil / expériences / prestations / docs
+    const profilRes = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/profile/profil`,
+      { method:'POST', headers:{ Authorization:`Bearer ${token}` }, body: formData }
+    );
+    if (!profilRes.ok) throw new Error(await profilRes.text());
 
-    // Envoi réalisations
-    const realRes = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
-      body: realFormData,
-    })
+    // 4-b : réalisations + fichiers
+    const realRes = await fetch(
+      `${import.meta.env.VITE_API_URL}/api/realisations`,
+      { method:'POST', headers:{ Authorization:`Bearer ${token}` }, body: realFormData }
+    );
+    if (!realRes.ok) throw new Error(await realRes.text());
 
-    if (realRes.ok) {
-      const newData = await fetch(`${import.meta.env.VITE_API_URL}/api/realisations`, {
-        headers: { Authorization: `Bearer ${token}` },
-      }).then(r => r.json())
-      setRealisations(newData)
-    }
-
-    if (!profilRes.ok || !realRes.ok) {
-      const resText = await (profilRes.ok ? realRes.text() : profilRes.text())
-      try {
-        const json = JSON.parse(resText)
-        console.error('Erreur backend complète :', json)
-      } catch {
-        console.error('Erreur backend brute :', resText)
-      }
-      throw new Error(resText)
-    }
-
-    navigate(`/profile?tab=${selectedTab}`)
+    /* ---------- 5. succès → retour au profil ------------------------- */
+    navigate('/profile?tab=realisations');
   } catch (err) {
-    alert('Erreur backend : ' + (err.message || 'inconnue'))
+    alert('Erreur backend : ' + (err.message || 'inconnue'));
   }
-}
+}; 
 
-  
-  return (
-    <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
-      <div className="w-full max-w-4xl bg-white rounded-2xl shadow-md p-6 space-y-10 relative">
-        {popup.open && (
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-xl shadow-xl text-center space-y-4 max-w-sm">
-              <p className="text-lg">Voulez-vous supprimer cette {popup.type} ?</p>
-              <div className="flex justify-center gap-4">
-                <button onClick={() => {
+
+  /* ───────────────────────────── RENDER ───────────────────────────── */
+return (
+  <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
+    <div className="w-full max-w-4xl bg-white rounded-2xl shadow-md p-6 space-y-10 relative">
+      {/* ───── Popup suppression ───── */}
+      {popup.open && (
+        <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-xl shadow-xl text-center space-y-4 max-w-sm">
+            <p className="text-lg">
+              Voulez-vous supprimer cette {popup.type} ?
+            </p>
+            <div className="flex justify-center gap-4">
+              <button
+                onClick={() => {
                   if (popup.type === 'expérience') {
                     const copy = [...experiences]
                     copy.splice(popup.index, 1)
                     setExperiences(copy)
-                  } else if (popup.type === 'realisation') {
-                    removeRealisation(popup.index)
                   } else if (popup.type === 'prestation') {
                     removePrestation(popup.index)
                   }
                   setPopup({ open: false, index: null, type: '' })
-                }} className="bg-red-600 text-white px-4 py-2 rounded">Oui</button>
-                <button onClick={() => setPopup({ open: false, index: null, type: '' })} className="border px-4 py-2 rounded">Non</button>
-              </div>
+                }}
+                className="bg-red-600 text-white px-4 py-2 rounded"
+              >
+                Oui
+              </button>
+              <button
+                onClick={() => setPopup({ open: false, index: null, type: '' })}
+                className="border px-4 py-2 rounded"
+              >
+                Non
+              </button>
             </div>
           </div>
-        )}
-
-        <h1 className="text-2xl text-darkBlue font-bold text-center">Modifier mon profil</h1>
-        <div className="flex gap-3 justify-center">
-          {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
-            <button key={tab} onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 rounded-xl font-semibold ${selectedTab === tab ? 'bg-blue-100 text-darkBlue' : 'hover:bg-blue-50'}`}>
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
         </div>
+      )}
 
-        {/* Profil */}
-        {selectedTab === 'profil' && (
-          <>
-            <ProfileInfo data={profile} setData={setProfile} errors={errors} />
-            <AddressInfo data={address} setData={setAddress} errors={errors} />
-            <div className="space-y-2">
-              <label className="text-xl font-semibold text-darkBlue">Langues</label>
+      {/* ───── Tabs ───── */}
+      <h1 className="text-2xl text-darkBlue font-bold text-center">
+        Modifier mon profil
+      </h1>
+      <div className="flex gap-3 justify-center">
+        {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
+          <button
+            key={tab}
+            onClick={() => setSelectedTab(tab)}
+            className={`px-4 py-2 rounded-xl font-semibold ${
+              selectedTab === tab
+                ? 'bg-blue-100 text-darkBlue'
+                : 'hover:bg-blue-50'
+            }`}
+          >
+            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+          </button>
+        ))}
+      </div>
+
+      {/* ───── PROFIL ───── */}
+      {selectedTab === 'profil' && (
+        <>
+          <ProfileInfo data={profile} setData={setProfile} errors={errors} />
+          <AddressInfo data={address} setData={setAddress} errors={errors} />
+
+          {/* langues */}
+          <div className="space-y-2">
+            <label className="text-xl font-semibold text-darkBlue">
+              Langues
+            </label>
+            <div className="flex gap-2">
+              <input
+                name="languages"
+                type="text"
+                value={langInput}
+                onChange={e => setLangInput(e.target.value)}
+                placeholder="Langue (ex: français)"
+              />
+              <select
+                value={writtenInput}
+                onChange={e => setWrittenInput(e.target.value)}
+              >
+                <option value="débutant">Écrit : Débutant</option>
+                <option value="intermediaire">Écrit : Intermédiaire</option>
+                <option value="courant">Écrit : Courant</option>
+              </select>
+              <select
+                value={oralInput}
+                onChange={e => setOralInput(e.target.value)}
+              >
+                <option value="débutant">Oral : Débutant</option>
+                <option value="intermediaire">Oral : Intermédiaire</option>
+                <option value="courant">Oral : Courant</option>
+              </select>
+              <button onClick={addLanguage}>Ajouter</button>
+            </div>
+
+            <ul className="text-sm text-gray-700 space-y-1">
+              {langList.map((l, i) => {
+                const [name, levels]   = l.split(':')
+                const [written, oral]  = levels.split('/')
+                return (
+                  <li key={i} className="flex items-center justify-between">
+                    <span>
+                      {name} — écrit : {written}, oral : {oral}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setLangList(langList.filter((_, idx) => idx !== i))
+                      }
+                      className="text-red-500 text-xs hover:underline ml-4"
+                    >
+                      Supprimer
+                    </button>
+                  </li>
+                )
+              })}
+            </ul>
+            {errors.languages && (
+              <p className="text-red-500 text-sm">{errors.languages}</p>
+            )}
+          </div>
+
+          {/* documents */}
+          <DocumentUpload data={documents} setData={setDocuments} />
+        </>
+      )}
+
+      {/* ───── EXPÉRIENCES ───── */}
+      {selectedTab === 'experiences' && (
+        <>
+          {/* statut dispo */}
+          <div className="flex items-center gap-6 mb-4">
+            <label className="inline-flex items-center gap-2 font-semibold text-darkBlue">
+              <input
+                type="checkbox"
+                checked={profile.isEmployed}
+                onChange={e =>
+                  setProfile({ ...profile, isEmployed: e.target.checked })
+                }
+              />
+              Actuellement en poste
+            </label>
+            {profile.isEmployed && (
+              <>
+                <label className="font-semibold text-darkBlue ml-12">
+                  Disponible à partir du
+                </label>
+                <input
+                  type="date"
+                  name="availableDate"
+                  min={new Date(Date.now() + 86_400_000)
+                    .toISOString()
+                    .split('T')[0]}
+                  value={profile.availableDate}
+                  onChange={e =>
+                    setProfile({ ...profile, availableDate: e.target.value })
+                  }
+                  className="border rounded px-2 py-1"
+                />
+              </>
+            )}
+          </div>
+
+          {/* liste expériences */}
+          {experiences.map((exp, i) => (
+            <div key={i} className="border rounded p-4 space-y-3">
+              <input
+                type="text"
+                placeholder="Titre de l'expérience"
+                value={exp.title}
+                onChange={e => updateExperience(i, 'title', e.target.value)}
+                className="border rounded px-3 py-2 w-full"
+              />
+              <input
+                type="text"
+                placeholder="Client"
+                value={exp.client || ''}
+                onChange={e => updateExperience(i, 'client', e.target.value)}
+                className="border rounded px-3 py-2 w-full"
+              />
+              <input
+                type="text"
+                placeholder="Domaines"
+                value={exp.domains}
+                onChange={e => updateExperience(i, 'domains', e.target.value)}
+                className="border rounded px-3 py-2 w-full"
+              />
+              <textarea
+                placeholder="Description"
+                value={exp.description}
+                onChange={e =>
+                  updateExperience(i, 'description', e.target.value)
+                }
+                className="border rounded px-3 py-2 w-full min-h-[120px]"
+              />
+
+              {/* langages / logiciels */}
               <div className="flex gap-2">
                 <input
-                  name="languages"
                   type="text"
-                  value={langInput}
-                  onChange={e => setLangInput(e.target.value)}
-                  placeholder="Langue (ex: français)"
+                  placeholder="Langages et logiciels"
+                  value={exp.newLangInput}
+                  onChange={e =>
+                    updateExperience(i, 'newLangInput', e.target.value)
+                  }
+                  className="border rounded px-2 py-1 flex-1"
                 />
-                <select value={writtenInput} onChange={e => setWrittenInput(e.target.value)}>
-                  <option value="débutant">Écrit : Débutant</option>
-                  <option value="intermédiaire">Écrit : Intermédiaire</option>
-                  <option value="courant">Écrit : Courant</option>
+                <select
+                  value={exp.newLangLevel}
+                  onChange={e =>
+                    updateExperience(i, 'newLangLevel', e.target.value)
+                  }
+                  className="border rounded px-2 py-1"
+                >
+                  <option value="junior">Junior</option>
+                  <option value="intermediaire">Intermédiaire</option>
+                  <option value="senior">Senior</option>
                 </select>
-                <select value={oralInput} onChange={e => setOralInput(e.target.value)}>
-                  <option value="débutant">Oral : Débutant</option>
-                  <option value="intermédiaire">Oral : Intermédiaire</option>
-                  <option value="courant">Oral : Courant</option>
-                </select>
-                <button onClick={addLanguage}>Ajouter</button>
+                <button
+                  onClick={() => addExperienceLanguage(i)}
+                  className="bg-darkBlue text-white px-3 py-1 rounded"
+                >
+                  Ajouter
+                </button>
               </div>
+
+              {/* chips langages */}
               <ul className="text-sm text-gray-700 space-y-1">
-                {langList.map((l, i) => {
-                  const [name, levels] = l.split(':')
-                  const [written, oral] = levels.split('/')
-                  return (
-                    <li key={i} className="flex items-center justify-between">
-                      <span>{name} — écrit : {written}, oral : {oral}</span>
-                      <button type="button" onClick={() => { setLangList(langList.filter((_, idx) => idx !== i)) }} className="text-red-500 text-xs hover:underline ml-4">
-                        Supprimer
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-              {errors.languages && <p className="text-red-500 text-sm">{errors.languages}</p>}
-            </div>
-            <DocumentUpload data={documents} setData={setDocuments} />
-          </>
-        )}
-
-        {/* Expériences */}
-        {selectedTab === 'experiences' && (
-          <>
-            <div className="flex items-center gap-6 mb-4">
-              <label className="inline-flex items-center gap-2 font-semibold text-darkBlue">
-                <input type="checkbox" checked={profile.isEmployed} onChange={(e) => setProfile({ ...profile, isEmployed: e.target.checked })} />
-                Actuellement en poste
-              </label>
-              {profile.isEmployed && (
-                <>
-                  <label className="font-semibold text-darkBlue ml-12">Disponible à partir du</label>
-                  <input
-                    type="date"
-                    name="availableDate"
-                    min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}
-                    value={profile.availableDate}
-                    onChange={(e) => setProfile({ ...profile, availableDate: e.target.value })}
-                    className="border rounded px-2 py-1"
-                  />
-                </>
-              )}
-            </div>
-
-            {experiences.map((exp, i) => (
-              <div key={i} className="border rounded p-4 space-y-3">
-                <input type="text" placeholder="Titre de l'expérience" value={exp.title} onChange={e => updateExperience(i, 'title', e.target.value)} className="border rounded px-3 py-2 w-full" />
-                <input type="text" placeholder="Client" value={exp.client || ''} onChange={e => updateExperience(i, 'client', e.target.value)} className="border rounded px-3 py-2 w-full" />
-                <input type="text" placeholder="Domaines" value={exp.domains} onChange={e => updateExperience(i, 'domains', e.target.value)} className="border rounded px-3 py-2 w-full" />
-                <textarea placeholder="Description" value={exp.description} onChange={e => updateExperience(i, 'description', e.target.value)} className="border rounded px-3 py-2 w-full min-h-[120px]" />
-
-                <div className="flex gap-2">
-                  <input type="text" placeholder="Langages et logiciels" value={exp.newLangInput} onChange={e => updateExperience(i, 'newLangInput', e.target.value)} className="border rounded px-2 py-1 flex-1" />
-                  <select value={exp.newLangLevel} onChange={e => updateExperience(i, 'newLangLevel', e.target.value)} className="border rounded px-2 py-1">
-                    <option value="junior">Junior</option>
-                    <option value="intermédiaire">Intermédiaire</option>
-                    <option value="senior">Senior</option>
-                  </select>
-                  <button onClick={() => addExperienceLanguage(i)} className="bg-darkBlue text-white px-3 py-1 rounded">Ajouter</button>
-                </div>
-
-                <ul className="text-sm text-gray-700 space-y-1">
-                  {Array.isArray(exp.languages) && exp.languages.map((l, j) => {
+                {Array.isArray(exp.languages) &&
+                  exp.languages.map((l, j) => {
                     const [name, level] = l.split(':')
                     return (
                       <li key={j} className="flex gap-2 items-center">
-                        <span>{name} : {level}</span>
-                        <button type="button" onClick={() => removeExperienceLanguage(i, j)} className="text-red-500 text-xs hover:underline">Supprimer</button>
+                        <span>
+                          {name} : {level}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => removeExperienceLanguage(i, j)}
+                          className="text-red-500 text-xs hover:underline"
+                        >
+                          Supprimer
+                        </button>
                       </li>
                     )
                   })}
-                </ul>
+              </ul>
 
-                <button onClick={() => setPopup({ open: true, index: i, type: 'expérience' })} className="text-red-600 underline text-sm">Supprimer cette expérience</button>
-              </div>
-            ))}
-
-            <div className="text-center mt-6">
               <button
-                type="button"
-                onClick={addExperience}
-                className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
+                onClick={() =>
+                  setPopup({ open: true, index: i, type: 'expérience' })
+                }
+                className="text-red-600 underline text-sm"
               >
-                Ajouter une expérience
+                Supprimer cette expérience
               </button>
             </div>
-          </>
-        )}
+          ))}
 
-{/* Réalisations */}
-{selectedTab === 'realisations' && (
-  <>
-    <h2 className="text-xl font-bold text-darkBlue mb-3">Mes réalisations</h2>
-    {realisations.map((real, i) => (
-      <div key={i} className="border rounded p-4 my-3 bg-blue-50">
-        <input
-          type="text"
-          placeholder="Titre"
-          value={real.title}
-          onChange={e => updateRealisation(i, 'title', e.target.value)}
-          className="border rounded px-2 py-1 w-full mb-2"
-        />
-        <textarea
-          placeholder="Description"
-          value={real.description}
-          onChange={e => updateRealisation(i, 'description', e.target.value)}
-          className="border rounded px-2 py-1 w-full mb-2"
-        />
-
-        {real.techs.map((tech, j) => (
-          <div key={j} className="flex items-center gap-2 mb-2">
-            <input
-              type="text"
-              placeholder="Technologie"
-              value={tech.name}
-              onChange={e => {
-                const updated = [...real.techs]
-                updated[j].name = e.target.value
-                updateRealisation(i, 'techs', updated)
-              }}
-              className="border rounded px-2 py-1 flex-1"
-            />
-            <select
-              value={tech.level}
-              onChange={e => {
-                const updated = [...real.techs]
-                updated[j].level = e.target.value
-                updateRealisation(i, 'techs', updated)
-              }}
-              className="border rounded px-2 py-1"
-            >
-              <option value="">Niveau</option>
-              <option value="junior">Junior</option>
-              <option value="intermédiaire">Intermédiaire</option>
-              <option value="senior">Senior</option>
-            </select>
+          <div className="text-center mt-6">
             <button
               type="button"
-              onClick={() => {
-                const updated = real.techs.filter((_, idx) => idx !== j)
-                updateRealisation(i, 'techs', updated)
-              }}
-              className="text-red-600 underline text-sm"
+              onClick={addExperience}
+              className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
             >
-              Supprimer
+              Ajouter une expérience
             </button>
           </div>
-        ))}
+        </>
+      )}
 
-        <button
-          type="button"
-          onClick={() => {
-            const updated = [...real.techs, { name: '', level: '' }]
-            updateRealisation(i, 'techs', updated)
-          }}
-          className="text-blue-600 underline text-sm mb-2"
-        >
-          Ajouter une techno
-        </button>
+      {/* ───── RÉALISATIONS ───── */}
+      {selectedTab==='realisations' && (
+        <>
+          <h2 className="text-xl font-bold text-darkBlue">Mes réalisations</h2>
+          {realisations.map((r,i)=>(
+            <RealisationsEditor
+              key={i}
+              data={r}
+              onChange={d=>updateReal(i,d)}
+              onRemove={()=>removeReal(i)}
+              canRemove={realisations.length>1}
+            />
+          ))}
+          <button
+            onClick={addRealisation}
+            className="border border-darkBlue px-4 py-2 rounded mt-3 hover:bg-darkBlue hover:text-white">
+            Ajouter une réalisation
+          </button>
+        </>
+      )}
 
-        <Real
-          files={real.files}
-          onFilesChange={files => updateRealFiles(i, files)}
-        />
-        <button
-          type="button"
-          className="text-red-600 underline text-sm mt-2"
-          onClick={() => setPopup({ open: true, index: i, type: 'realisation' })}
-          disabled={realisations.length <= 1}
-        >
-          Supprimer cette réalisation
-        </button>
-      </div>
-    ))}
-    <button
-      type="button"
-      className="border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white mt-3"
-      onClick={addRealisation}
-    >
-      Ajouter une réalisation
-    </button>
-  </>
-)}
+      {/* ───── PRESTATIONS ───── */}
+      {selectedTab === 'prestations' && (
+        <>
+          {prestations.map((p, i) => (
+            <div key={i} className="border rounded p-4 space-y-3">
+              <p className="font-medium text-darkBlue">
+                Je suis capable d'assurer
+              </p>
+              <select
+                value={p.type || ''}
+                onChange={e => {
+                  const copy = [...prestations]
+                  copy[i] = { ...copy[i], type: e.target.value }
+                  setPrestations(copy)
+                }}
+                className="border rounded px-2 py-1 w-full"
+              >
+                <option value="">-- Choisir --</option>
+                <option value="la formation">la formation</option>
+                <option value="le coaching">le coaching</option>
+                <option value="la maintenance">la maintenance</option>
+                <option value="le développement">le développement</option>
+              </select>
 
+              <p className="font-medium text-darkBlue">pour</p>
+              <input
+                type="text"
+                placeholder="Ex: React, Java"
+                value={p.tech || ''}
+                onChange={e => {
+                  const copy = [...prestations]
+                  copy[i] = { ...copy[i], tech: e.target.value }
+                  setPrestations(copy)
+                }}
+                className="border rounded px-2 py-1 w-full"
+              />
 
-        {/* Prestations */}
-        {selectedTab === 'prestations' && (
-          <>
-            {prestations.map((p, i) => (
-              <div key={i} className="border rounded p-4 space-y-3">
-                <p className="font-medium text-darkBlue">Je suis capable d'assurer</p>
-                <select
-                  value={p.type || ''}
-                  onChange={e => {
-                    const copy = [...prestations]
-                    copy[i] = { ...copy[i], type: e.target.value }
-                    setPrestations(copy)
-                  }}
-                  className="border rounded px-2 py-1 w-full"
-                >
-                  <option value="">-- Choisir --</option>
-                  <option value="la formation">la formation</option>
-                  <option value="le coaching">le coaching</option>
-                  <option value="la maintenance">la maintenance</option>
-                  <option value="le développement">le développement</option>
-                </select>
-                <p className="font-medium text-darkBlue">pour</p>
-                <input
-                  type="text"
-                  placeholder="Ex: React, Java"
-                  value={p.tech || ''}
-                  onChange={e => {
-                    const copy = [...prestations]
-                    copy[i] = { ...copy[i], tech: e.target.value }
-                    setPrestations(copy)
-                  }}
-                  className="border rounded px-2 py-1 w-full"
-                />
-                <p className="font-medium text-darkBlue">à un niveau</p>
-                <select
-                  value={p.level || 'junior'}
-                  onChange={e => {
-                    const copy = [...prestations]
-                    copy[i] = { ...copy[i], level: e.target.value }
-                    setPrestations(copy)
-                  }}
-                  className="border rounded px-2 py-1 w-full"
-                >
-                  <option value="junior">junior</option>
-                  <option value="intermédiaire">intermédiaire</option>
-                  <option value="expert">expert</option>
-                </select>
-                <button
-                  type="button"
-                  onClick={() => setPopup({ open: true, index: i, type: 'prestation' })}
-                  disabled={prestations.length <= 1}
-                  className="text-red-600 underline text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Supprimer cette prestation
-                </button>
-              </div>
-            ))}
-            <div className="text-center mt-4">
+              <p className="font-medium text-darkBlue">à un niveau</p>
+              <select
+                value={p.level || 'junior'}
+                onChange={e => {
+                  const copy = [...prestations]
+                  copy[i] = { ...copy[i], level: e.target.value }
+                  setPrestations(copy)
+                }}
+                className="border rounded px-2 py-1 w-full"
+              >
+                <option value="junior">junior</option>
+                <option value="intermediaire">intermédiaire</option>
+                <option value="expert">expert</option>
+              </select>
+
               <button
                 type="button"
-                onClick={addPrestation}
-                className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
+                onClick={() =>
+                  setPopup({ open: true, index: i, type: 'prestation' })
+                }
+                disabled={prestations.length <= 1}
+                className="text-red-600 underline text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Ajouter une prestation
+                Supprimer cette prestation
               </button>
             </div>
-          </>
-        )}
+          ))}
 
-        <div className="text-center mt-8">
-          <button onClick={handleSubmit} className="bg-darkBlue text-white px-6 py-3 rounded-xl hover:bg-[#001a5c] transition">
-            Enregistrer le profil
-          </button>
-        </div>
+          <div className="text-center mt-4">
+            <button
+              type="button"
+              onClick={addPrestation}
+              className="text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
+            >
+              Ajouter une prestation
+            </button>
+          </div>
+        </>
+      )}
+
+      {/* ───── SUBMIT ───── */}
+      <div className="text-center mt-8">
+        <button
+          onClick={handleSubmit}
+          className="bg-darkBlue text-white px-6 py-3 rounded-xl hover:bg-[#001a5c] transition"
+        >
+          Enregistrer le profil
+        </button>
       </div>
     </div>
-  )
+  </div>
+)
 }
