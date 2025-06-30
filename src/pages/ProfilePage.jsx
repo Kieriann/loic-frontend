@@ -250,7 +250,7 @@ export default function ProfilePage() {
                     <strong>Langages :</strong>{' '}
                     {Array.isArray(exp.languages) && exp.languages.length
                       ? exp.languages.map((l, j) => {
-                          const [name, level] = l.split(':');
+                      const [name, level] = (l || '').split(':');
                           return (
                             <span key={j}>
                               {name} ({level})
