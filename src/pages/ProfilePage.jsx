@@ -159,20 +159,23 @@ export default function ProfilePage() {
                 </p>
               </Section>
 
-              {/* Langues */}
-              <Section title="Langues">
-                <ul className="text-base text-gray-800 pl-5 max-w-xl mx-auto text-center">
-                  {(profile.languages || '').split(',').map((l, i) => {
-                    const [name, levels]        = l.split(':');
-                    const [written = '–', oral = '–'] = (levels || '').split('/');
-                    return (
-                      <li key={i}>
-                        {name} — écrit : {written}, oral : {oral}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </Section>
+             {/* Langues */}
+<Section title="Langues">
+  <ul className="text-base text-gray-800 pl-5 max-w-xl mx-auto text-center">
+    {(profile.languages || '')
+      .split(',')
+      .filter(Boolean)
+      .map((l, i) => {
+        const [name, levels] = (l || '').split(':');
+        const [written = '–', oral = '–'] = (levels || '').split('/');
+        return (
+          <li key={i}>
+            {name} — écrit : {written}, oral : {oral}
+          </li>
+        );
+      })}
+  </ul>
+</Section>
 
               {/* Documents */}
               <Section title="Documents">
