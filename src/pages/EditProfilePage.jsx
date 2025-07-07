@@ -96,6 +96,7 @@ export default function EditProfilePage() {
             smallDayRate, mediumDayRate, highDayRate,
             languages, isEmployed,
             availableDate: availableDate || '',
+            website: res.profile.website || '',
           })
 
           setLangList((languages || '').split(','))
