@@ -22,6 +22,7 @@ export default function EditProfilePage() {
     isEmployed   : false,
     availableDate: null,
     teleworkDays : 0,
+    website: '',
   })
 
   const [langInput,   setLangInput]   = useState('')
@@ -402,6 +403,15 @@ return (
         <>
           <ProfileInfo data={profile} setData={setProfile} errors={errors} />
           <AddressInfo data={address} setData={setAddress} errors={errors} />
+
+        <input
+          type="text"
+          placeholder="Lien vers votre portfolio ou site"
+          value={profile.website || ''}
+          onChange={e => setProfile({ ...profile, website: e.target.value })}
+          className="border rounded px-3 py-2 w-full"
+        />
+
 
           {/* langues */}
           <div className="space-y-2">

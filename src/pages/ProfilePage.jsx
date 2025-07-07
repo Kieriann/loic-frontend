@@ -133,6 +133,21 @@ export default function ProfilePage() {
                   <Line label="SIRET">{profile.siret}</Line>
                   <Line label="En poste">{profile.isEmployed ? 'Oui' : 'Non'}</Line>
                   <Line label="Bio">{profile.bio}</Line>
+                  <Line label="Lien">
+                  {profile.website ? (
+                    <a
+                      href={profile.website}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline break-all"
+                    >
+                      {profile.website}
+                    </a>
+                  ) : (
+                    <span className="text-gray-500 italic">Non renseigné</span>
+                  )}
+                </Line>
+
                 </Section>
 
                 {/* Adresse */}
