@@ -26,8 +26,7 @@ import { fetchProfile } from './api'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SessionManager from './components/SessionManager'
-
-
+import Home from './pages/Home'
 
 //
 // ─── En-tête avec logo et menu utilisateur ─────────────────────────
@@ -106,11 +105,12 @@ function AppRouter({ token, setToken }) {
     return (
       <>
         <Header onLogout={() => setToken(null)} />
-        <CenteredLayout>
-          <Routes>
-            <Route
-              path="/login"
-              element={
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route
+            path="/login"
+            element={
+              <CenteredLayout>
                 <>
                   <Login
                     onLogin={t => {
@@ -125,11 +125,13 @@ function AppRouter({ token, setToken }) {
                     </Link>
                   </p>
                 </>
-              }
-            />
-            <Route
-              path="/signup"
-              element={
+              </CenteredLayout>
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              <CenteredLayout>
                 <>
                   <Signup
                     onLogin={t => {
@@ -144,18 +146,15 @@ function AppRouter({ token, setToken }) {
                     </Link>
                   </p>
                 </>
-              }
-            />
-            <Route
-              path="/signup-success"
-              element={<SignupSuccess />}
-            />
-            <Route path="/confirm-email" element={<ConfirmEmailPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </CenteredLayout>
+              </CenteredLayout>
+            }
+          />
+          <Route path="/signup-success" element={<CenteredLayout><SignupSuccess /></CenteredLayout>} />
+          <Route path="/confirm-email" element={<CenteredLayout><ConfirmEmailPage /></CenteredLayout>} />
+          <Route path="/forgot-password" element={<CenteredLayout><ForgotPasswordPage /></CenteredLayout>} />
+          <Route path="/reset-password/:token" element={<CenteredLayout><ResetPasswordPage /></CenteredLayout>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
       </>
     )
   }
