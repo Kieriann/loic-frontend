@@ -26,6 +26,7 @@ import { fetchProfile } from './api'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SessionManager from './components/SessionManager'
+import Footer from './components/Footer'
 import Cgu from './pages/Cgu'
 
 
