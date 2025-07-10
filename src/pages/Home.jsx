@@ -1,10 +1,21 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import labels from '../labels'
+import { useEffect } from 'react'
 
 export default function Home() {
   const [showClientText, setShowClientText] = useState(false)
   const [showFreelanceText, setShowFreelanceText] = useState(false)
+
+  const [cvCount, setCvCount] = useState(0)
+
+useEffect(() => {
+  fetch(`${import.meta.env.VITE_API_URL}/api/documents/count-cv`)
+    .then(res => res.json())
+    .then(data => setCvCount(data.count))
+    .catch(() => setCvCount(0))
+}, [])
+
 
   return (
   <div className="min-h-screen bg-[#94c9df] py-10 flex flex-col items-center w-full">
@@ -50,6 +61,8 @@ export default function Home() {
             )}
           </div>
 
+
+
           {/* Bloc freelance */}
           <div className="flex-1 space-y-4">
             <h1 className="text-2xl font-bold text-gray-800">Vous êtes indépendant ?</h1>
@@ -79,6 +92,9 @@ export default function Home() {
             )}
           </div>
         </div>
+          <p className="mt-6 text-gray-800 font-semibold">
+            {cvCount} CV disponibles sur la plateforme
+          </p>
       </div>
     </div>
   )
