@@ -1,18 +1,19 @@
-import { useEffect } from 'react'
+import React, { useEffect } from 'react'
 
-export default function SessionManager({ timeoutMinutes = 30 }) {
+
+export default function SessionManager({ timeoutMinutes = 30, children }) {
   useEffect(() => {
+    const logout = () => {
+      localStorage.removeItem('token')
+      window.location.href = '/login'
+    }
+
     const timeout = timeoutMinutes * 60 * 1000
     let timer = setTimeout(logout, timeout)
 
     const resetTimer = () => {
       clearTimeout(timer)
       timer = setTimeout(logout, timeout)
-    }
-
-    const logout = () => {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
     }
 
     window.addEventListener('mousemove', resetTimer)
@@ -27,5 +28,5 @@ export default function SessionManager({ timeoutMinutes = 30 }) {
     }
   }, [timeoutMinutes])
 
-  return null
+  return children
 }

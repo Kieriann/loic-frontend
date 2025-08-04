@@ -1,7 +1,3 @@
-//
-// ─── Point d'entrée principal de l'application React ──────────────
-//
-
 import React, { useEffect, useState } from 'react'
 import {
   BrowserRouter,
@@ -10,6 +6,7 @@ import {
   Navigate,
   Link,
   useNavigate,
+  useLocation,
 } from 'react-router-dom'
 
 import Signup from './pages/Signup'
@@ -21,68 +18,27 @@ import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
 import AdminProfilDetail from './pages/AdminProfilDetail'
 import CenteredLayout from './components/CenteredLayout'
-import logo from './assets/logo.png'
 import { fetchProfile } from './api'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SessionManager from './components/SessionManager'
 import Home from './pages/Home'
-
-//
-// ─── En-tête avec logo et menu utilisateur ─────────────────────────
-//
-
-function Header({ onLogout }) {
-  const [open, setOpen] = useState(false)
-  const navigate = useNavigate()
-
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    onLogout(null)
-    navigate('/login')
-  }
-
-  return (
-    <header className="bg-primary py-6 relative">
-      <div className="flex justify-center items-center relative">
-        <img src={logo} alt="Logo Free's Biz" className="h-60" />
-        <div className="absolute right-6 top-1/2 -translate-y-1/2">
-          <button
-            onClick={() => setOpen(!open)}
-            className="w-10 h-10 rounded-full bg-white text-darkBlue font-bold border border-darkBlue hover:bg-darkBlue hover:text-white transition"
-            title="Menu"
-          >
-            ≡
-          </button>
-          {open && (
-            <div className="absolute right-0 mt-2 w-40 bg-white rounded shadow border border-gray-200 z-50">
-              <button
-                onClick={() => navigate('/profile')}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-darkBlue"
-              >
-                Voir mon profil
-              </button>
-              <button
-                onClick={handleLogout}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100 text-darkBlue"
-              >
-                Déconnexion
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </header>
-  )
-}
-
-//
-// ─── Gestion des routes selon le rôle (admin ou normal) ────────────
-//
+import Stats from './pages/Stats'
+import Indep from './pages/Indep'
+import Entreprise from './pages/Entreprise'
+import HomeTopBar from './components/Home/HomeTopBar'
+import Header from './components/Header'
 
 function AppRouter({ token, setToken }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
+  const location = useLocation()
+
+  const showHeader =
+    !['/indep', '/entreprise'].includes(location.pathname)
+
+  const showTopBar =
+    ['/', '/signup', '/login', '/stats'].includes(location.pathname)
 
   useEffect(() => {
     if (!token) {
@@ -100,17 +56,19 @@ function AppRouter({ token, setToken }) {
 
   if (loading) return <p className="p-4">Chargement…</p>
 
-  // ─── Routes publiques (inscription, connexion, confirmation) ─────
-  if (!token) {
-    return (
-      <>
-        <Header onLogout={() => setToken(null)} />
+  return (
+    <>
+{showHeader && !showTopBar && (
+  <Header onLogout={setToken} />
+)}
+
+
+      {!token ? (
         <Routes>
           <Route path="/" element={<Home />} />
           <Route
             path="/login"
             element={
-              <CenteredLayout>
                 <>
                   <Login
                     onLogin={t => {
@@ -125,13 +83,11 @@ function AppRouter({ token, setToken }) {
                     </Link>
                   </p>
                 </>
-              </CenteredLayout>
             }
           />
           <Route
             path="/signup"
             element={
-              <CenteredLayout>
                 <>
                   <Signup
                     onLogin={t => {
@@ -146,53 +102,47 @@ function AppRouter({ token, setToken }) {
                     </Link>
                   </p>
                 </>
-              </CenteredLayout>
             }
           />
           <Route path="/signup-success" element={<CenteredLayout><SignupSuccess /></CenteredLayout>} />
           <Route path="/confirm-email" element={<CenteredLayout><ConfirmEmailPage /></CenteredLayout>} />
           <Route path="/forgot-password" element={<CenteredLayout><ForgotPasswordPage /></CenteredLayout>} />
           <Route path="/reset-password/:token" element={<CenteredLayout><ResetPasswordPage /></CenteredLayout>} />
+          <Route path="/stats" element={<Stats />} />
+          <Route path="/indep" element={<Indep />} />
+          <Route path="/entreprise" element={<Entreprise />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </>
-    )
-  }
-
-  // ─── Routes privées après authentification ────────────────────────
-  return (
-    <>
-      <Header onLogout={setToken} />
-      <Routes>
-        {user?.isAdmin ? (
-          <>
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/profil/:id" element={<AdminProfilDetail />} />
-            <Route path="*" element={<Navigate to="/admin" replace />} />
-          </>
-        ) : (
-          <>
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/profile/edit" element={<EditProfilePage />} />
-            <Route path="/confirm-email" element={<ConfirmEmailPage />} />
-            <Route path="*" element={<Navigate to="/profile" replace />} />
-          </>
-        )}
-      </Routes>
+      ) : (
+        <Routes>
+          {user?.isAdmin ? (
+            <>
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/admin/profil/:id" element={<AdminProfilDetail />} />
+              <Route path="*" element={<Navigate to="/admin" replace />} />
+            </>
+          ) : (
+            <>
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/edit" element={<EditProfilePage />} />
+              <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+              <Route path="*" element={<Navigate to="/profile" replace />} />
+            </>
+          )}
+        </Routes>
+      )}
     </>
   )
 }
-
-//
-// ─── Initialisation de l'application ───────────────────────────────
-//
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'))
 
   return (
     <BrowserRouter>
-      <AppRouter token={token} setToken={setToken} />
+      <SessionManager>
+        <AppRouter token={token} setToken={setToken} />
+      </SessionManager>
     </BrowserRouter>
   )
 }

@@ -6,6 +6,9 @@ module.exports = {
         primary: '#90c8df',
         darkBlue: '#00247d',
       },
+      fontFamily: {
+        sans: ['"Quicksand"', 'sans-serif'],
+      },
     },
   },
   plugins: [],
