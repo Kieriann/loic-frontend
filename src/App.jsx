@@ -22,6 +22,9 @@ import { fetchProfile } from './api'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SessionManager from './components/SessionManager'
+import Footer from './components/Footer'
+import Cgu from './pages/Cgu'
+
 import Home from './pages/Home'
 import Stats from './pages/Stats'
 import Indep from './pages/Indep'
@@ -34,11 +37,8 @@ function AppRouter({ token, setToken }) {
   const [loading, setLoading] = useState(true)
   const location = useLocation()
 
-  const showHeader =
-    !['/indep', '/entreprise'].includes(location.pathname)
-
-  const showTopBar =
-    ['/', '/signup', '/login', '/stats'].includes(location.pathname)
+  const showHeader = !['/indep', '/entreprise'].includes(location.pathname)
+  const showTopBar = ['/', '/signup', '/login', '/stats'].includes(location.pathname)
 
   useEffect(() => {
     if (!token) {
@@ -58,17 +58,15 @@ function AppRouter({ token, setToken }) {
 
   return (
     <>
-{showHeader && !showTopBar && (
-  <Header onLogout={setToken} />
-)}
-
+      {showHeader && !showTopBar && <Header onLogout={setToken} />}
 
       {!token ? (
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route
-            path="/login"
-            element={
+        <>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route
+              path="/login"
+              element={
                 <>
                   <Login
                     onLogin={t => {
@@ -83,11 +81,11 @@ function AppRouter({ token, setToken }) {
                     </Link>
                   </p>
                 </>
-            }
-          />
-          <Route
-            path="/signup"
-            element={
+              }
+            />
+            <Route
+              path="/signup"
+              element={
                 <>
                   <Signup
                     onLogin={t => {
@@ -102,34 +100,40 @@ function AppRouter({ token, setToken }) {
                     </Link>
                   </p>
                 </>
-            }
-          />
-          <Route path="/signup-success" element={<CenteredLayout><SignupSuccess /></CenteredLayout>} />
-          <Route path="/confirm-email" element={<CenteredLayout><ConfirmEmailPage /></CenteredLayout>} />
-          <Route path="/forgot-password" element={<CenteredLayout><ForgotPasswordPage /></CenteredLayout>} />
-          <Route path="/reset-password/:token" element={<CenteredLayout><ResetPasswordPage /></CenteredLayout>} />
-          <Route path="/stats" element={<Stats />} />
-          <Route path="/indep" element={<Indep />} />
-          <Route path="/entreprise" element={<Entreprise />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+              }
+            />
+            <Route path="/signup-success" element={<CenteredLayout><SignupSuccess /></CenteredLayout>} />
+            <Route path="/confirm-email" element={<CenteredLayout><ConfirmEmailPage /></CenteredLayout>} />
+            <Route path="/forgot-password" element={<CenteredLayout><ForgotPasswordPage /></CenteredLayout>} />
+            <Route path="/reset-password/:token" element={<CenteredLayout><ResetPasswordPage /></CenteredLayout>} />
+            <Route path="/stats" element={<Stats />} />
+            <Route path="/indep" element={<Indep />} />
+            <Route path="/entreprise" element={<Entreprise />} />
+            <Route path="/cgu" element={<Cgu />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
+          <Footer />
+        </>
       ) : (
-        <Routes>
-          {user?.isAdmin ? (
-            <>
-              <Route path="/admin" element={<AdminPage />} />
-              <Route path="/admin/profil/:id" element={<AdminProfilDetail />} />
-              <Route path="*" element={<Navigate to="/admin" replace />} />
-            </>
-          ) : (
-            <>
-              <Route path="/profile" element={<ProfilePage />} />
-              <Route path="/profile/edit" element={<EditProfilePage />} />
-              <Route path="/confirm-email" element={<ConfirmEmailPage />} />
-              <Route path="*" element={<Navigate to="/profile" replace />} />
-            </>
-          )}
-        </Routes>
+        <>
+          <Routes>
+            {user?.isAdmin ? (
+              <>
+                <Route path="/admin" element={<AdminPage />} />
+                <Route path="/admin/profil/:id" element={<AdminProfilDetail />} />
+                <Route path="*" element={<Navigate to="/admin" replace />} />
+              </>
+            ) : (
+              <>
+                <Route path="/profile" element={<ProfilePage />} />
+                <Route path="/profile/edit" element={<EditProfilePage />} />
+                <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+                <Route path="*" element={<Navigate to="/profile" replace />} />
+              </>
+            )}
+          </Routes>
+          <Footer />
+        </>
       )}
     </>
   )
