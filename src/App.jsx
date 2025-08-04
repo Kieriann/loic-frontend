@@ -37,8 +37,8 @@ function AppRouter({ token, setToken }) {
   const [loading, setLoading] = useState(true)
   const location = useLocation()
 
-  const showHeader = !['/indep', '/entreprise'].includes(location.pathname)
-  const showTopBar = ['/', '/signup', '/login', '/stats'].includes(location.pathname)
+
+
 
   useEffect(() => {
     if (!token) {
@@ -58,7 +58,7 @@ function AppRouter({ token, setToken }) {
 
   return (
     <>
-      {showHeader && !showTopBar && <Header onLogout={setToken} />}
+
 
       {!token ? (
         <>
