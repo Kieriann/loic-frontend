@@ -60,8 +60,11 @@ function AppRouter({ token, setToken }) {
     <>
 
 
-      {!token ? (
-        <>
+{token && !user?.isAdmin && <Header onLogout={setToken} />}
+
+{!token ? (
+  <>
+
           <Routes>
             <Route path="/" element={<Home />} />
             <Route
