@@ -3,7 +3,7 @@ import HomeTopBar from '../components/Home/HomeTopBar'
 
 export default function Stats() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#6bb3d6] to-[#94c9df] py-10 px-4 pt-28">
+    <div className="min-h-screen bg-gradient-to-b from-[#2f7ea9] to-[#6bb3d6] py-10 px-4 pt-28">
       <HomeTopBar isConnected={!!localStorage.getItem('token')} />
 
       <div className="relative max-w-6xl mx-auto mt-10 w-full h-[800px]">

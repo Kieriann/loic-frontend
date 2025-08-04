@@ -35,26 +35,27 @@ export default function Login({ onLogin }) {
     }
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-[#6bb3d6] to-[#94c9df] py-10 px-4 pt-28">
-      <HomeTopBar isConnected={!!localStorage.getItem('token')} />
+return (
+  <div className="min-h-screen bg-gradient-to-b from-[#2f7ea9] to-[#6bb3d6] py-10 px-4 pt-28">
+    <HomeTopBar isConnected={!!localStorage.getItem('token')} />
 
-      <div className="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-md mt-40">
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          {error && (
-            <div className="bg-red-100 text-red-700 p-3 rounded-md">
-              {error}
-              {error.includes("confirmé") && (
-                <button
-                  type="button"
-                  className="ml-4 underline text-sm"
-                  onClick={() => navigate('/confirm-email')}
-                >
-                  Renvoyer le lien
-                </button>
-              )}
-            </div>
-          )}
+    <div className="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-md mt-40">
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        {error && (
+          <div className="bg-red-100 text-red-700 p-3 rounded-md">
+            {error}
+            {error.includes("confirmé") && (
+              <button
+                type="button"
+                className="ml-4 underline text-sm"
+                onClick={() => navigate('/confirm-email')}
+              >
+                Renvoyer le lien
+              </button>
+            )}
+          </div>
+        )}
+
 
           <label className="block text-darkBlue font-semibold">Email</label>
           <input
