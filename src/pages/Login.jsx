@@ -36,7 +36,7 @@ export default function Login({ onLogin }) {
   }
 
 return (
-  <div className="min-h-screen bg-gradient-to-b from-[#2f7ea9] to-[#6bb3d6] py-10 px-4 pt-28">
+  <div className="min-h-screen py-10 px-4 pt-28">
     <HomeTopBar isConnected={!!localStorage.getItem('token')} />
 
     <div className="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-md mt-40">
