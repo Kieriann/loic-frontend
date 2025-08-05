@@ -29,6 +29,13 @@ export const login = async (data) => {
   return json
 }
 
+export async function getAllDocuments() {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/documents`, {
+    credentials: 'include',
+  })
+  if (!res.ok) throw new Error('Erreur lors de la récupération des documents')
+  return res.json()
+}
 
 export const fetchProfile = async (token) => {
   const res = await fetch(`${BASE_URL}/api/profile/profil`, {
