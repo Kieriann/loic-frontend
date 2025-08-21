@@ -47,6 +47,7 @@ export default function Entreprise() {
           )
         })}
       </div>
+      <div id="qa-expand" className="px-4 mt-6" />
     </div>
   )
 }

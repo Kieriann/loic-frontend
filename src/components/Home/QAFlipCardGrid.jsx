@@ -1,7 +1,7 @@
 import React from 'react'
 
 
-import QAFlipCard from './QAFlipCard'
+import QAFlipCardExpanded from './QAFlipCardExpanded'
 
 const qaList = [
   { question: 'Combien ça coûte ?', answer: '10€/mois, sans engagement.' },
@@ -13,7 +13,13 @@ export default function QAFlipCardGrid() {
   return (
     <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {qaList.map((qa, index) => (
-        <QAFlipCard key={index} {...qa} />
+<QAFlipCardExpanded
+  key={index}
+  title={qa.question}
+  frontText={qa.question}
+  backText={qa.answer}
+  fullText="Texte long en affichage plein : infos random pour l’instant. Ajoute ici les détails, exemples, tarifs, process, FAQ, etc."
+/>
       ))}
     </div>
   )

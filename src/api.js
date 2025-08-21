@@ -54,3 +54,16 @@ export const fetchProfile = async (token) => {
 
   return res.json();
 };
+
+export async function setSponsorEmail(token, email) {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsor`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`
+    },
+    body: JSON.stringify({ email })
+  })
+  if (!res.ok) throw await res.json()
+  return res.json()
+}

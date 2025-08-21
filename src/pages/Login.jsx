@@ -19,6 +19,7 @@ export default function Login({ onLogin }) {
 
       if (result.token) {
         localStorage.setItem('token', result.token)
+        if (result.isFirstLogin) localStorage.setItem('needSponsor', '1')
         onLogin(result.token)
       }
     } catch (err) {
