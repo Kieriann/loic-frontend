@@ -54,14 +54,27 @@ export default function QAFlipCard({
                 <button
                   type="button"
                   onClick={() => setExpanded(false)}
-                  className="inline-flex items-center gap-2 rounded-full border border-blue-400 px-4 py-2 text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  className="relative inline-flex items-center justify-center gap-2 rounded-full border border-blue-400 text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                  style={{ minWidth: '100px', minHeight: '44px' }} // ✅ zone cliquable plus grande
                   aria-label="Réduire"
                   title="Réduire"
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M6 14l6-6 6 6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    className="pointer-events-none"
+                  >
+                    <path
+                      d="M6 14l6-6 6 6"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      fill="none"
+                      strokeLinecap="round"
+                    />
                   </svg>
-                  Réduire
+                  <span className="pointer-events-none">Réduire</span>
                 </button>
               </div>
             </div>
@@ -69,6 +82,7 @@ export default function QAFlipCard({
           expanderRoot
         )
       : null
+
 
   return (
     <>
