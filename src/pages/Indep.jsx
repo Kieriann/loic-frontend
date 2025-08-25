@@ -3,7 +3,7 @@ import HomeTopBar from '../components/Home/HomeTopBar'
 import React, { useState } from 'react'
 
 const indepQAs = [
-  { question: 'Freesbiz', answer: 'Cliquez sur la flèche pour en savoir plus', fullText: 'Freebiz est bien plus qu’une plateforme : c’est un allié pour les indépendants dans un environnement économique où les freelances sont de plus en plus sous pression. Avec son service à la carte, l’absence de marge commerciale, ses options de facturation flexibles, et l’absence de clause de non-concurrence, Freebiz garantit une liberté et une rentabilité inégalées. La valorisation des profils – via les réalisations, compétences rares, et services comme la formation ou le coaching – permet de se démarquer et d’attirer des projets variés. Les services d’accompagnement, comme les partenariats avec des experts comptables, les conseils sur la retraite, les statuts juridiques, ou les cryptomonnaies, simplifient la gestion quotidienne des indépendants. Surtout, Freebiz fédère une communauté solidaire, essentielle pour survivre et prospérer face aux défis croissants du marché. Alors que les ESN perdent du terrain sous l’impact de l’IA, réduisant les opportunités et durcissant les conditions pour les freelances, Freebiz offre un espace où les indépendants se soutiennent mutuellement, partagent des ressources, et renforcent leur résilience. Rejoignez Freebiz dès aujourd’hui pour valoriser vos compétences, gérer vos projets en toute autonomie, et avancer avec le soutien d’une communauté unie !' },
+  { question: 'Pourquoi Freesbiz ?', answer: 'Cliquez sur la flèche pour en savoir plus', fullText: 'Freebiz est bien plus qu’une plateforme : c’est un allié pour les indépendants dans un environnement économique où les freelances sont de plus en plus sous pression. Avec son service à la carte, l’absence de marge commerciale, ses options de facturation flexibles, et l’absence de clause de non-concurrence, Freebiz garantit une liberté et une rentabilité inégalées. La valorisation des profils – via les réalisations, compétences rares, et services comme la formation ou le coaching – permet de se démarquer et d’attirer des projets variés. Les services d’accompagnement, comme les partenariats avec des experts comptables, les conseils sur la retraite, les statuts juridiques, ou les cryptomonnaies, simplifient la gestion quotidienne des indépendants. Surtout, Freebiz fédère une communauté solidaire, essentielle pour survivre et prospérer face aux défis croissants du marché. Alors que les ESN perdent du terrain sous l’impact de l’IA, réduisant les opportunités et durcissant les conditions pour les freelances, Freebiz offre un espace où les indépendants se soutiennent mutuellement, partagent des ressources, et renforcent leur résilience. Rejoignez Freebiz dès aujourd’hui pour valoriser vos compétences, gérer vos projets en toute autonomie, et avancer avec le soutien d’une communauté unie !' },
   { question: 'Différences avec les ESN', answer: 'Cliquez sur la flèche pour en savoir plus', fullText: 'Contrairement aux ESN, Freesbiz ne prend aucune marge sur les contrats conclus entre les indépendants et les clients. Freesbiz n’applique pas de clause de non concurrence. Freesbiz vous met en relation avec les clients, et vous êtes libres de facturer directement si c’est possible. Vous pouvez aussi retourner chez un même client au rythme qui vous convient.' },
   { question: 'Développement de l’activité', answer: 'Cliquez sur la flèche pour en savoir plus', fullText: 'Freesbiz permet d’augmenter votre volume d’affaires, vous avez la possibilité de proposer différents types de prestations, formation, coaching, vente ou location d’outils ou de logiciels, proposition de mission… Afin de sécuriser ce type de transaction, Freesbiz génère un contrat electronique. Une marge de 2,5% du montant de la transaction est facturé. Le paiement de cette marge déclenche la mise en relation des deux parties.' },
   { question: 'Développement des compétences', answer: 'Cliquez sur la flèche pour en savoir plus', fullText: 'Freesbiz vous permet de profiter de l’expérience des autres membres dans le cadre de formations ou de coaching personnalisé. Une marge de 2,5% du montant de la transaction est facturé. Le paiement de cette marge déclenche la mise en relation des deux parties.' },
@@ -17,6 +17,11 @@ const indepQAs = [
   ]
 
 export default function Indep() {
+    const data = React.useMemo(() => {
+    const idx = indepQAs.findIndex(q => q.question?.toLowerCase().startsWith('freesbiz'))
+    if (idx <= 0) return indepQAs
+    return [indepQAs[idx], ...indepQAs.slice(0, idx), ...indepQAs.slice(idx + 1)]
+  }, [])
   return (
     <div className="min-h-screen py-10 px-4 pt-28">
       <HomeTopBar isConnected={!!localStorage.getItem('token')} />
@@ -25,26 +30,28 @@ export default function Indep() {
           Pour l’indépendant
         </div>
 
-        {indepQAs.map((qa, i) => {
-          const [z, setZ] = useState(10 + i)
+{data.map((qa, i) => {
+  const [z, setZ] = useState(10 + i)
+  const angle = (i / data.length) * 2 * Math.PI - Math.PI / 2 // 0 → “midi”
 
-          return (
-            <div
-              key={i}
-              className="absolute w-36 h-10 transition-all duration-200"
-              style={{
-                top: `${40 + 30 * Math.sin((i / indepQAs.length) * 2 * Math.PI)}%`,
-                left: `${50 + 35 * Math.cos((i / indepQAs.length) * 2 * Math.PI)}%`,
-                transform: `translate(-50%, -50%) rotate(${(Math.random() - 0.5) * 10}deg)`,
-                zIndex: z,
-              }}
-              onMouseEnter={() => setZ(999)}
-              onMouseLeave={() => setZ(10 + i)}
-            >
-              <QAFlipCard {...qa} />
-            </div>
-          )
-        })}
+  return (
+    <div
+      key={i}
+      className="absolute w-36 h-10 transition-all duration-200"
+      style={{
+        top: `${40 + 30 * Math.sin(angle)}%`,
+        left: `${50 + 35 * Math.cos(angle)}%`,
+        transform: `translate(-50%, -50%) rotate(${(Math.random() - 0.5) * 10}deg)`,
+        zIndex: z,
+      }}
+      onMouseEnter={() => setZ(999)}
+      onMouseLeave={() => setZ(10 + i)}
+    >
+      <QAFlipCard {...qa} />
+    </div>
+  )
+})}
+
       </div>
       <div id="qa-expand" className="px-4 mt-6" />
 

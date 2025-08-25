@@ -14,7 +14,7 @@ export default function QAFlipCard({
   const expanderRoot =
     typeof document !== 'undefined' ? document.getElementById('qa-expand') : null
 
-  // ---- Scroll auto uniquement à l'ouverture (pas après) ----
+  // ---- Scroll auto uniquement à l'ouverture  ----
   const expandedPanelRef = useRef(null)
   const didScrollOnceRef = useRef(false)
 
@@ -55,7 +55,7 @@ export default function QAFlipCard({
                   type="button"
                   onClick={() => setExpanded(false)}
                   className="relative inline-flex items-center justify-center gap-2 rounded-full border border-blue-400 text-blue-600 hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-blue-300"
-                  style={{ minWidth: '100px', minHeight: '44px' }} // ✅ zone cliquable plus grande
+                  style={{ minWidth: '100px', minHeight: '44px' }} 
                   aria-label="Réduire"
                   title="Réduire"
                 >

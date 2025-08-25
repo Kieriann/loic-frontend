@@ -1,8 +1,18 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
+
 
 export default function Cgu() {
+    const navigate = useNavigate()
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 text-sm leading-6 text-gray-800">
+<div className="max-w-4xl mx-auto px-4 py-8 text-lg font-medium leading-7 text-gray-800">
+        <button
+    onClick={() => navigate(-1)}
+    className="mb-6 rounded-full border border-blue-400 bg-white px-4 py-2 text-blue-600 hover:bg-blue-50"
+  >
+    ← Retour
+  </button>
       <h1 className="text-2xl font-bold mb-6">Conditions Générales d’Utilisation</h1>
 
       <h2 className="font-bold mt-4 mb-2">1. Préambule</h2>
@@ -65,6 +75,12 @@ export default function Cgu() {
 
       <h2 className="font-bold mt-4 mb-2">12. Contact</h2>
       <p>Contact : [email de contact] / [adresse postale]</p>
+        <button
+    onClick={() => navigate(-1)}
+    className="mt-6 rounded-full border border-blue-400 bg-white px-4 py-2 text-blue-600 hover:bg-blue-50"
+  >
+    ← Retour
+  </button>
     </div>
   )
 }

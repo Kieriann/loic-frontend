@@ -67,3 +67,31 @@ export async function setSponsorEmail(token, email) {
   if (!res.ok) throw await res.json()
   return res.json()
 }
+
+export async function getCvCount() {
+  const res = await fetch(`${BASE_URL}/api/documents/count-cv`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data?.error || 'Erreur compte CV')
+  return data?.count ?? 0
+}
+
+export async function getCvProfilesCount() {
+  const res = await fetch(`${BASE_URL}/api/documents/count-cv-profiles`, {
+    method: 'GET',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data?.error || 'Erreur compte CV profils')
+  return data?.count ?? 0
+}
