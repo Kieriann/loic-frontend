@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react' 
 import cx from 'classnames'
 import { createPortal } from 'react-dom'
 
@@ -7,7 +7,7 @@ export default function QAFlipCard({
   answer,
   fullText = 'Texte long en plein écran (factice). Ajoute infos, exemples, process, FAQ, etc.'
 }) {
-  const [flipped, setFlipped] = useState(false)
+  // (on supprime la logique de flip)
   const [expanded, setExpanded] = useState(false)
   const selfId = question || 'qa-item'
 
@@ -83,51 +83,20 @@ export default function QAFlipCard({
         )
       : null
 
-
   return (
     <>
       {/* Carte dans la ronde */}
       <div
-        onClick={() => setFlipped(!flipped)}
-        className="w-full h-40 overflow-hidden bg-white text-center p-2 rounded-2xl shadow-lg cursor-pointer perspective"
+        onClick={() => {
+          // notifier les autres cartes de se fermer
+          window.dispatchEvent(new CustomEvent('qa:expand', { detail: { id: selfId } }))
+          setExpanded(true)
+        }}
+        className="w-full h-40 overflow-hidden bg-white text-center p-2 rounded-2xl shadow-lg cursor-pointer"
       >
-        <div
-          className={cx(
-            'relative w-full h-full transition-transform duration-500',
-            flipped ? 'rotate-y-180' : ''
-          )}
-          style={{ transformStyle: 'preserve-3d' }}
-        >
-          {/* Face avant */}
-          <div className="absolute inset-0 backface-hidden flex items-center justify-center px-2 text-blue-500 font-semibold text-[15px] leading-tight text-center">
-            {question}
-          </div>
-
-          {/* Face arrière + flèche intégrée */}
-          <div className="absolute inset-0 backface-hidden rotate-y-180 flex flex-col rounded-2xl bg-blue-50">
-            <div className="flex-1 px-2 py-1 flex items-center justify-center text-gray-700 font-medium text-[13px] leading-tight text-center">
-              {answer}
-            </div>
-            <div className="py-1 flex justify-center">
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  // notifier les autres cartes de se fermer
-                  window.dispatchEvent(new CustomEvent('qa:expand', { detail: { id: selfId } }))
-                  setFlipped(true)
-                  setExpanded(true)
-                }}
-                className="flex items-center justify-center text-blue-600 hover:text-blue-800 focus:outline-none"
-                aria-label="Agrandir"
-                title="Agrandir"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
-          </div>
+        {/* Face avant uniquement */}
+        <div className="flex items-center justify-center w-full h-full px-2 text-blue-500 font-semibold text-[15px] leading-tight text-center">
+          {question}
         </div>
       </div>
 
