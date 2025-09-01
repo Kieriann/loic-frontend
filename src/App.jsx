@@ -8,7 +8,6 @@ import {
   useNavigate,
   useLocation,
 } from 'react-router-dom'
-
 import Signup from './pages/Signup'
 import SignupSuccess from './pages/SignupSuccess'
 import Login from './pages/Login'
@@ -24,21 +23,19 @@ import ResetPasswordPage from './pages/ResetPasswordPage'
 import SessionManager from './components/SessionManager'
 import Footer from './components/Footer'
 import Cgu from './pages/Cgu'
-
 import Home from './pages/Home'
 import Stats from './pages/Stats'
 import Indep from './pages/Indep'
 import Entreprise from './pages/Entreprise'
 import HomeTopBar from './components/Home/HomeTopBar'
 import Header from './components/Header'
+import ClientDashboard from './pages/ClientDashboard'
+
 
 function AppRouter({ token, setToken }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const location = useLocation()
-
-
-
 
   useEffect(() => {
     if (!token) {
@@ -114,6 +111,9 @@ function AppRouter({ token, setToken }) {
             <Route path="/entreprise" element={<Entreprise />} />
             <Route path="/cgu" element={<Cgu />} />
             <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/login-indep" element={<Login expectedRole="INDEP" />} />
+            <Route path="/login-client" element={<Login expectedRole="CLIENT" />} />
+            <Route path="/client" element={<ClientDashboard />} />
           </Routes>
           <Footer />
         </>

@@ -8,12 +8,14 @@ export default function Signup({ onLogin }) {
   const [password, setPassword] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState('')
+  const [role, setRole] = useState('INDEP')
+
 
   const handleSubmit = async e => {
     e.preventDefault()
     setError('')
     try {
-      const result = await signup({ email, password })
+      const result = await signup({ email, password, role })
       if (result.message) {
         setSubmitted(true)
       } else {
@@ -64,6 +66,18 @@ export default function Signup({ onLogin }) {
             required
             className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-darkBlue"
           />
+
+          <div className="flex justify-center gap-10 mt-6 mb-6 text-lg font-semibold text-darkBlue">
+            <label className="flex items-center gap-2">
+              <input type="radio" name="role" value="INDEP" checked={role==='INDEP'} onChange={()=>setRole('INDEP')} />
+              Je suis indépendant ou salarié
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="radio" name="role" value="CLIENT" checked={role==='CLIENT'} onChange={()=>setRole('CLIENT')} />
+              Je suis client
+            </label>
+          </div>
+
 
           <button
             type="submit"
