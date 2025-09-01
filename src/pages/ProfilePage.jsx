@@ -12,7 +12,7 @@ export default function ProfilePage() {
   /* ------------------------------------------------------------------ */
   const [data,         setData        ] = useState(null);
   const [loading,      setLoading     ] = useState(true);
-  const [realisations, setRealisations] = useState([]);     // ①
+  const [realisations, setRealisations] = useState([]);     //
   const [documents,    setDocuments   ] = useState([]);
 
   /* Onglet actif ------------------------------------------------------ */
@@ -31,7 +31,7 @@ export default function ProfilePage() {
         const token = localStorage.getItem('token');
         const res   = await fetchProfile(token);        // ← profil + réalisations
         setData(res);
-        setRealisations(res.realisations || []);        // ②
+        setRealisations(res.realisations || []);        // 
       } catch (err) {
         console.error('Erreur chargement profil :', err);
       } finally {
