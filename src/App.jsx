@@ -30,7 +30,22 @@ import Entreprise from './pages/Entreprise'
 import HomeTopBar from './components/Home/HomeTopBar'
 import Header from './components/Header'
 import ClientDashboard from './pages/ClientDashboard'
+import { decodeToken } from './utils/decodeToken'
 
+function getRole() {
+  const t = localStorage.getItem('token') || ''
+  try { return decodeToken(t)?.role || null } catch { return null }
+}
+
+function RedirectClientAway({ children }) {
+  return getRole() === 'CLIENT' ? <Navigate to="/client" replace /> : children
+}
+
+function RoleLandingRedirect() {
+  const r = getRole()
+  if (r === 'CLIENT') return <Navigate to="/client" replace />
+  return <Navigate to="/profile" replace />
+}
 
 function AppRouter({ token, setToken }) {
   const [user, setUser] = useState(null)
@@ -113,27 +128,28 @@ function AppRouter({ token, setToken }) {
             <Route path="*" element={<Navigate to="/" replace />} />
             <Route path="/login-indep" element={<Login expectedRole="INDEP" />} />
             <Route path="/login-client" element={<Login expectedRole="CLIENT" />} />
-            <Route path="/client" element={<ClientDashboard />} />
           </Routes>
           <Footer />
         </>
       ) : (
         <>
           <Routes>
-            {user?.isAdmin ? (
-              <>
-                <Route path="/admin" element={<AdminPage />} />
-                <Route path="/admin/profil/:id" element={<AdminProfilDetail />} />
-                <Route path="*" element={<Navigate to="/admin" replace />} />
-              </>
-            ) : (
-              <>
-                <Route path="/profile" element={<ProfilePage />} />
-                <Route path="/profile/edit" element={<EditProfilePage />} />
-                <Route path="/confirm-email" element={<ConfirmEmailPage />} />
-                <Route path="*" element={<Navigate to="/profile" replace />} />
-              </>
-            )}
+           {user?.isAdmin ? (
+          <>
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/profil/:id" element={<AdminProfilDetail />} />
+            <Route path="*" element={<Navigate to="/admin" replace />} />
+          </>
+        ) : (
+          <>
+            <Route path="/client" element={<ClientDashboard />} />
+            <Route path="/profile" element={<RedirectClientAway><ProfilePage /></RedirectClientAway>} />
+            <Route path="/profile/edit" element={<RedirectClientAway><EditProfilePage /></RedirectClientAway>} />
+            <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+            <Route path="*" element={<RoleLandingRedirect />} />
+          </>
+        )}
+
           </Routes>
           <Footer />
         </>
