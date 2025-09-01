@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Header from '../components/Header'
-import ClientSidebar from '../components/Client/ClientSidebar'
+import ClientSidebar from '../components/Client/ClientSidebar' 
 
 export default function ClientDashboard() {
   const [tab, setTab] = useState('demande') // 'demande' | 'statut' | 'messages'
@@ -11,6 +11,7 @@ export default function ClientDashboard() {
         <aside className="w-full lg:w-64 shrink-0">
           <ClientSidebar activeTab={tab} onChange={setTab} />
         </aside>
+        
         <main className="flex-1">
           {tab === 'demande' && (
             <section>
