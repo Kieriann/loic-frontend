@@ -72,7 +72,7 @@ function AppRouter({ token, setToken }) {
     <>
 
 
-{token && !user?.isAdmin && <Header onLogout={setToken} />}
+{token && !user?.isAdmin && getRole() !== 'CLIENT' && <Header onLogout={setToken} />}
 
 {!token ? (
   <>
