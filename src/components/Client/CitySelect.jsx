@@ -25,11 +25,12 @@ export default function CitySelect({ value, onChange }) {
       try {
         setLoading(true)
         const token = localStorage.getItem('token') || ''
-        const res = await fetch(`/api/cities?query=${encodeURIComponent(query)}`, {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cities?query=${encodeURIComponent(query)}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
           credentials: 'include',
+          mode: 'cors',
         })
         const data = await res.json()
         if (stop) return
