@@ -7,12 +7,12 @@ export default function ClientDashboard() {
   return (
     <div className="min-h-screen flex flex-col">
       <Header onLogout={() => {}} />
-      <div className="max-w-6xl mx-auto w-full px-4 pt-8 pb-16 flex flex-col lg:flex-row gap-6">
-        <aside className="w-full lg:w-64 shrink-0">
+        <div className="max-w-6xl mx-auto w-full px-4 pt-8 pb-16 flex flex-col lg:flex-row gap-6">
+          <aside className="w-full lg:w-64 shrink-0 flex">
           <ClientSidebar activeTab={tab} onChange={setTab} />
         </aside>
-        
-        <main className="flex-1">
+
+        <main className="flex-1 bg-white rounded-2xl shadow-md p-6">
           {tab === 'demande' && (
             <section>
               <h1 className="text-2xl font-bold text-darkBlue mb-4">Faire une demande</h1>
