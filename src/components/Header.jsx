@@ -21,6 +21,13 @@ export default function Header({ onLogout }) {
     navigate('/')
   }
 
+  let role = 'client'
+  try {
+    role = JSON.parse(localStorage.getItem('user'))?.role || 'client'
+  } catch {
+    role = 'client'
+  }
+
   return (
     <>
       <header className="bg-primary px-6 flex items-center justify-between">
@@ -43,18 +50,22 @@ export default function Header({ onLogout }) {
 
           {open && (
             <div className="absolute right-0 mt-2 w-40 bg-white text-darkBlue rounded shadow-lg z-50">
-              <button
-                onClick={() => setOpenSponsor(true)}
-                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-              >
-                Parrainage
-              </button>
-              <button
-                onClick={() => navigate('/profile')}
-                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
-              >
-                Mon profil
-              </button>
+              {role === 'indep' && (
+                <>
+                  <button
+                    onClick={() => setOpenSponsor(true)}
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                  >
+                    Parrainage
+                  </button>
+                  <button
+                    onClick={() => navigate('/profile')}
+                    className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                  >
+                    Mon profil
+                  </button>
+                </>
+              )}
               <button
                 onClick={handleLogout}
                 className="block w-full px-4 py-2 text-left hover:bg-gray-100"

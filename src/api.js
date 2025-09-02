@@ -95,3 +95,19 @@ export async function getCvProfilesCount() {
   if (!res.ok) throw new Error(data?.error || 'Erreur compte CV profils')
   return data?.count ?? 0
 }
+
+export async function createClientRequest(payload) {
+  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/client/requests`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
+    },
+    credentials: 'include',
+    body: JSON.stringify(payload),
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data?.error || 'Erreur serveur')
+  // attendu: { id: number }
+  return data
+}

@@ -9,7 +9,7 @@ const tabs = [
 
 export default function ClientSidebar({ activeTab, onChange }) {
   return (
-    <nav className="rounded-2xl border border-blue-200 bg-white p-3 shadow-md">
+    <nav className="rounded-2xl border border-blue-200 bg-white p-3 shadow-md h-full flex flex-col">
       <ul className="space-y-2">
         {tabs.map(t => (
           <li key={t.key}>
