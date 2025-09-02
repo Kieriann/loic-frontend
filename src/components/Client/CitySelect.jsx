@@ -35,8 +35,17 @@ export default function CitySelect({ value, onChange }) {
         const data = await res.json()
         if (stop) return
         if (!res.ok) throw new Error(data?.error || 'Erreur villes')
-        // attendu: [{id, name, country}] côté backend
-        setResults(Array.isArray(data) ? data.slice(0, 50) : [])
+
+        const seen = new Set()
+        const list = (Array.isArray(data) ? data : [])
+        .filter(c => {
+            const k = `${(c.name || '').toLowerCase()}|${(c.country || '').toLowerCase()}`
+            if (seen.has(k)) return false
+            seen.add(k)
+            return true
+        })
+        .slice(0, 50)
+        setResults(list)
         setOpen(true)
       } catch {
         setResults([])
