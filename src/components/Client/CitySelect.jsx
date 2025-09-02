@@ -15,49 +15,57 @@ export default function CitySelect({ value, onChange }) {
     return () => document.removeEventListener('click', onDocClick)
   }, [])
 
-  useEffect(() => {
-    if (query.trim().length < 2) {
-      setResults([])
-      return
-    }
-    let stop = false
-    ;(async () => {
-      try {
-        setLoading(true)
-        const token = localStorage.getItem('token') || ''
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/cities?query=${encodeURIComponent(query)}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          credentials: 'include',
-          mode: 'cors',
-        })
-        const data = await res.json()
-        if (stop) return
-        if (!res.ok) throw new Error(data?.error || 'Erreur villes')
+useEffect(() => {
+  if (query.trim().length < 2) {
+    setResults([])
+    return
+  }
 
-        const seen = new Set()
-        const list = (Array.isArray(data) ? data : [])
+  const ac = new AbortController()
+  const id = setTimeout(async () => {
+    try {
+      setLoading(true)
+      const token = localStorage.getItem('token') || ''
+      const res = await fetch(
+        `${import.meta.env.VITE_API_URL}/api/cities?query=${encodeURIComponent(query)}`,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: 'include',
+          signal: ac.signal,
+        }
+      )
+      const data = await res.json()
+      if (!res.ok) throw new Error(data?.error || 'Erreur villes')
+
+      // dédoublonnage
+      const seen = new Set()
+      const list = (Array.isArray(data) ? data : [])
         .filter(c => {
-            const k = `${(c.name || '').toLowerCase()}|${(c.country || '').toLowerCase()}`
-            if (seen.has(k)) return false
-            seen.add(k)
-            return true
+          const k = `${(c.name || '').toLowerCase()}|${(c.country || '').toLowerCase()}`
+          if (seen.has(k)) return false
+          seen.add(k)
+          return true
         })
         .slice(0, 50)
-        setResults(list)
-        setOpen(true)
-      } catch {
+
+      setResults(list)
+      setOpen(true)
+    } catch {
+      if (!ac.signal.aborted) {
         setResults([])
         setOpen(false)
-      } finally {
-        if (!stop) setLoading(false)
       }
-    })()
-    return () => {
-      stop = true
+    } finally {
+      if (!ac.signal.aborted) setLoading(false)
     }
-  }, [query])
+  }, 350) // debounce
+
+  return () => {
+    clearTimeout(id)
+    ac.abort()
+  }
+}, [query])
+
 
   const selectCity = c => {
     onChange?.(c)
