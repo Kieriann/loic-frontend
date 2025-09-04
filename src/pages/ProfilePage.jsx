@@ -81,7 +81,7 @@ export default function ProfilePage() {
   if (!data?.profile || !data.profile.firstname)
     return <Navigate to="/profile/edit" replace />;
 
-  const { profile, address = {}, experiences = [], prestations = [] } = data; // NB : plus de realisations ici
+const { profile, address = {}, experiences = [], prestations = [], memberStatus } = data;
 
   /* ------------------------------------------------------------------ */
   /* Rendu                                                              */
@@ -112,23 +112,42 @@ export default function ProfilePage() {
         <div className="flex-1 bg-white rounded-2xl shadow-md p-6 space-y-10">
 
           {/* En-tête + bouton modifier */}
-          <div className="mb-8">
-            <div className="flex justify-between items-center">
-              <h1 className="text-2xl text-darkBlue font-bold">
-                {selectedTab === 'profil'        && 'Mon Profil'}
-                {selectedTab === 'experiences'   && 'Mes Expériences'}
-                {selectedTab === 'realisations'  && 'Mes Réalisations'}
-                {selectedTab === 'prestations'   && 'Mes Prestations'}
-              </h1>
+        <div className="mb-8">
+          {/* Titre centré en haut */}
+          {/* Titre + bouton modifier alignés au centre */}
+        <div className="flex justify-center items-center gap-4 mb-2">
+          <h1 className="text-2xl text-darkBlue font-bold">
+            {selectedTab === 'profil'        && 'Mon Profil'}
+            {selectedTab === 'experiences'   && 'Mes Expériences'}
+            {selectedTab === 'realisations'  && 'Mes Réalisations'}
+            {selectedTab === 'prestations'   && 'Mes Prestations'}
+          </h1>
 
-              <button
-                onClick={() => navigate(`/profile/edit?tab=${selectedTab}`)}
-                className="text-sm text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
-              >
-                Modifier
-              </button>
-            </div>
-          </div>
+          <button
+            onClick={() => navigate(`/profile/edit?tab=${selectedTab}`)}
+            className="text-sm text-darkBlue border border-darkBlue px-4 py-2 rounded hover:bg-darkBlue hover:text-white transition"
+          >
+            Modifier
+          </button>
+        </div>
+
+        {/* Badge membre en dessous à droite */}
+        <div className="flex justify-end">
+          <span
+            className={`inline-block px-6 py-2 rounded-full text-lg font-bold shadow
+              ${memberStatus === 'vip'     ? 'bg-yellow-300 text-yellow-900'
+              : memberStatus === 'abonne' ? 'bg-green-200 text-green-800'
+              : 'bg-blue-200 text-blue-800'}`}
+          >
+        Statut : {memberStatus === 'vip' ? 'VIP'
+          : memberStatus === 'abonne' ? 'Abonné'
+          : 'Membre'}
+
+          </span>
+        </div>
+
+        </div>
+
 
           {/* ────────────────────────────────── PROFIL ────────────────── */}
           {selectedTab === 'profil' && (
@@ -143,6 +162,10 @@ export default function ProfilePage() {
                   <Line label="Téléphone">{profile.phone}</Line>
                   <Line label="SIRET">{profile.siret}</Line>
                   <Line label="En poste">{profile.isEmployed ? 'Oui' : 'Non'}</Line>
+                  <Line label="Statut membre">
+                    {{ vip: 'VIP', membre: 'Membre', abonne: 'Abonné' }[memberStatus] || 'Non renseigné'}
+                  </Line>
+
                   <Line label="Statut">
                     {profile.workerStatus === 'indep'
                       ? 'Indépendant'
