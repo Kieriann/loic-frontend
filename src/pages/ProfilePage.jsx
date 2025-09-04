@@ -132,6 +132,13 @@ export default function ProfilePage() {
                   <Line label="Téléphone">{profile.phone}</Line>
                   <Line label="SIRET">{profile.siret}</Line>
                   <Line label="En poste">{profile.isEmployed ? 'Oui' : 'Non'}</Line>
+                  <Line label="Statut">
+                    {profile.workerStatus === 'indep'
+                      ? 'Indépendant'
+                      : profile.workerStatus === 'salarie'
+                      ? 'Salarié'
+                      : null}
+                  </Line>
                   <Line label="Bio">{profile.bio}</Line>
                   <Line label="Lien">
                   {profile.website ? (

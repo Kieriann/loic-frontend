@@ -23,6 +23,7 @@ export default function EditProfilePage() {
     availableDate: null,
     teleworkDays : 0,
     website: '',
+    workerStatus: 'indep',
   })
 
   const [langInput,   setLangInput]   = useState('')
@@ -88,7 +89,7 @@ export default function EditProfilePage() {
           const {
             firstname, lastname, phone, siret, bio,
             smallDayRate, mediumDayRate, highDayRate,
-            languages, isEmployed, availableDate,
+            languages, isEmployed, availableDate, workerStatus,
           } = res.profile
 
           setProfile({
@@ -97,6 +98,7 @@ export default function EditProfilePage() {
             languages, isEmployed,
             availableDate: availableDate || '',
             website: res.profile.website || '',
+            workerStatus: workerStatus || 'indep',
           })
 
           setLangList((languages || '').split(','))
@@ -402,6 +404,31 @@ return (
       {/* ───── PROFIL ───── */}
       {selectedTab === 'profil' && (
         <>
+         <div className="space-y-2">
+            <label className="text-xl font-semibold text-darkBlue">Statut</label>
+            <div className="flex gap-6">
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="workerStatus"
+                  value="indep"
+                  checked={profile.workerStatus === 'indep'}
+                  onChange={(e)=>setProfile({ ...profile, workerStatus: e.target.value })}
+                />
+                Indépendant
+              </label>
+              <label className="inline-flex items-center gap-2">
+                <input
+                  type="radio"
+                  name="workerStatus"
+                  value="salarie"
+                  checked={profile.workerStatus === 'salarie'}
+                  onChange={(e)=>setProfile({ ...profile, workerStatus: e.target.value })}
+                />
+                Salarié
+              </label>
+            </div>
+          </div>
           <ProfileInfo data={profile} setData={setProfile} errors={errors} />
           <AddressInfo data={address} setData={setAddress} errors={errors} />
 
