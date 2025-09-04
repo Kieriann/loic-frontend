@@ -162,9 +162,7 @@ const { profile, address = {}, experiences = [], prestations = [], memberStatus 
                   <Line label="Téléphone">{profile.phone}</Line>
                   <Line label="SIRET">{profile.siret}</Line>
                   <Line label="En poste">{profile.isEmployed ? 'Oui' : 'Non'}</Line>
-                  <Line label="Statut membre">
-                    {{ vip: 'VIP', membre: 'Membre', abonne: 'Abonné' }[memberStatus] || 'Non renseigné'}
-                  </Line>
+
 
                   <Line label="Statut">
                     {profile.workerStatus === 'indep'
