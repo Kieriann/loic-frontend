@@ -92,21 +92,35 @@ export default function EditProfilePage() {
             languages, isEmployed, availableDate, workerStatus,
           } = res.profile
 
-          setProfile({
-            firstname, lastname, phone, siret, bio,
-            smallDayRate, mediumDayRate, highDayRate,
-            languages, isEmployed,
-            availableDate: availableDate || '',
-            website: res.profile.website || '',
-            workerStatus: workerStatus || 'indep',
-          })
+        setProfile({
+          firstname: firstname ?? '',
+          lastname : lastname  ?? '',
+          phone    : phone     ?? '',
+          siret    : siret     ?? '',
+          bio      : bio       ?? '',
+          smallDayRate : smallDayRate  ?? '',
+          mediumDayRate: mediumDayRate ?? '',
+          highDayRate  : highDayRate   ?? '',
+          languages    : languages     ?? '',
+          isEmployed   : !!isEmployed,
+          availableDate: availableDate ?? '',
+          website     : res.profile.website ?? '',
+          workerStatus: workerStatus ?? 'indep',
+        })
+
 
           setLangList((languages || '').split(','))
 
           /* adresse */
           if (res.profile.Address) {
             const { address, city, postalCode, state, country } = res.profile.Address
-            setAddress({ address, city, postalCode, state, country })
+          setAddress({
+            address   : address    ?? '',
+            city      : city       ?? '',
+            postalCode: postalCode ?? '',
+            state     : state      ?? '',
+            country   : country    ?? '',
+          })
           }
         }
 
@@ -231,20 +245,24 @@ const removeReal = idx =>
   }
 
   /* ───────────────────────── VALIDATION FORM ──────────────────────── */
-  const validate = () => {
-    const e = {}
-    if (!profile.firstname.trim())    e.firstname    = 'Champ obligatoire'
-    if (!profile.lastname.trim())     e.lastname     = 'Champ obligatoire'
-    if (!profile.bio.trim())          e.bio          = 'Champ obligatoire'
-    if (!profile.smallDayRate)        e.smallDayRate = 'Champ obligatoire'
-    if (!address.address.trim())      e.address      = 'Champ obligatoire'
-    if (!address.city.trim())         e.city         = 'Champ obligatoire'
-    if (!address.postalCode.trim())   e.postalCode   = 'Champ obligatoire'
-    if (!address.country.trim())      e.country      = 'Champ obligatoire'
-    if (!langList.length)             e.languages    = 'Champ obligatoire'
-    setErrors(e)
-    return Object.keys(e).length === 0
-  }
+const isEmpty = v => (v ?? '').toString().trim() === '';
+
+const validate = () => {
+  const e = {}
+  if (isEmpty(profile.firstname))    e.firstname    = 'Champ obligatoire'
+  if (isEmpty(profile.lastname))     e.lastname     = 'Champ obligatoire'
+  // (siret non obligatoire)
+  if (isEmpty(profile.bio))          e.bio          = 'Champ obligatoire'
+  if (!profile.smallDayRate)         e.smallDayRate = 'Champ obligatoire'
+  if (isEmpty(address.address))      e.address      = 'Champ obligatoire'
+  if (isEmpty(address.city))         e.city         = 'Champ obligatoire'
+  if (isEmpty(address.postalCode))   e.postalCode   = 'Champ obligatoire'
+  if (isEmpty(address.country))      e.country      = 'Champ obligatoire'
+  if (!langList?.length)             e.languages    = 'Champ obligatoire'
+  setErrors(e)
+  return Object.keys(e).length === 0
+}
+
 
 /* ───────────────────────────── SUBMIT ───────────────────────────── */
 const handleSubmit = async () => {
