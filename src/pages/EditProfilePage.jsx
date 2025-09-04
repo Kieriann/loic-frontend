@@ -57,6 +57,7 @@ export default function EditProfilePage() {
   const [popup,     setPopup    ] = useState({ open: false, index: null, type: '' })
 
   const navigate                = useNavigate()
+  const hasToken = !!localStorage.getItem('token')
   const [searchParams]          = useSearchParams()
   const initialTab              = searchParams.get('tab')
   const [selectedTab,setSelectedTab] = useState(initialTab || 'profil')
@@ -66,11 +67,20 @@ export default function EditProfilePage() {
     if (initialTab) setSelectedTab(initialTab)
   }, [initialTab])
 
+   useEffect(() => {
+   if (!hasToken) {
+     navigate('/login', { replace: true })
+   }
+ }, [hasToken, navigate])
+
+
   useEffect(() => {
+    if (!hasToken) return;
     const loadData = async () => {
       setLoading(true);
       try {
         const token = localStorage.getItem('token')
+        if (!token) return
         const res   = await fetchProfile(token)
 
         /* documents */
@@ -267,6 +277,8 @@ const validate = () => {
 /* ───────────────────────────── SUBMIT ───────────────────────────── */
 const handleSubmit = async () => {
   if (!validate()) return;
+  const tk = localStorage.getItem('token')
+ if (!tk) { navigate('/login', { replace: true }); return }
 
   /* ---------- 1. FormData “profil” (+ expériences, prestations, docs) */
   const formData = new FormData();
@@ -374,6 +386,7 @@ const fieldLabels = {
 };
 
   /* ───────────────────────────── RENDER ───────────────────────────── */
+  if (!hasToken) return null
 return (
   <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
     <div className="w-full max-w-4xl bg-white rounded-2xl shadow-md p-6 space-y-10 relative">

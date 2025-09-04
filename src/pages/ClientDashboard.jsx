@@ -6,9 +6,9 @@ import ClientRequestsStatus from '../components/Client/ClientRequestsStatus'
 import ClientMessages from '../components/Client/ClientMessages'
 
 export default function ClientDashboard() {
-  const [tab, setTab] = useState('demande') // 'demande' | 'statut' | 'messages'
+  const [tab, setTab] = useState('demande')
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-primary">
       <Header onLogout={() => {}} />
         <div className="max-w-6xl mx-auto w-full px-4 pt-8 pb-16 flex flex-col lg:flex-row gap-6 flex-1 items-stretch">
           <aside className="w-full lg:w-64 shrink-0 flex flex-col self-stretch">

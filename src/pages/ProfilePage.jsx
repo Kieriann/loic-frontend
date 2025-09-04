@@ -21,6 +21,14 @@ export default function ProfilePage() {
   const [selectedTab, setSelectedTab] = useState(initialTab || 'profil');
 
   const navigate = useNavigate();
+  const hasToken = !!localStorage.getItem('token');
+
+    useEffect(() => {
+      if (!localStorage.getItem('token')) {
+        navigate('/login', { replace: true })
+      }
+    }, [navigate])
+
 
   /* ------------------------------------------------------------------ */
   /* Chargement profil + réalisations                                   */
@@ -29,6 +37,7 @@ export default function ProfilePage() {
     const load = async () => {
       try {
         const token = localStorage.getItem('token');
+        if (!token) return;
         const res   = await fetchProfile(token);        // ← profil + réalisations
         setData(res);
         setRealisations(res.realisations || []);        // 
@@ -48,6 +57,7 @@ export default function ProfilePage() {
     const fetchDocs = async () => {
       try {
         const token = localStorage.getItem('token');
+        if (!token) return;
         const res   = await axios.get(
           `${import.meta.env.VITE_API_URL}/api/documents/me`,
           { headers: { Authorization: `Bearer ${token}` } }
@@ -66,6 +76,7 @@ export default function ProfilePage() {
   /* ------------------------------------------------------------------ */
   /* Redirections / états                                               */
   /* ------------------------------------------------------------------ */
+   if (!hasToken) return null;
   if (loading) return <p className="p-4">Chargement…</p>;
   if (!data?.profile || !data.profile.firstname)
     return <Navigate to="/profile/edit" replace />;

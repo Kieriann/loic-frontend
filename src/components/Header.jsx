@@ -67,8 +67,10 @@ export default function Header({ onLogout }) {
                 </>
               )}
               <button
-                onClick={handleLogout}
-                className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+                onClick={() => {
+                  localStorage.removeItem('token')
+                  navigate('/login', { replace: true })
+                }}
               >
                 Déconnexion
               </button>
