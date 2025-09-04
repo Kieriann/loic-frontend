@@ -235,7 +235,6 @@ const removeReal = idx =>
     const e = {}
     if (!profile.firstname.trim())    e.firstname    = 'Champ obligatoire'
     if (!profile.lastname.trim())     e.lastname     = 'Champ obligatoire'
-    if (!profile.siret.trim())        e.siret        = 'Champ obligatoire'
     if (!profile.bio.trim())          e.bio          = 'Champ obligatoire'
     if (!profile.smallDayRate)        e.smallDayRate = 'Champ obligatoire'
     if (!address.address.trim())      e.address      = 'Champ obligatoire'
@@ -342,6 +341,19 @@ navigate(`/profile?tab=${selectedTab}`, { replace: true });
 }; 
 
 if (error) return <p className="text-red-500 p-4">Erreur : {error}</p>;
+
+const fieldLabels = {
+  firstname   : 'Prénom',
+  lastname    : 'Nom',
+  phone       : 'Téléphone',
+  bio         : 'Bio',
+  smallDayRate: 'TJM',
+  address     : 'Adresse',
+  city        : 'Ville',
+  postalCode  : 'Code postal',
+  country     : 'Pays',
+  languages   : 'Langues',
+};
 
   /* ───────────────────────────── RENDER ───────────────────────────── */
 return (
@@ -750,6 +762,13 @@ return (
       )}
 
       {/* ───── SUBMIT ───── */}
+      {Object.keys(errors).length > 0 && (
+      <p className="text-red-600 text-center mb-4 text-lg font-bold">
+        Le champ {fieldLabels[Object.keys(errors)[0]] || Object.keys(errors)[0]} doit être rempli pour valider.
+      </p>
+
+
+      )}
       <div className="text-center mt-8">
         <button
           onClick={handleSubmit}
@@ -758,6 +777,7 @@ return (
           Enregistrer le profil
         </button>
       </div>
+
     </div>
   </div>
 )
