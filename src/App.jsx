@@ -31,6 +31,8 @@ import HomeTopBar from './components/Home/HomeTopBar'
 import Header from './components/Header'
 import ClientDashboard from './pages/ClientDashboard'
 import { decodeToken } from './utils/decodeToken'
+import SuggestionsPage from './pages/SuggestionsPage'
+
 
 function getRole() {
   const t = localStorage.getItem('token') || ''
@@ -128,6 +130,8 @@ function AppRouter({ token, setToken }) {
             <Route path="*" element={<Navigate to="/" replace />} />
             <Route path="/login-indep" element={<Login expectedRole="INDEP" />} />
             <Route path="/login-client" element={<Login expectedRole="CLIENT" />} />
+            <Route path="/suggestions" element={<SuggestionsPage />} />
+
           </Routes>
           <Footer />
         </>
