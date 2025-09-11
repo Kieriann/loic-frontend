@@ -3,10 +3,11 @@ import Header from '../components/Header'
 import ClientSidebar from '../components/Client/ClientSidebar' 
 import ClientRequestForm from '../components/Client/ClientRequestForm'
 import ClientRequestsStatus from '../components/Client/ClientRequestsStatus'
-import ClientMessages from '../components/Client/ClientMessages'
+// import ClientMessages from '../components/Client/ClientMessages'
+import ClientProfile from '../components/Client/ClientProfile'
 
 export default function ClientDashboard() {
-  const [tab, setTab] = useState('demande')
+const [tab, setTab] = useState('profile')
   return (
     <div className="min-h-screen flex flex-col bg-primary">
       <Header onLogout={() => {}} />
@@ -16,9 +17,10 @@ export default function ClientDashboard() {
         </aside>
 
       <main className="flex-1 bg-white rounded-2xl shadow-md p-6 flex flex-col">
-          {tab === 'demande' && <ClientRequestForm />}
-          {tab === 'statut' && <ClientRequestsStatus />}
-          {tab === 'messages' && <ClientMessages />}
+        {tab === 'profile' && <ClientProfile />}
+        {tab === 'demande' && <ClientRequestForm />}
+        {tab === 'statut' && <ClientRequestsStatus />}
+
         </main>
       </div>
     </div>

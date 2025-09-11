@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from 'react'
 import axios from 'axios'
 
-export default function ClientMessagerie() {
+export default function IndepMessagerie() {
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
   const [otherId, setOtherId] = useState('') // ID de l'autre utilisateur
   const API = import.meta.env.VITE_API_URL
   const token = localStorage.getItem('token')
-  const [sendStatus, setSendStatus] = useState(null) // 'ok' | 'err' | null
+  const [sendStatus, setSendStatus] = useState(null)
 
 
 
@@ -17,18 +17,17 @@ export default function ClientMessagerie() {
     if (!otherId) return
 
     const fetchMessages = () => {
-    axios.get(`${API}/api/messages/${otherId}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => setMessages(Array.isArray(res.data) ? res.data : []))
-      .catch(err => console.error(err))
-
+        axios.get(`${API}/api/messages/${otherId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+        })
+        .then(res => setMessages(Array.isArray(res.data) ? res.data : []))
+        .catch(err => console.error(err))
     }
 
-    fetchMessages() // première récupération immédiate
-    const interval = setInterval(fetchMessages, 3000) // toutes les 3s
+    fetchMessages()
+    const interval = setInterval(fetchMessages, 3000)
 
-    return () => clearInterval(interval) // nettoyage
+    return () => clearInterval(interval)
   }, [otherId])
 
   useEffect(() => {
@@ -57,30 +56,29 @@ try {
 }
 
 
-
   return (
     <div className="p-4 flex flex-col h-full">
       <input
         type="text"
-        placeholder="ID de l'autre utilisateur"
+        placeholder="ID du client"
         value={otherId}
         onChange={e => setOtherId(e.target.value)}
         className="border p-2 mb-2"
       />
 
-      <div className="flex-1 border p-2 mb-2 overflow-y-auto max-h-[500px]">
-        {messages.map(msg => (
+<div className="flex-1 border p-2 mb-2 overflow-y-auto max-h-[500px]">
+        {Array.isArray(messages) && messages.map(msg => (
           <div
             key={msg.id}
             className={`p-2 my-1 rounded ${
               msg.senderId === parseInt(otherId, 10)
                 ? 'bg-gray-200 self-start text-left'
-                : 'bg-blue-200 self-end text-right'
+                : 'bg-green-200 self-end text-right'
             }`}
           >
-          <div className="text-xs text-gray-500 mb-1">
+            <div className="text-xs text-gray-500 mb-1">
             {(msg.sender?.profile?.workerStatus === 'indep' ? 'Indep' : 'Client') + ' ' + msg.senderId}
-          </div>
+            </div>
 
             <div className="flex items-center justify-between">
               <span>{msg.content}</span>
@@ -105,7 +103,7 @@ try {
         />
         <button
           onClick={sendMessage}
-          className="bg-blue-500 text-white px-4 ml-2"
+          className="bg-green-500 text-white px-4 ml-2"
         >
           Envoyer
         </button>

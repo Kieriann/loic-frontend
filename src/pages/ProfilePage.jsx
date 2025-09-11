@@ -5,6 +5,8 @@ import { fetchProfile }               from '../api/fetchProfile';
 import { Navigate, useNavigate }      from 'react-router-dom';
 import axios                          from 'axios';
 import { useSearchParams }            from 'react-router-dom';
+import IndepMessagerie from '../components/IndepMessagerie';
+
 
 export default function ProfilePage() {
   /* ------------------------------------------------------------------ */
@@ -28,6 +30,21 @@ export default function ProfilePage() {
         navigate('/login', { replace: true })
       }
     }, [navigate])
+
+
+    const [unreadCount, setUnreadCount] = useState(0)
+
+useEffect(() => {
+  const fetchCount = () => {
+    axios.get('/api/messages/unread/count', { withCredentials: true })
+      .then(res => setUnreadCount(res.data.unreadCount))
+      .catch(err => console.error(err))
+  }
+
+  fetchCount()
+  const interval = setInterval(fetchCount, 5000)
+  return () => clearInterval(interval)
+}, [])
 
 
   /* ------------------------------------------------------------------ */
@@ -92,7 +109,7 @@ const { profile, address = {}, experiences = [], prestations = [], memberStatus 
         {/* ───── Onglets latéraux ───── */}
         <div className="w-48 bg-white rounded-2xl shadow-md p-6 h-full">
           <div className="flex flex-col gap-3">
-            {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
+            {['profil', 'experiences', 'realisations', 'prestations', 'messages'].map(tab => (
               <button
                 key={tab}
                 onClick={() => setSelectedTab(tab)}
@@ -102,7 +119,14 @@ const { profile, address = {}, experiences = [], prestations = [], memberStatus 
                     : 'hover:bg-blue-50'
                 }`}
               >
-                {tab.charAt(0).toUpperCase() + tab.slice(1)}
+<span className="flex justify-between items-center w-full">
+  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+  {tab === 'messages' && unreadCount > 0 && (
+    <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+      {unreadCount}
+    </span>
+  )}
+</span>
               </button>
             ))}
           </div>
@@ -141,7 +165,7 @@ const { profile, address = {}, experiences = [], prestations = [], memberStatus 
           >
         Statut : {memberStatus === 'vip' ? 'VIP'
           : memberStatus === 'abonne' ? 'Abonné'
-          : 'Membre'}
+          : 'Inscrit'}
 
           </span>
         </div>
@@ -376,6 +400,14 @@ const { profile, address = {}, experiences = [], prestations = [], memberStatus 
               )}
             </Section>
           )}
+          
+        {/* ─────────────────────────── MESSAGERIE ──────────────────── */}
+        {selectedTab === 'messages' && (
+          <Section title="Messagerie">
+            <IndepMessagerie />
+          </Section>
+        )}
+
         </div>
       </div>
     </div>
@@ -410,3 +442,4 @@ function Line({ label, children }) {
     </p>
   );
 }
+
