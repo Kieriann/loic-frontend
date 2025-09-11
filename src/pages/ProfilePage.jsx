@@ -8,6 +8,7 @@ import { useSearchParams }            from 'react-router-dom';
 import IndepMessagerie from '../components/IndepMessagerie';
 
 
+
 export default function ProfilePage() {
   /* ------------------------------------------------------------------ */
   /* State                                                              */
@@ -33,6 +34,11 @@ export default function ProfilePage() {
 
 
     const [unreadCount, setUnreadCount] = useState(0)
+    const [sugTitle, setSugTitle]       = useState('')
+    const [sugContent, setSugContent]   = useState('')
+    const [sugMsg, setSugMsg]           = useState('')
+    const [sugLoading, setSugLoading]   = useState(false)
+
 
 useEffect(() => {
   const fetchCount = () => {
@@ -100,6 +106,40 @@ useEffect(() => {
 
 const { profile, address = {}, experiences = [], prestations = [], memberStatus } = data;
 
+async function handleSendSuggestion(e) {
+  e?.preventDefault?.()
+  setSugMsg('')
+  if (!sugTitle.trim() || !sugContent.trim()) {
+    setSugMsg('Titre et contenu requis.')
+    return
+  }
+  const token = localStorage.getItem('token')
+  if (!token) { navigate('/login', { replace: true }); return }
+
+  setSugLoading(true)
+  try {
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/suggestions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ title: sugTitle.trim(), content: sugContent.trim() })
+    })
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({}))
+      throw new Error(err.error || 'Erreur serveur')
+    }
+    const data = await res.json()
+    setSugMsg(`Suggestion enregistrée`)
+    setSugTitle('')
+    setSugContent('')
+  } catch (err) {
+    setSugMsg(err.message)
+  } finally {
+    setSugLoading(false)
+  }
+}
   /* ------------------------------------------------------------------ */
   /* Rendu                                                              */
   /* ------------------------------------------------------------------ */
@@ -108,32 +148,38 @@ const { profile, address = {}, experiences = [], prestations = [], memberStatus 
       <div className="w-full max-w-6xl flex gap-6 items-stretch">
         {/* ───── Onglets latéraux ───── */}
         <div className="w-48 bg-white rounded-2xl shadow-md p-6 h-full">
-          <div className="flex flex-col gap-3">
-            {['profil', 'experiences', 'realisations', 'prestations', 'messages'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setSelectedTab(tab)}
-                className={`w-full rounded-xl px-4 py-2 font-semibold text-left ${
-                  selectedTab === tab
-                    ? 'bg-blue-100 text-darkBlue'
-                    : 'hover:bg-blue-50'
-                }`}
-              >
-<span className="flex justify-between items-center w-full">
-  {tab.charAt(0).toUpperCase() + tab.slice(1)}
-  {tab === 'messages' && unreadCount > 0 && (
-    <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-      {unreadCount}
-    </span>
-  )}
-</span>
-              </button>
-            ))}
-          </div>
-        </div>
+         <div className="flex flex-col gap-3">
+{['profil', 'experiences', 'realisations', 'prestations', 'messages', 'suggestions'].map(tab => (
+  <React.Fragment key={tab}>
+    {tab === 'suggestions' && <div className="my-3 border-t border-gray-200" />}
+    <button
+      onClick={() => setSelectedTab(tab)}
+      className={`w-full rounded-xl px-4 py-2 font-semibold text-left ${
+        selectedTab === tab
+          ? 'bg-blue-100 text-darkBlue'
+          : 'hover:bg-blue-50'
+      }`}
+    >
+      <span className="flex justify-between items-center w-full">
+        {tab.charAt(0).toUpperCase() + tab.slice(1)}
+        {tab === 'messages' && unreadCount > 0 && (
+          <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
+            {unreadCount}
+          </span>
+        )}
+      </span>
+    </button>
+  </React.Fragment>
+))}
+  </div>
+</div>
+
+
+
 
         {/* ───── Contenu central ───── */}
         <div className="flex-1 bg-white rounded-2xl shadow-md p-6 space-y-10">
+
 
           {/* En-tête + bouton modifier */}
         <div className="mb-8">
@@ -145,6 +191,8 @@ const { profile, address = {}, experiences = [], prestations = [], memberStatus 
             {selectedTab === 'experiences'   && 'Mes Expériences'}
             {selectedTab === 'realisations'  && 'Mes Réalisations'}
             {selectedTab === 'prestations'   && 'Mes Prestations'}
+            {selectedTab === 'suggestions'  && 'Suggestions'}
+
           </h1>
 
           <button
@@ -171,6 +219,38 @@ const { profile, address = {}, experiences = [], prestations = [], memberStatus 
         </div>
 
         </div>
+
+                          {/* ─────────────────────────── SUGGESTIONS ──────────────────── */}
+{selectedTab === 'suggestions' && (
+  <Section title="Proposer une amélioration">
+    <form onSubmit={handleSendSuggestion} className="space-y-3 max-w-xl mx-auto">
+      <input
+        type="text"
+        value={sugTitle}
+        onChange={e => setSugTitle(e.target.value)}
+        placeholder="Titre — ce qu’il faudrait ajouter/améliorer"
+        className="w-full border rounded-lg px-3 py-2 text-sm placeholder-gray-500"
+        maxLength={150}
+        required
+      />
+      <textarea
+        value={sugContent}
+        onChange={e => setSugContent(e.target.value)}
+        placeholder="Décrivez votre idée (contexte, besoin, impact…)"
+        className="w-full h-40 border rounded-lg px-3 py-2 text-sm placeholder-gray-500"
+        required
+      />
+      <button
+        type="submit"
+        disabled={sugLoading}
+        className="px-4 py-2 rounded-lg bg-blue-500 text-white disabled:opacity-50"
+      >
+        {sugLoading ? 'Envoi…' : 'Envoyer la suggestion'}
+      </button>
+      {sugMsg ? <p className="text-sm mt-1">{sugMsg}</p> : null}
+    </form>
+  </Section>
+)}
 
 
           {/* ────────────────────────────────── PROFIL ────────────────── */}
@@ -442,4 +522,6 @@ function Line({ label, children }) {
     </p>
   );
 }
+
+
 
