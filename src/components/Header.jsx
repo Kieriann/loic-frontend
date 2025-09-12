@@ -15,18 +15,25 @@ export default function Header({ onLogout }) {
     }
   }, [])
 
-  const handleLogout = () => {
-    localStorage.removeItem('token')
-    onLogout(null)
-    navigate('/')
-  }
+const handleLogout = () => {
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+  onLogout?.(null)
+  setOpen(false)
+  navigate('/', { replace: true })
+}
 
-  let role = 'client'
-  try {
-    role = JSON.parse(localStorage.getItem('user'))?.role || 'client'
-  } catch {
-    role = 'client'
+
+
+let role = 'client'
+try {
+  role = JSON.parse(localStorage.getItem('user'))?.role || role
+  if (localStorage.getItem('token') && role === 'client') {
+    const payload = JSON.parse(atob(localStorage.getItem('token').split('.')[1]))
+    role = payload.role?.toLowerCase() || role
   }
+} catch {}
+
 
   return (
     <>
@@ -66,14 +73,13 @@ export default function Header({ onLogout }) {
                   </button>
                 </>
               )}
-              <button
-                onClick={() => {
-                  localStorage.removeItem('token')
-                  navigate('/login', { replace: true })
-                }}
-              >
-                Déconnexion
-              </button>
+            <button
+              onClick={handleLogout}
+              className="block w-full px-4 py-2 text-left hover:bg-gray-100"
+            >
+              Déconnexion
+            </button>
+
             </div>
           )}
         </div>

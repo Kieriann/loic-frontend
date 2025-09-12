@@ -25,6 +25,12 @@ export default function ProfilePage() {
 
   const navigate = useNavigate();
   const hasToken = !!localStorage.getItem('token');
+  useEffect(() => {
+  setData(null);
+  setRealisations([]);
+  setDocuments([]);
+}, [localStorage.getItem('token')]);
+
 
     useEffect(() => {
       if (!localStorage.getItem('token')) {
@@ -63,7 +69,8 @@ useEffect(() => {
         if (!token) return;
         const res   = await fetchProfile(token);        // ← profil + réalisations
         setData(res);
-        setRealisations(res.realisations || []);        // 
+        setRealisations(res.realisations || []); 
+        setDocuments(res.documents || []);
       } catch (err) {
         console.error('Erreur chargement profil :', err);
       } finally {
@@ -73,28 +80,6 @@ useEffect(() => {
     load();
   }, []);
 
-  /* ------------------------------------------------------------------ */
-  /* Chargement documents (photo / CV)                                  */
-  /* ------------------------------------------------------------------ */
-  useEffect(() => {
-    const fetchDocs = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        if (!token) return;
-        const res   = await axios.get(
-          `${import.meta.env.VITE_API_URL}/api/documents/me`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        const docs  = Array.isArray(res.data)
-          ? res.data
-          : Object.values(res.data || {});
-        setDocuments(docs);
-      } catch (err) {
-        console.error('Erreur chargement documents :', err);
-      }
-    };
-    fetchDocs();
-  }, []);
 
   /* ------------------------------------------------------------------ */
   /* Redirections / états                                               */

@@ -3,25 +3,14 @@ const API = import.meta.env.VITE_API_URL;
 
 /* ──────────────── PROFIL DE L’UTILISATEUR + RÉALISATIONS ──────────────── */
 export async function fetchProfile(token) {
-  // profil et réalisations en parallèle
-  const [profileRes, realRes] = await Promise.all([
-    fetch(`${API}/api/profile/profil`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }),
-    fetch(`${API}/api/realisations`, {
-      headers: { Authorization: `Bearer ${token}` },
-    }),
-  ]);
-
-  if (!profileRes.ok) throw new Error('Erreur récupération profil');
-  if (!realRes.ok)   throw new Error('Erreur récupération réalisations');
-
-  const profile      = await profileRes.json();
-  const realisations = await realRes.json();
-
-  // on renvoie un objet combiné
-  return { ...profile, realisations };
+  const res = await fetch(`${API}/api/profile/profil`, {
+    headers: { Authorization: `Bearer ${token}` },
+    cache: 'no-store',
+  })
+  if (!res.ok) throw new Error('Erreur récupération profil')
+  return await res.json()
 }
+
 
 /* ──────────────── AUTH ──────────────── */
 export async function signup(credentials) {
