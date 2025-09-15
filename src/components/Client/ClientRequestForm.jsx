@@ -1,8 +1,13 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import CitySelect from './CitySelect'
 import { createClientRequest } from '../../api'
+import { getClientRequest, updateClientRequest } from '../../api/clientRequests'
+
 
 export default function ClientRequestForm() {
+  const [searchParams] = useSearchParams()
+  const editId = searchParams.get('edit')
   const [kind, setKind] = useState('expertise') // 'expertise' | 'mission'
   const [technology, setTechnology] = useState('')
   const [level, setLevel] = useState('junior')
@@ -11,6 +16,28 @@ export default function ClientRequestForm() {
   const [loading, setLoading] = useState(false)
   const [successId, setSuccessId] = useState(null)
   const [error, setError] = useState('')
+
+    useEffect(() => {
+    if (!editId) return
+    (async () => {
+      const r = await getClientRequest(editId)
+      setKind(r.kind === 'MISSION' ? 'mission' : 'expertise')
+      setTechnology(r.technology || '')
+      setLevel((r.level || 'JUNIOR').toLowerCase())
+      const isRemote = r.locationMode === 'REMOTE'
+      setRemote(isRemote)
+      if (!isRemote) {
+        if (r.city) {
+          setCity({ id: r.city.id, name: r.city.name, country: r.city.countryCode })
+        } else {
+          setCity(null)
+        }
+      } else {
+        setCity(null)
+      }
+    })().catch(console.error)
+  }, [editId])
+
 
   const canSubmit =
     kind && technology.trim() && level && (remote || (!remote && city?.name))
@@ -27,11 +54,16 @@ export default function ClientRequestForm() {
         level, // 'junior' | 'medium' | 'expert'
         location: remote ? { mode: 'remote' } : { mode: 'onsite', city },
       }
-      const { id } = await createClientRequest(payload)
+      const resp = editId
+        ? await updateClientRequest(editId, payload)
+        : await createClientRequest(payload)
+      const { id } = resp
       setSuccessId(id)
-      // reset minimal
-      setTechnology('')
-      if (!remote) setCity(null)
+     // reset minimal si création
+      if (!editId) {
+        setTechnology('')
+        if (!remote) setCity(null)
+      }
     } catch (err) {
       setError(err?.message || 'Échec de l’enregistrement')
     } finally {
@@ -41,7 +73,6 @@ export default function ClientRequestForm() {
 
   return (
     <section>
-      <h1 className="text-2xl font-bold text-darkBlue mb-4">Faire une demande</h1>
       <form onSubmit={submit} className="space-y-6">
         {/* Type */}
         <div>
@@ -130,7 +161,7 @@ export default function ClientRequestForm() {
             disabled={!canSubmit || loading}
             className="inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2 text-white disabled:opacity-50"
           >
-            {loading ? 'Enregistrement…' : 'Envoyer la demande'}
+            {loading ? 'Enregistrement…' : editId ? 'Mettre à jour' : 'Envoyer la demande'}
           </button>
         </div>
 

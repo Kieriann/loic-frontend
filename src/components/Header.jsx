@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import logo from '../assets/logo.png'
 import SponsorModal from './SponsorModal'
 
-export default function Header({ onLogout }) {
+export default function Header() {
   const [open, setOpen] = useState(false)
   const [openSponsor, setOpenSponsor] = useState(false)
   const navigate = useNavigate()
@@ -18,10 +18,10 @@ export default function Header({ onLogout }) {
 const handleLogout = () => {
   localStorage.removeItem('token')
   localStorage.removeItem('user')
-  onLogout?.(null)
   setOpen(false)
-  navigate('/', { replace: true })
+  window.location.replace('/') 
 }
+
 
 
 

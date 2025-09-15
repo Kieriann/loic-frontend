@@ -32,6 +32,8 @@ import Header from './components/Header'
 import ClientDashboard from './pages/ClientDashboard'
 import { decodeToken } from './utils/decodeToken'
 import SuggestionsPage from './pages/SuggestionsPage'
+import ClientRequestForm from './components/Client/ClientRequestForm'
+
 
 
 function getRole() {
@@ -151,6 +153,8 @@ function AppRouter({ token, setToken }) {
             <Route path="/profile/edit" element={<RedirectClientAway><EditProfilePage /></RedirectClientAway>} />
             <Route path="/confirm-email" element={<ConfirmEmailPage />} />
             <Route path="*" element={<RoleLandingRedirect />} />
+            <Route path="/client/faire-une-demande" element={<ClientRequestForm />} />
+
           </>
         )}
 
