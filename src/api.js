@@ -96,6 +96,21 @@ export async function getCvProfilesCount() {
   return data?.count ?? 0
 }
 
+export async function getProfilesCount() {
+  const res = await fetch(`${BASE_URL}/api/documents/count-profiles`, {
+    credentials: 'include',
+  })
+  const ct = res.headers.get('content-type') || ''
+  if (!ct.includes('application/json')) {
+    const txt = await res.text()
+    throw new Error(`Réponse non-JSON (${res.status}) : ${txt.slice(0,120)}...`)
+  }
+  const { count } = await res.json()
+  if (!res.ok) throw new Error('Erreur fetch count-profiles')
+  return count ?? 0
+}
+
+
 export async function createClientRequest(payload) {
   const res = await fetch(`${import.meta.env.VITE_API_URL}/api/client/requests`, {
     method: 'POST',
