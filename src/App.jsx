@@ -6,6 +6,7 @@ import {
   Navigate,
   Link,
   useNavigate,
+  useParams,
   useLocation,
 } from 'react-router-dom'
 import Signup from './pages/Signup'
@@ -33,8 +34,7 @@ import ClientDashboard from './pages/ClientDashboard'
 import { decodeToken } from './utils/decodeToken'
 import SuggestionsPage from './pages/SuggestionsPage'
 import ClientRequestForm from './components/Client/ClientRequestForm'
-
-
+import IndepMessagerie from './components/IndepMessagerie' 
 
 function getRole() {
   const t = localStorage.getItem('token') || ''
@@ -51,30 +51,47 @@ function RoleLandingRedirect() {
   return <Navigate to="/profile" replace />
 }
 
+function MessageRedirect() {
+  const { otherId } = useParams()
+  const location = useLocation()
+  const fromNeed = new URLSearchParams(location.search).get('fromNeed') || ''
+  return (
+    <Navigate
+ to={`/profile?tab=messages&otherId=${otherId}${fromNeed ? `&fromNeed=${fromNeed}` : ''}`}
+      replace
+    />
+  )
+}
+
+
 function AppRouter({ token, setToken }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
   const location = useLocation()
 
-  useEffect(() => {
-    if (!token) {
-      setLoading(false)
-      return
-    }
-    fetchProfile(token)
-      .then(res => setUser({ isAdmin: res.isAdmin }))
-      .catch(() => {
+useEffect(() => {
+  if (!token) {
+    setLoading(false)
+    return
+  }
+  fetchProfile(token)
+    .then(res => setUser({ isAdmin: res.isAdmin }))
+    .catch(err => {
+      if (err?.response?.status === 401) {
         localStorage.removeItem('token')
         setToken(null)
-      })
-      .finally(() => setLoading(false))
-  }, [token, setToken])
+      } else {
+        console.error('fetchProfile failed', err) 
+      }
+    })
+    .finally(() => setLoading(false))
+}, [token, setToken])
+
 
   if (loading) return <p className="p-4">Chargement…</p>
 
   return (
     <>
-
 
 {token && !user?.isAdmin && getRole() !== 'CLIENT' && <Header onLogout={setToken} />}
 
@@ -133,32 +150,34 @@ function AppRouter({ token, setToken }) {
             <Route path="/login-indep" element={<Login expectedRole="INDEP" />} />
             <Route path="/login-client" element={<Login expectedRole="CLIENT" />} />
             <Route path="/suggestions" element={<SuggestionsPage />} />
+            <Route path="/messages/:otherId" element={<MessageRedirect />} />
+
 
           </Routes>
           <Footer />
         </>
       ) : (
         <>
-          <Routes>
-           {user?.isAdmin ? (
-          <>
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/profil/:id" element={<AdminProfilDetail />} />
-            <Route path="*" element={<Navigate to="/admin" replace />} />
-          </>
-        ) : (
-          <>
-            <Route path="/client" element={<ClientDashboard />} />
-            <Route path="/profile" element={<RedirectClientAway><ProfilePage /></RedirectClientAway>} />
-            <Route path="/profile/edit" element={<RedirectClientAway><EditProfilePage /></RedirectClientAway>} />
-            <Route path="/confirm-email" element={<ConfirmEmailPage />} />
-            <Route path="*" element={<RoleLandingRedirect />} />
-            <Route path="/client/faire-une-demande" element={<ClientRequestForm />} />
+         <Routes>
+  <Route path="/messages/:otherId" element={<IndepMessagerie />} />
+  {user?.isAdmin ? (
+    <>
+      <Route path="/admin" element={<AdminPage />} />
+      <Route path="/admin/profil/:id" element={<AdminProfilDetail />} />
+      <Route path="*" element={<Navigate to="/admin" replace />} />
+    </>
+  ) : (
+    <>
+      <Route path="/client" element={<ClientDashboard />} />
+      <Route path="/profile" element={<RedirectClientAway><ProfilePage /></RedirectClientAway>} />
+      <Route path="/profile/edit" element={<RedirectClientAway><EditProfilePage /></RedirectClientAway>} />
+      <Route path="/confirm-email" element={<ConfirmEmailPage />} />
+      <Route path="*" element={<RoleLandingRedirect />} />
+      <Route path="/client/faire-une-demande" element={<ClientRequestForm />} />
+    </>
+  )}
+</Routes>
 
-          </>
-        )}
-
-          </Routes>
           <Footer />
         </>
       )}

@@ -9,7 +9,7 @@ const statusMap = {
   2: { label: 'traité', cls: 'bg-green-50 text-green-700 border border-green-200' },
   PENDING: { label: 'non traité', cls: 'bg-gray-100 text-gray-700 border border-gray-200' },
   IN_PROGRESS: { label: 'en cours de traitement', cls: 'bg-yellow-50 text-yellow-700 border border-yellow-200' },
-   DONE: { label: 'proposition envoyée', cls: 'bg-green-50 text-green-700 border border-green-200' },
+  DONE: { label: 'proposition envoyée', cls: 'bg-green-50 text-green-700 border border-green-200' },
 }
 
 // ─── Normalisation du statut ───────────────────────────────────────
@@ -17,7 +17,6 @@ function getStatusMeta(status) {
   const key = typeof status === 'string' ? status.toUpperCase() : status
   return statusMap[key] || statusMap.IN_PROGRESS
 }
-
 
 export default function ClientRequestsStatus() {
   const [items, setItems] = useState([])
@@ -38,13 +37,12 @@ export default function ClientRequestsStatus() {
               <th className="px-4 py-3 font-medium text-gray-600">ID</th>
               <th className="px-4 py-3 font-medium text-gray-600">Statut</th>
               <th className="px-4 py-3 font-medium text-gray-600">Actions</th>
-
             </tr>
           </thead>
           <tbody>
             {items.length === 0 ? (
               <tr>
-                <td className="px-4 py-4 text-gray-500" colSpan={2}>
+                <td className="px-4 py-4 text-gray-500" colSpan={3}>
                   Aucune demande pour le moment.
                 </td>
               </tr>
@@ -59,9 +57,9 @@ export default function ClientRequestsStatus() {
                         {meta.label}
                       </span>
                     </td>
-                                      <td className="px-4 py-3">
+                    <td className="px-4 py-3">
                       <button
-                      onClick={() => navigate('/client?tab=demande&edit=' + row.id)}
+                        onClick={() => navigate('/client?tab=demande&edit=' + row.id)}
                         className="rounded-lg border px-3 py-1 text-sm"
                       >
                         Modifier

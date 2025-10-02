@@ -6,8 +6,8 @@ import { Navigate, useNavigate }      from 'react-router-dom';
 import axios                          from 'axios';
 import { useSearchParams }            from 'react-router-dom';
 import IndepMessagerie from '../components/IndepMessagerie';
-
-
+import ServiceNeedForm   from '../components/ServiceNeedForm';
+import ServiceNeedsList  from '../components/ServiceNeedsList';
 
 export default function ProfilePage() {
   /* ------------------------------------------------------------------ */
@@ -20,8 +20,15 @@ export default function ProfilePage() {
 
   /* Onglet actif ------------------------------------------------------ */
   const [searchParams]     = useSearchParams();
-  const initialTab         = searchParams.get('tab');
-  const [selectedTab, setSelectedTab] = useState(initialTab || 'profil');
+const initialTab = searchParams.get('tab');
+const [selectedTab, setSelectedTab] = useState(initialTab || 'profil');
+
+useEffect(() => {
+  const t = searchParams.get('tab');
+  if (t && t !== selectedTab) setSelectedTab(t);
+}, [searchParams]);
+
+
 
   const navigate = useNavigate();
   const hasToken = !!localStorage.getItem('token');
@@ -138,7 +145,13 @@ async function handleSendSuggestion(e) {
   <React.Fragment key={tab}>
     {tab === 'suggestions' && <div className="my-3 border-t border-gray-200" />}
     <button
-      onClick={() => setSelectedTab(tab)}
+ onClick={() => {
+   setSelectedTab(tab)
+   const params = new URLSearchParams(window.location.search)
+   const other = params.get('otherId')
+   const extra = tab === 'messages' && other ? `&otherId=${other}` : ''
+   navigate(`/profile?tab=${tab}${extra}`, { replace: true })
+ }}
       className={`w-full rounded-xl px-4 py-2 font-semibold text-left ${
         selectedTab === tab
           ? 'bg-blue-100 text-darkBlue'
@@ -166,16 +179,14 @@ async function handleSendSuggestion(e) {
         <div className="flex-1 bg-white rounded-2xl shadow-md p-6 space-y-10">
 
 
-          {/* En-tête + bouton modifier */}
         <div className="mb-8">
-          {/* Titre centré en haut */}
-          {/* Titre + bouton modifier alignés au centre */}
         <div className="flex justify-center items-center gap-4 mb-2">
           <h1 className="text-2xl text-darkBlue font-bold">
             {selectedTab === 'profil'        && 'Mon Profil'}
             {selectedTab === 'experiences'   && 'Mes Expériences'}
             {selectedTab === 'realisations'  && 'Mes Réalisations'}
-            {selectedTab === 'prestations'   && 'Mes Prestations'}
+            {selectedTab === 'prestations'   && 'Prestations'}
+            {selectedTab === 'messages'    && 'Messagerie'}
             {selectedTab === 'suggestions'  && 'Suggestions'}
 
           </h1>
@@ -450,21 +461,31 @@ async function handleSendSuggestion(e) {
             </Section>
           )}
 
-          {/* ─────────────────────────── PRESTATIONS ──────────────────── */}
-          {selectedTab === 'prestations' && (
-            <Section title="Prestations">
-              {prestations.length ? (
-                prestations.map((p, i) => (
-                  <p key={i} className="mb-2">
-                    Je suis capable d’assurer <strong>{p.type}</strong> pour{' '}
-                    <strong>{p.tech}</strong> à un niveau <strong>{p.level}</strong>.
-                  </p>
-                ))
-              ) : (
-                <p className="text-gray-500 italic">Aucune prestation renseignée</p>
-              )}
-            </Section>
-          )}
+         {/* ─────────────────────────── PRESTATIONS ──────────────────── */}
+{selectedTab === 'prestations' && (
+  <>
+    <Section title="Je propose ces prestations">
+      {prestations.length ? (
+        prestations.map((p, i) => (
+          <p key={i} className="mb-2">
+            Je suis capable d’assurer <strong>{p.type}</strong> pour{' '}
+            <strong>{p.tech}</strong> à un niveau <strong>{p.level}</strong>.
+          </p>
+        ))
+      ) : (
+        <p className="text-gray-500 italic">Aucune prestation renseignée</p>
+      )}
+    </Section>
+
+    <Section title="Mon besoin en prestations">
+      <ServiceNeedForm />
+      <ServiceNeedsList onContact={(candidateIds, needId) => {
+        candidateIds.forEach((uid) => window.open(`/messages/${uid}?fromNeed=${needId}`, '_blank'))
+      }} />
+    </Section>
+  </>
+)}
+
           
         {/* ─────────────────────────── MESSAGERIE ──────────────────── */}
         {selectedTab === 'messages' && (

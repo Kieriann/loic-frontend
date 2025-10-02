@@ -6,8 +6,7 @@ const tabs = [
   { key: 'profile', label: 'Profil' },
   { key: 'demande', label: 'Faire une demande' },
   { key: 'statut', label: 'Statut de mes demandes' },
-// { key: 'messages', label: 'Messagerie' },
-
+  // { key: 'messages', label: 'Messagerie' },
 ]
 
 export default function ClientSidebar({ activeTab, onChange }) {
@@ -15,14 +14,13 @@ export default function ClientSidebar({ activeTab, onChange }) {
 
   useEffect(() => {
     const fetchCount = () => {
-      axios.get('/api/messages/unread/count', { withCredentials: true })
+      axios
+        .get('/api/messages/unread/count', { withCredentials: true })
         .then(res => setUnreadCount(res.data.unreadCount))
         .catch(err => console.error(err))
     }
-
     fetchCount()
     const interval = setInterval(fetchCount, 5000)
-
     return () => clearInterval(interval)
   }, [])
 
