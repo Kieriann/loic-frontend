@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import cx from 'classnames'
 import CitySelect from './CitySelect'
 import { createClientRequest } from '../../api'
 import { getClientRequest, updateClientRequest } from '../../api/clientRequests'
 import { computeShortlist } from '../../api/shortlist'
+
 
 export default function ClientRequestForm() {
   const [searchParams] = useSearchParams()
@@ -24,14 +25,14 @@ export default function ClientRequestForm() {
   const [locationWeight, setLocationWeight] = useState(0)
   const [city, setCity] = useState(null)
 
-// Technologies (par onglet)
-const [techRowsByKind, setTechRowsByKind] = useState({
-  expertise:   [{ technology: '', level: 'junior', weight: 1 }],
-  mission:     [{ technology: '', level: 'junior', weight: 1 }],
-  preembauche: [{ technology: '', level: 'junior', weight: 1 }],
-  alternance:  [{ technology: '', level: 'junior', weight: 1 }],
-})
-const techRows = techRowsByKind[kind] || techRowsByKind.expertise
+  // Technologies (par onglet)
+  const [techRowsByKind, setTechRowsByKind] = useState({
+    expertise:   [{ technology: '', level: 'junior', weight: 1 }],
+    mission:     [{ technology: '', level: 'junior', weight: 1 }],
+    preembauche: [{ technology: '', level: 'junior', weight: 1 }],
+    alternance:  [{ technology: '', level: 'junior', weight: 1 }],
+  })
+  const techRows = techRowsByKind[kind] || techRowsByKind.expertise
 
   // Expertise
   const [expertiseObjective, setExpertiseObjective] = useState('')
@@ -51,16 +52,35 @@ const techRows = techRowsByKind[kind] || techRowsByKind.expertise
 
   // UI
   const [loading, setLoading] = useState(false)
+
+
   const [successId, setSuccessId] = useState(null)
   const [error, setError] = useState('')
   const [showValidationMsg, setShowValidationMsg] = useState(false)
+  const shortlistRef = useRef(null)
+
 
   // Shortlist (Cas 2 direct)
-const [shortlistByKind, setShortlistByKind] = useState({
-  expertise: [], mission: [], preembauche: [], alternance: []
-})
-const shortlist = shortlistByKind[kind] || []
+  const [shortlistByKind, setShortlistByKind] = useState({
+    expertise: [], mission: [], preembauche: [], alternance: []
+  })
+  const shortlist = shortlistByKind[kind] || []
   const [loadingShortlist, setLoadingShortlist] = useState(false)
+    useEffect(() => {
+  if (!loadingShortlist && (shortlist?.length || 0) > 0) {
+    shortlistRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+}, [loadingShortlist, shortlist])
+  // ─── Click shortlist avec validation visible ───────────────────────
+const onClickShortlist = () => {
+  if (!canSearch) {
+    setShowValidationMsg(true)
+    return
+  }
+  setShowValidationMsg(false)
+  handleComputeShortlist()
+}
+
   const [weights, setWeights] = useState({ skills: 5, tjm: 3, location: 2, availability: 2 })
 
   /* ── Chargement édition ────────────────────────────────────────── */
@@ -89,19 +109,18 @@ const shortlist = shortlistByKind[kind] || []
       }
 
       const rows = Array.isArray(r.technologies) ? r.technologies : []
-if (rows.length) {
-  const mapped = rows.map(t => ({
-    technology: t.technology || '',
-    level: (t.level || 'JUNIOR').toLowerCase(),
-    weight: Number.isFinite(t.weight) ? t.weight : 1,
-  }))
-  const kindKey =
-    r.kind === 'MISSION' ? 'mission' :
-    r.kind === 'PREEMBAUCHE' ? 'preembauche' :
-    r.kind === 'ALTERNANCE' ? 'alternance' : 'expertise'
-  setTechRowsByKind(prev => ({ ...prev, [kindKey]: mapped }))
-}
-
+      if (rows.length) {
+        const mapped = rows.map(t => ({
+          technology: t.technology || '',
+          level: (t.level || 'JUNIOR').toLowerCase(),
+          weight: Number.isFinite(t.weight) ? t.weight : 1,
+        }))
+        const kindKey =
+          r.kind === 'MISSION' ? 'mission' :
+          r.kind === 'PREEMBAUCHE' ? 'preembauche' :
+          r.kind === 'ALTERNANCE' ? 'alternance' : 'expertise'
+        setTechRowsByKind(prev => ({ ...prev, [kindKey]: mapped }))
+      }
 
       setExpertiseObjective(r.expertiseObjective ?? '')
       setExpertiseDuration(r.expertiseDuration ?? '')
@@ -118,89 +137,89 @@ if (rows.length) {
     })().catch(console.error)
   }, [editId])
 
-const updateRow = (idx, patch) => {
-  setTechRowsByKind(prev => {
-    const rows = (prev[kind] || []).map((r, i) => (i === idx ? { ...r, ...patch } : r))
+  const updateRow = (idx, patch) => {
+    setTechRowsByKind(prev => {
+      const rows = (prev[kind] || []).map((r, i) => (i === idx ? { ...r, ...patch } : r))
+      return { ...prev, [kind]: rows }
+    })
+  }
+  const addRow = () => setTechRowsByKind(prev => {
+    const rows = [...(prev[kind] || []), { technology: '', level: 'junior', weight: 1 }]
     return { ...prev, [kind]: rows }
   })
-}
-const addRow = () => setTechRowsByKind(prev => {
-  const rows = [...(prev[kind] || []), { technology: '', level: 'junior', weight: 1 }]
-  return { ...prev, [kind]: rows }
-})
-const removeRow = idx => setTechRowsByKind(prev => {
-  const rows = (prev[kind] || []).filter((_, i) => i !== idx)
-  return { ...prev, [kind]: rows.length ? rows : [{ technology: '', level: 'junior', weight: 1 }] }
-})
+  const removeRow = idx => setTechRowsByKind(prev => {
+    const rows = (prev[kind] || []).filter((_, i) => i !== idx)
+    return { ...prev, [kind]: rows.length ? rows : [{ technology: '', level: 'junior', weight: 1 }] }
+  })
 
-// ─── Helpers validation ────────────────────────────────────────────
-const isFilled = (v) => {
-  if (typeof v === 'string') return v.trim() !== ''
-  if (typeof v === 'number') return !Number.isNaN(v)
-  if (typeof v === 'boolean') return true
-  if (Array.isArray(v)) return v.length > 0
-  if (v && typeof v === 'object') return true
-  return false
-}
+  // ─── Helpers validation ────────────────────────────────────────────
+  const isFilled = (v) => {
+    if (typeof v === 'string') return v.trim() !== ''
+    if (typeof v === 'number') return !Number.isNaN(v)
+    if (typeof v === 'boolean') return true
+    if (Array.isArray(v)) return v.length > 0
+    if (v && typeof v === 'object') return true
+    return false
+  }
 
-/* ── Validation ───────────────────────────────────────────────── */
-const hasAtLeastOneTech = techRows.some(r => (r.technology || '').trim())
-const techOk = hasAtLeastOneTech && techRows.every(r => {
-  if (!(r.technology || '').trim()) return true
-  return isFilled(r.level) && isFilled(String(r.weight))
-})
+  /* ── Validation ───────────────────────────────────────────────── */
+  const hasAtLeastOneTech = techRows.some(r => (r.technology || '').trim())
+  const techOk = hasAtLeastOneTech && techRows.every(r => {
+    if (!(r.technology || '').trim()) return true
+    return isFilled(r.level) && isFilled(String(r.weight))
+  })
 
-const tjmRequired = kind === 'mission' || kind === 'expertise'
-const tjmOk = !tjmRequired
-  ? true
-  : (
-      String(tjmMin).trim() !== '' &&
-      String(tjmMax).trim() !== '' &&
-      Number(tjmMin) >= 0 &&
-      Number(tjmMax) >= Number(tjmMin) &&
-      isFilled(String(tjmWeight))
-    )
+  const tjmRequired = kind === 'mission' || kind === 'expertise'
+  const tjmOk = !tjmRequired
+    ? true
+    : (
+        String(tjmMin).trim() !== '' &&
+        String(tjmMax).trim() !== '' &&
+        Number(tjmMin) >= 0 &&
+        Number(tjmMax) >= Number(tjmMin) &&
+        isFilled(String(tjmWeight))
+      )
 
-const locationOk = remote
-  ? (
-      isFilled(String(remoteDaysCount)) &&
-      Number(remoteDaysCount) >= 1 &&
-      Number(remoteDaysCount) <= 5 &&
-      isFilled(String(locationWeight))
-    )
-  : (
-      !!(city && city.name) &&
-      isFilled(String(locationWeight))
-    )
+  const locationOk = remote
+    ? (
+        isFilled(String(remoteDaysCount)) &&
+        Number(remoteDaysCount) >= 1 &&
+        Number(remoteDaysCount) <= 5 &&
+        isFilled(String(locationWeight))
+      )
+    : (
+        !!(city && city.name) &&
+        isFilled(String(locationWeight))
+      )
 
-const expertiseOk =
-  isFilled(expertiseObjective) &&
-  isFilled(expertiseDuration)
+  const expertiseOk =
+    isFilled(expertiseObjective) &&
+    isFilled(expertiseDuration)
 
-const preembaucheOk =
-  isFilled(prehireJobTitle) &&
-  isFilled(prehireContractType) &&
-  isFilled(prehireTrialPeriod) &&
-  isFilled(prehireCompensation)
+  const preembaucheOk =
+    isFilled(prehireJobTitle) &&
+    isFilled(prehireContractType) &&
+    isFilled(prehireTrialPeriod) &&
+    isFilled(prehireCompensation)
 
-const alternanceOk =
-  isFilled(alternanceJobTitle) &&
-  isFilled(alternanceDescription) &&
-  (alternanceRemuMode !== 'SUPERIEURE' || isFilled(alternanceRemuAmount))
+  const alternanceOk =
+    isFilled(alternanceJobTitle) &&
+    isFilled(alternanceDescription) &&
+    (alternanceRemuMode !== 'SUPERIEURE' || isFilled(alternanceRemuAmount))
 
-const canSearch =
-  kind === 'mission'
-    ? (tjmOk && locationOk && techOk)
-    : kind === 'expertise'
-    ? (tjmOk && locationOk && techOk && expertiseOk)
-    : kind === 'preembauche'
-    ? (locationOk && techOk && preembaucheOk)
-    : (locationOk && techOk && alternanceOk) // alternance
+  const canSearch =
+    kind === 'mission'
+      ? (tjmOk && locationOk && techOk)
+      : kind === 'expertise'
+      ? (tjmOk && locationOk && techOk && expertiseOk)
+      : kind === 'preembauche'
+      ? (locationOk && techOk && preembaucheOk)
+      : (locationOk && techOk && alternanceOk) // alternance
 
   /* ── Soumission ───────────────────────────────────────────────── */
-  const submit = async e => {
-    e.preventDefault()
-    if (!canSubmit || loading) return
+const submit = async e => {
+  e.preventDefault()
+  if (!canSearch || loading) return
     setError('')
     setLoading(true)
     try {
@@ -268,12 +287,12 @@ const canSearch =
         setRemoteDaysCount(1)
         setLocationWeight(0)
         setCity(null)
-setTechRowsByKind({
-  expertise:   [{ technology: '', level: 'junior', weight: 1 }],
-  mission:     [{ technology: '', level: 'junior', weight: 1 }],
-  preembauche: [{ technology: '', level: 'junior', weight: 1 }],
-  alternance:  [{ technology: '', level: 'junior', weight: 1 }],
-})
+        setTechRowsByKind({
+          expertise:   [{ technology: '', level: 'junior', weight: 1 }],
+          mission:     [{ technology: '', level: 'junior', weight: 1 }],
+          preembauche: [{ technology: '', level: 'junior', weight: 1 }],
+          alternance:  [{ technology: '', level: 'junior', weight: 1 }],
+        })
         setExpertiseObjective('')
         setExpertiseDuration('')
         setPrehireJobTitle('')
@@ -297,61 +316,62 @@ setTechRowsByKind({
     if (!canSearch) return
     try {
       setLoadingShortlist(true)
-const criteria = {
-  kind:
-    String(kind || 'expertise').toLowerCase() === 'mission'
-      ? 'MISSION'
-      : String(kind || 'expertise').toLowerCase() === 'preembauche'
-      ? 'PREEMBAUCHE'
-      : 'EXPERTISE',
-  cityId: (city && (city.id || city.value)) || null,
-  remote,
-  remoteDaysCount: Number(remoteDaysCount) || 0,
-  tjmMin: tjmMin ? Number(tjmMin) : null,
-  tjmMax: tjmMax ? Number(tjmMax) : null,
+      const criteria = {
+        kind:
+          String(kind || 'expertise').toLowerCase() === 'mission'
+            ? 'MISSION'
+            : String(kind || 'expertise').toLowerCase() === 'preembauche'
+            ? 'PREEMBAUCHE'
+            : 'EXPERTISE',
+        cityId: (city && (city.id || city.value)) || null,
+        remote,
+        remoteDaysCount: Number(remoteDaysCount) || 0,
+        tjmMin: tjmMin ? Number(tjmMin) : null,
+        tjmMax: tjmMax ? Number(tjmMax) : null,
 
-technologies: techRows
-  .filter(r => (r.technology || '').trim())
-  .map(r => ({
-    name: String(r.technology).trim().toLowerCase(),
-    level: String(r.level || 'medium').toLowerCase(),
-    weight: Math.max(1, Math.min(10, Number(r.weight) || 1)),
-  })),
+        technologies: techRows
+          .filter(r => (r.technology || '').trim())
+          .map(r => ({
+            name: String(r.technology).trim().toLowerCase(),
+            level: String(r.level || 'medium').toLowerCase(),
+            weight: Math.max(1, Math.min(10, Number(r.weight) || 1)),
+          })),
+      }
 
-}
+      const skillImportance = Math.max(
+        1,
+        ...techRows.filter(r => (r.technology || '').trim()).map(r => Number(r.weight) || 0)
+      )
 
-const skillImportance = Math.max(
-  1,
-  ...techRows.filter(r => (r.technology || '').trim()).map(r => Number(r.weight) || 0)
-)
+      const derivedWeights = {
+        skills: skillImportance,
+        tjm: Number(tjmWeight) || 0,
+        location: Number(locationWeight) || 0,
+        availability: Number(weights.availability) || 0,
+      }
+      const res = await computeShortlist({ criteria, weights: derivedWeights })
 
-const derivedWeights = {
-  skills: skillImportance,
-  tjm: Number(tjmWeight) || 0,
-  location: Number(locationWeight) || 0,
-  availability: Number(weights.availability) || 0,
-}
-const res = await computeShortlist({ criteria, weights: derivedWeights })
+      setShortlistByKind(prev => ({ ...prev, [kind]: res || [] }))
 
-setShortlistByKind(prev => ({ ...prev, [kind]: res || [] }))
     } catch {
-      setShortlist([])
-    } finally {
+      setShortlistByKind(prev => ({ ...prev, [kind]: [] }))    } finally {
       setLoadingShortlist(false)
     }
   }
+  
   const locationLabel = remote ? 'télétravail' : 'localisation'
 
-  // ─── Click shortlist avec validation visible ───────────────────────
-const onClickShortlist = () => {
-  if (!canSearch) {
-    setShowValidationMsg(true)
-    return
-  }
-  setShowValidationMsg(false)
-  handleComputeShortlist()
-}
 
+
+
+  // ─── Helpers affichage shortlist ───────────────────────────────────
+  const getSkillsTotal = (r) => {
+    if (!r?.details) return 0
+    if (typeof r.details.skills === 'object') return r.details.skills?.total ?? 0
+    return r.details.skills ?? 0
+  }
+  const getPerTech = (r) => (typeof r?.details?.skills === 'object') ? (r.details.skills.details || []) : []
+  const getMismatches = (r) => getPerTech(r).filter(d => (d.match ?? 0) < 100)
 
   /* ── UI ────────────────────────────────────────────────────────── */
   return (
@@ -363,7 +383,7 @@ const onClickShortlist = () => {
             Vous cherchez
           </label>
           <div className="flex flex-wrap items-center gap-6">
-                        <label className="inline-flex items-center gap-2">
+            <label className="inline-flex items-center gap-2">
               <input type="radio" value="mission" checked={kind==='mission'} onChange={()=>setKind('mission')} />
               <span>une mission</span>
             </label>
@@ -614,30 +634,28 @@ const onClickShortlist = () => {
           )}
         </div>
 
-{/* Actions */}
-<div className="pt-4 flex justify-center">
-  {showValidationMsg && !canSearch && (
-  <p className="w-3/4 max-w-3xl mx-auto mb-2 text-sm text-red-600 text-center">
-    Remplissez tous les champs de l’onglet pour lancer la recherche.
-  </p>
-)}
-<button
-  type="button"
-  onClick={onClickShortlist}
-  disabled={loadingShortlist}
-  className={cx(
-    "w-3/4 max-w-3xl inline-flex items-center justify-center rounded-2xl px-6 py-3 font-semibold text-base md:text-lg shadow-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8EBDFC] focus-visible:ring-offset-1 disabled:opacity-60",
-    canSearch
-      ? "bg-[#7CB2F7] hover:bg-[#6AA4F3] active:bg-[#5C99E8] text-black border-[#5C99E8]/60"
-      : "bg-[#CBE0FF] text-[#5B6B8A] border-[#8EBDFC]/40"
-  )}
->
-  {loadingShortlist ? 'Calcul…' : 'Voir la shortlist'}
-</button>
-</div>
-<div className="mx-auto my-6 h-[1px] w-3/4 max-w-3xl bg-[#8EBDFC]/40" />
-
-
+        {/* Actions */}
+        <div className="pt-4 flex justify-center">
+          {showValidationMsg && !canSearch && (
+            <p className="w-3/4 max-w-3xl mx-auto mb-2 text-sm text-red-600 text-center">
+              Remplissez tous les champs de l’onglet pour lancer la recherche.
+            </p>
+          )}
+          <button
+            type="button"
+            onClick={onClickShortlist}
+            disabled={loadingShortlist}
+            className={cx(
+              "w-3/4 max-w-3xl inline-flex items-center justify-center rounded-2xl px-6 py-3 font-semibold text-base md:text-lg shadow-lg border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#8EBDFC] focus-visible:ring-offset-1 disabled:opacity-60",
+              canSearch
+                ? "bg-[#7CB2F7] hover:bg-[#6AA4F3] active:bg-[#5C99E8] text-black border-[#5C99E8]/60"
+                : "bg-[#CBE0FF] text-[#5B6B8A] border-[#8EBDFC]/40"
+            )}
+          >
+            {loadingShortlist ? 'Calcul…' : 'Voir la shortlist'}
+          </button>
+        </div>
+        <div className="mx-auto my-6 h-[1px] w-3/4 max-w-3xl bg-[#8EBDFC]/40" />
 
         {/* Messages */}
         {successId && (
@@ -648,40 +666,142 @@ const onClickShortlist = () => {
         {error && <div className="text-red-600">{error}</div>}
 
 {/* Résultat shortlist */}
-{!loadingShortlist && shortlist?.length > 0 && (
-  <div className="mt-6">
-<h3 className="text-2xl md:text-3xl font-semibold text-center text-[#8EBDFC] mb-2">Top 10</h3>
-<div className="mx-auto mb-4 h-1 w-16 rounded-full bg-[#8EBDFC]" />
-    <div className="space-y-3">
-      {shortlist.map(r => (
-<div key={r.userId} className="rounded-2xl border border-[#8EBDFC]/30 bg-white shadow-sm p-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Profil</div>
-              <div className="text-lg font-semibold">ID {r.userId}</div>
-            </div>
-<span className="inline-flex items-center rounded-full border border-[#8EBDFC] bg-[#8EBDFC]/10 px-3 py-1 text-sm font-semibold text-blue-700">
-              score {r.score}%
-            </span>
-          </div>
+{!loadingShortlist && (shortlist?.length > 0) && (
+  <div ref={shortlistRef} className="mt-6">
+    <h3 className="text-2xl md:text-3xl font-semibold text-center text-[#8EBDFC] mb-2">Top 10</h3>
 
-          {r.details && (
-            <div className="mt-3 flex flex-wrap gap-2 text-sm">
-              <span className="inline-flex items-center rounded-full bg-[#8EBDFC]/10 text-blue-800
- px-3 py-1">skills {r.details.skills}%</span>
-              <span className="inline-flex items-center rounded-full bg-[#8EBDFC]/10 text-blue-800
- px-3 py-1">tjm {r.details.tjm}%</span>
-              <span className="inline-flex items-center rounded-full bg-[#8EBDFC]/10 text-blue-800
- px-3 py-1">{locationLabel} {r.details.location}%</span>
-              <span className="inline-flex items-center rounded-fullbg-[#8EBDFC]/10 text-blue-800
- px-3 py-1">dispo {r.details.availabilityText}</span>
+            <div className="mx-auto mb-4 h-1 w-16 rounded-full bg-[#8EBDFC]" />
+
+            {/* Filtrer: masquer profils avec skills à 0% */}
+            <div className="space-y-3">
+              {shortlist
+                .filter(r => getSkillsTotal(r) > 0)
+                .map(r => {
+                  const skillsTotal = getSkillsTotal(r)
+                  const perTech = getPerTech(r)
+                  const mismatches = perTech.filter(d => (d.match ?? 0) < 100)
+                  const availText = r?.details?.availabilityText || 'oui'
+                  const hasFutureDate = availText !== 'oui'
+
+                  return (
+                    <div key={r.userId} className="rounded-2xl border border-[#8EBDFC]/30 bg-white shadow-sm p-4">
+                  {/* En-tête : bandeau gradient avec profil + scores */}
+                  <div className="rounded-xl bg-gradient-to-r from-[#F5FAFF] to-[#ECF3FF] border border-[#8EBDFC]/40 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <div className="text-xs text-gray-500">Profil</div>
+                      <div className="text-lg font-semibold">
+                        {r.fullName || `ID ${r.userId}`}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="inline-flex items-center rounded-full border border-[#8EBDFC] bg-[#8EBDFC]/10 px-3 py-1 text-sm font-semibold text-blue-700">
+                        score {r.score}%
+                      </span>
+
+                      <span className="h-6 w-px bg-[#8EBDFC]/30 mx-1 hidden sm:block" />
+
+                      <span className="inline-flex items-center rounded-full bg-[#EAF2FF] text-blue-800 px-3 py-1 text-sm">
+                        skills {skillsTotal ?? 0}%
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-[#EAF2FF] text-blue-800 px-3 py-1 text-sm">
+                        tjm {r.details?.tjm ?? 0}%
+                      </span>
+                      <span className="inline-flex items-center rounded-full bg-[#EAF2FF] text-blue-800 px-3 py-1 text-sm">
+                        {locationLabel} {r.details?.location ?? 0}%
+                      </span>
+
+
+                      <span className="h-6 w-px bg-[#8EBDFC]/30 mx-1 hidden sm:block" />
+
+                      {hasFutureDate ? (
+                        <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-orange-100 text-orange-800">
+                          dispo le {availText}
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-green-100 text-green-800">
+                          disponible
+                        </span>
+                      )}
+
+                    </div>
+                  </div>
+
+
+{/* Détails étalés */}
+<div className="mt-4 space-y-3 text-sm">
+
+{(r.details?.skills?.total ?? 0) < 100 && perTech.length > 0 && (
+  <div>
+    <div className="font-semibold text-gray-800 mb-2">Détails skills:</div>
+    <div className="rounded-lg border border-gray-200 overflow-hidden">
+      <div className="grid grid-cols-12 bg-gray-50 text-xs font-medium text-gray-600 px-3 py-2">
+        <div className="col-span-4">Technologie</div>
+        <div className="col-span-4">Attendu vs Profil</div>
+        <div className="col-span-4 text-right">Match</div>
+      </div>
+      <ul>
+        {[...perTech].sort((a, b) => (b.match ?? 0) - (a.match ?? 0)).map((d, i) => (
+          <li
+            key={`${d.techName}-${i}`}
+            className="grid grid-cols-12 items-center px-3 py-2 border-t border-gray-100"
+          >
+            <div className="col-span-4 text-sm text-gray-800 font-semibold">{d.techName}</div>
+            <div className="col-span-4 text-xs text-gray-600">
+              <span className="capitalize">{d.requestedLevel || '—'}</span>
+              <span className="mx-1 text-gray-400">→</span>
+              <span className="capitalize font-medium text-gray-800">{d.profileLevel || '—'}</span>
             </div>
-          )}
-        </div>
-      ))}
+            <div className="col-span-4">
+              <div className="flex items-center justify-end gap-3">
+                {d.match === 0 ? (
+                  <span className="text-sm font-semibold text-red-600 flex items-center gap-1">
+                    ✖ 0%
+                  </span>
+                ) : (
+                  <>
+                    <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-2 bg-[#7CB2F7]"
+                        style={{ width: `${Math.max(0, Math.min(100, d.match || 0))}%` }}
+                      />
+                    </div>
+                    <span className="tabular-nums text-sm font-semibold">{d.match}%</span>
+                  </>
+                )}
+              </div>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   </div>
 )}
+
+
+</div>
+
+
+
+                        {/* TJM */}
+                        <div>
+                          {(r?.details?.tjm ?? 0) < 100 && r.details?.tjmValue && (
+                            <>
+                              <div className="font-semibold text-gray-800 mb-2 pt-4">Détails TJM:</div>
+                              <div className="px-3 py-2 text-sm text-gray-700">
+                                <span className="font-medium">Mini: {r.details.tjmValue} €</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+
+
+                      </div>
+                  )
+                })}
+            </div>
+          </div>
+        )}
         {loadingShortlist && <p className="mt-4 text-sm">Calcul de la shortlist…</p>}
       </form>
     </section>
