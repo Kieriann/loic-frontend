@@ -784,9 +784,14 @@ const submit = async e => {
   <div className="font-semibold text-gray-800 mb-2">Détails du profil :</div>
   <div className="px-3 py-2 text-sm text-gray-700 space-y-1">
     <div>
-      <span className="font-medium">
-        TJM du profil : {r.details?.tjmValue ? `${r.details.tjmValue} €` : '—'}
-      </span>
+<span className="font-medium">
+  TJM du profil : {r.details?.tjmMin && r.details?.tjmMax
+    ? `${r.details.tjmMin}–${r.details.tjmMax} €`
+    : r.details?.tjmValue
+      ? `${r.details.tjmValue} €`
+      : '—'}
+</span>
+
     </div>
     <div>
       <span className="font-medium">
