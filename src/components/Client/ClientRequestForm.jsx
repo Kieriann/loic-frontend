@@ -777,25 +777,26 @@ const submit = async e => {
     </div>
   </div>
 )}
-
-
 </div>
 
-
-
-                        {/* TJM */}
-                        <div>
-                          {(r?.details?.tjm ?? 0) < 100 && r.details?.tjmValue && (
-                            <>
-                              <div className="font-semibold text-gray-800 mb-2 pt-4">Détails TJM:</div>
-                              <div className="px-3 py-2 text-sm text-gray-700">
-                                <span className="font-medium">Mini: {r.details.tjmValue} €</span>
-                              </div>
-                            </>
-                          )}
-                        </div>
-
-
+{/* Détails du profil sélectionné (TJM + télétravail) */}
+<div className="pt-4">
+  <div className="font-semibold text-gray-800 mb-2">Détails du profil :</div>
+  <div className="px-3 py-2 text-sm text-gray-700 space-y-1">
+    <div>
+      <span className="font-medium">
+        TJM du profil : {r.details?.tjmValue ? `${r.details.tjmValue} €` : '—'}
+      </span>
+    </div>
+    <div>
+      <span className="font-medium">
+        Télétravail : {r.details?.teleworkDays
+          ? `${r.details.teleworkDays} jour${r.details.teleworkDays > 1 ? 's' : ''} / semaine`
+          : 'non précisé'}
+      </span>
+    </div>
+  </div>
+</div>
                       </div>
                   )
                 })}

@@ -5,7 +5,7 @@ import axios from 'axios'
 const tabs = [
   { key: 'profile', label: 'Profil' },
   { key: 'demande', label: 'Faire une demande' },
-  { key: 'statut', label: 'Statut de mes demandes' },
+  //{ key: 'statut', label: 'Statut de mes demandes' },
   // { key: 'messages', label: 'Messagerie' },
 ]
 
