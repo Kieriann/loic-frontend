@@ -258,36 +258,27 @@ async function handleSendSuggestion(e) {
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {/* Infos */}
-                <Section title="Informations">
-                  <Line label="Téléphone">{profile.phone}</Line>
-                  <Line label="SIRET">{profile.siret}</Line>
-                  <Line label="En poste">{profile.isEmployed ? 'Oui' : 'Non'}</Line>
-
-
-                  <Line label="Statut">
-                    {profile.workerStatus === 'indep'
-                      ? 'Indépendant'
-                      : profile.workerStatus === 'salarie'
-                      ? 'Salarié'
-                      : null}
-                  </Line>
-                  <Line label="Bio">{profile.bio}</Line>
-                  <Line label="Lien">
-                  {profile.website ? (
-                    <a
-                      href={profile.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-blue-600 underline break-all"
-                    >
-                      {profile.website}
-                    </a>
-                  ) : (
-                    <span className="text-gray-500 italic">Non renseigné</span>
-                  )}
-                </Line>
-
-                </Section>
+<Section title="Informations">
+  <Line label="Téléphone">{profile.phone}</Line>
+  <Line label="SIRET">{profile.siret}</Line>
+  <Line label="En poste">{profile.isEmployed ? 'Oui' : 'Non'}</Line>
+  <Line label="Statut">
+    {profile.workerStatus === 'indep'
+      ? 'Indépendant'
+      : profile.workerStatus === 'salarie'
+      ? 'Salarié'
+      : null}
+  </Line>
+  <Line label="Lien">
+    {profile.website ? (
+      <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline break-all">
+        {profile.website}
+      </a>
+    ) : (
+      <span className="text-gray-500 italic">Non renseigné</span>
+    )}
+  </Line>
+</Section>
 
                 {/* Adresse */}
                 <Section title="Adresse" borderLeft>
@@ -297,6 +288,15 @@ async function handleSendSuggestion(e) {
                   <Line label="Pays">{address.country}</Line>
                 </Section>
               </div>
+              
+{/* Bio pleine largeur */}
+<Section title="Bio">
+  {profile.bio ? (
+    <p className="whitespace-pre-line leading-relaxed">{profile.bio}</p>
+  ) : (
+    <p className="text-gray-500 italic">Non renseigné</p>
+  )}
+</Section>
 
               {/* Tarifs */}
               <Section title="Tarifs journaliers" className="text-center">

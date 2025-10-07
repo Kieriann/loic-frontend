@@ -6,7 +6,6 @@ import { createClientRequest } from '../../api'
 import { getClientRequest, updateClientRequest } from '../../api/clientRequests'
 import { computeShortlist } from '../../api/shortlist'
 
-
 export default function ClientRequestForm() {
   const [searchParams] = useSearchParams()
   const editId = searchParams.get('edit')
@@ -17,12 +16,12 @@ export default function ClientRequestForm() {
   // TJM
   const [tjmMin, setTjmMin] = useState('')
   const [tjmMax, setTjmMax] = useState('')
-  const [tjmWeight, setTjmWeight] = useState(0)
+  const [tjmWeight, setTjmWeight] = useState(1)
 
   // Localisation
   const [remote, setRemote] = useState(true)
   const [remoteDaysCount, setRemoteDaysCount] = useState(1)
-  const [locationWeight, setLocationWeight] = useState(0)
+  const [locationWeight, setLocationWeight] = useState(1)
   const [city, setCity] = useState(null)
 
   // Technologies (par onglet)
@@ -36,7 +35,10 @@ export default function ClientRequestForm() {
 
   // Expertise
   const [expertiseObjective, setExpertiseObjective] = useState('')
-  const [expertiseDuration, setExpertiseDuration] = useState('')
+  const [expertiseBudget, setExpertiseBudget] = useState('')
+  const [expertiseUrgency, setExpertiseUrgency] = useState('moyenne') 
+  const [expertiseUrgencyWeight, setExpertiseUrgencyWeight] = useState(1)
+  const importanceOptions = Array.from({ length: 10 }, (_, i) => i + 1)
 
   // Pré-embauche
   const [prehireJobTitle, setPrehireJobTitle] = useState('')
@@ -47,18 +49,16 @@ export default function ClientRequestForm() {
   // Alternance
   const [alternanceJobTitle, setAlternanceJobTitle] = useState('')
   const [alternanceDescription, setAlternanceDescription] = useState('')
+  const [alternanceStudyLevel, setAlternanceStudyLevel] = useState('') // niveau d’études actuel
   const [alternanceRemuMode, setAlternanceRemuMode] = useState('BAREME') // BAREME | SUPERIEURE
   const [alternanceRemuAmount, setAlternanceRemuAmount] = useState('')
 
   // UI
   const [loading, setLoading] = useState(false)
-
-
   const [successId, setSuccessId] = useState(null)
   const [error, setError] = useState('')
   const [showValidationMsg, setShowValidationMsg] = useState(false)
   const shortlistRef = useRef(null)
-
 
   // Shortlist (Cas 2 direct)
   const [shortlistByKind, setShortlistByKind] = useState({
@@ -66,20 +66,22 @@ export default function ClientRequestForm() {
   })
   const shortlist = shortlistByKind[kind] || []
   const [loadingShortlist, setLoadingShortlist] = useState(false)
-    useEffect(() => {
-  if (!loadingShortlist && (shortlist?.length || 0) > 0) {
-    shortlistRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-  }
-}, [loadingShortlist, shortlist])
+
+  useEffect(() => {
+    if (!loadingShortlist && (shortlist?.length || 0) > 0) {
+      shortlistRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [loadingShortlist, shortlist])
+
   // ─── Click shortlist avec validation visible ───────────────────────
-const onClickShortlist = () => {
-  if (!canSearch) {
-    setShowValidationMsg(true)
-    return
+  const onClickShortlist = () => {
+    if (!canSearch) {
+      setShowValidationMsg(true)
+      return
+    }
+    setShowValidationMsg(false)
+    handleComputeShortlist()
   }
-  setShowValidationMsg(false)
-  handleComputeShortlist()
-}
 
   const [weights, setWeights] = useState({ skills: 5, tjm: 3, location: 2, availability: 2 })
 
@@ -96,12 +98,12 @@ const onClickShortlist = () => {
 
       setTjmMin(r.tjmMin ?? '')
       setTjmMax(r.tjmMax ?? '')
-      setTjmWeight(r.tjmWeight ?? 0)
+      setTjmWeight(Math.max(1, Math.min(10, Number(r.tjmWeight ?? 1))))
 
       const isRemote = (r.locationMode || 'REMOTE') === 'REMOTE'
       setRemote(isRemote)
       setRemoteDaysCount(r.remoteDaysCount ?? 1)
-      setLocationWeight(r.locationWeight ?? 0)
+      setLocationWeight(Math.max(1, Math.min(10, Number(r.locationWeight ?? 1))))
       if (!isRemote && r.city) {
         setCity({ id: r.city.id, name: r.city.name, country: r.city.countryCode })
       } else {
@@ -113,7 +115,7 @@ const onClickShortlist = () => {
         const mapped = rows.map(t => ({
           technology: t.technology || '',
           level: (t.level || 'JUNIOR').toLowerCase(),
-          weight: Number.isFinite(t.weight) ? t.weight : 1,
+          weight: Math.max(1, Math.min(10, Number.isFinite(t.weight) ? t.weight : 1)),
         }))
         const kindKey =
           r.kind === 'MISSION' ? 'mission' :
@@ -123,7 +125,9 @@ const onClickShortlist = () => {
       }
 
       setExpertiseObjective(r.expertiseObjective ?? '')
-      setExpertiseDuration(r.expertiseDuration ?? '')
+      setExpertiseBudget(r.expertiseBudget ?? '')
+      setExpertiseUrgency(r.expertiseUrgency ?? 'moyenne')
+      setExpertiseUrgencyWeight(Math.max(1, Math.min(10, Number(r.expertiseUrgencyWeight ?? 1))))
 
       setPrehireJobTitle(r.prehireJobTitle ?? '')
       setPrehireContractType(r.prehireContractType ?? '')
@@ -132,6 +136,7 @@ const onClickShortlist = () => {
 
       setAlternanceJobTitle(r.alternanceJobTitle ?? '')
       setAlternanceDescription(r.alternanceDescription ?? '')
+      setAlternanceStudyLevel(r.alternanceStudyLevel ?? '')
       setAlternanceRemuMode(r.alternanceRemuMode ?? 'BAREME')
       setAlternanceRemuAmount(r.alternanceRemuAmount ?? '')
     })().catch(console.error)
@@ -169,7 +174,8 @@ const onClickShortlist = () => {
     return isFilled(r.level) && isFilled(String(r.weight))
   })
 
-  const tjmRequired = kind === 'mission' || kind === 'expertise'
+  // TJM requis uniquement pour "mission"
+  const tjmRequired = kind === 'mission'
   const tjmOk = !tjmRequired
     ? true
     : (
@@ -194,7 +200,10 @@ const onClickShortlist = () => {
 
   const expertiseOk =
     isFilled(expertiseObjective) &&
-    isFilled(expertiseDuration)
+    String(expertiseBudget).trim() !== '' &&
+    Number(expertiseBudget) >= 0 &&
+    ['faible','moyenne','forte'].includes(String(expertiseUrgency)) &&
+    isFilled(String(expertiseUrgencyWeight))
 
   const preembaucheOk =
     isFilled(prehireJobTitle) &&
@@ -211,15 +220,15 @@ const onClickShortlist = () => {
     kind === 'mission'
       ? (tjmOk && locationOk && techOk)
       : kind === 'expertise'
-      ? (tjmOk && locationOk && techOk && expertiseOk)
+      ? (techOk && expertiseOk) // pas de TJM ni localisation
       : kind === 'preembauche'
       ? (locationOk && techOk && preembaucheOk)
-      : (locationOk && techOk && alternanceOk) // alternance
+      : (locationOk && techOk && alternanceOk)
 
   /* ── Soumission ───────────────────────────────────────────────── */
-const submit = async e => {
-  e.preventDefault()
-  if (!canSearch || loading) return
+  const submit = async e => {
+    e.preventDefault()
+    if (!canSearch || loading) return
     setError('')
     setLoading(true)
     try {
@@ -251,9 +260,15 @@ const submit = async e => {
       const payload =
         kindUpper === 'EXPERTISE'
           ? {
-              ...payloadBase,
+              // pas de TJM ni de localisation pour expertise
+              kind: kindUpper,
+              tjmMin: null,
+              tjmMax: null,
+              technologies,
               expertiseObjective,
-              expertiseDuration,
+              expertiseBudget: String(expertiseBudget).trim() === '' ? null : Number(expertiseBudget),
+              expertiseUrgency,
+              expertiseUrgencyWeight: Math.max(0, Math.min(10, Number(expertiseUrgencyWeight) || 0)),
             }
           : kindUpper === 'PREEMBAUCHE'
           ? {
@@ -268,6 +283,7 @@ const submit = async e => {
               ...payloadBase,
               alternanceJobTitle,
               alternanceDescription,
+              alternanceStudyLevel,
               alternanceRemuMode, // 'BAREME' | 'SUPERIEURE'
               alternanceRemuAmount: alternanceRemuMode === 'SUPERIEURE' ? alternanceRemuAmount : null,
             }
@@ -282,10 +298,10 @@ const submit = async e => {
       if (!editId) {
         setTjmMin('')
         setTjmMax('')
-        setTjmWeight(0)
+        setTjmWeight(1)
         setRemote(true)
         setRemoteDaysCount(1)
-        setLocationWeight(0)
+        setLocationWeight(1)
         setCity(null)
         setTechRowsByKind({
           expertise:   [{ technology: '', level: 'junior', weight: 1 }],
@@ -294,13 +310,16 @@ const submit = async e => {
           alternance:  [{ technology: '', level: 'junior', weight: 1 }],
         })
         setExpertiseObjective('')
-        setExpertiseDuration('')
+        setExpertiseBudget('')
+        setExpertiseUrgency('moyenne')
+        setExpertiseUrgencyWeight(1)
         setPrehireJobTitle('')
         setPrehireContractType('')
         setPrehireTrialPeriod('')
         setPrehireCompensation('')
         setAlternanceJobTitle('')
         setAlternanceDescription('')
+        setAlternanceStudyLevel('')
         setAlternanceRemuMode('BAREME')
         setAlternanceRemuAmount('')
       }
@@ -322,12 +341,16 @@ const submit = async e => {
             ? 'MISSION'
             : String(kind || 'expertise').toLowerCase() === 'preembauche'
             ? 'PREEMBAUCHE'
+            : String(kind || 'expertise').toLowerCase() === 'alternance'
+            ? 'ALTERNANCE'
             : 'EXPERTISE',
-        cityId: (city && (city.id || city.value)) || null,
-        remote,
-        remoteDaysCount: Number(remoteDaysCount) || 0,
-        tjmMin: tjmMin ? Number(tjmMin) : null,
-        tjmMax: tjmMax ? Number(tjmMax) : null,
+
+        // Pour EXPERTISE : ignorer localisation + TJM
+        cityId: kind === 'expertise' ? null : ((city && (city.id || city.value)) || null),
+        remote: kind === 'expertise' ? true : remote,
+        remoteDaysCount: kind === 'expertise' ? 0 : (Number(remoteDaysCount) || 0),
+        tjmMin: kind === 'expertise' ? null : (tjmMin ? Number(tjmMin) : null),
+        tjmMax: kind === 'expertise' ? null : (tjmMax ? Number(tjmMax) : null),
 
         technologies: techRows
           .filter(r => (r.technology || '').trim())
@@ -345,24 +368,22 @@ const submit = async e => {
 
       const derivedWeights = {
         skills: skillImportance,
-        tjm: Number(tjmWeight) || 0,
-        location: Number(locationWeight) || 0,
-        availability: Number(weights.availability) || 0,
+        tjm: kind === 'expertise' ? 0 : (Number(tjmWeight) || 0),
+        location: kind === 'expertise' ? 0 : (Number(locationWeight) || 0),
+        // on utilise le poids d’urgence pour availability côté score
+        availability: kind === 'expertise' ? (Number(expertiseUrgencyWeight) || 0) : (Number(weights.availability) || 0),
       }
+
       const res = await computeShortlist({ criteria, weights: derivedWeights })
-
       setShortlistByKind(prev => ({ ...prev, [kind]: res || [] }))
-
     } catch {
-      setShortlistByKind(prev => ({ ...prev, [kind]: [] }))    } finally {
+      setShortlistByKind(prev => ({ ...prev, [kind]: [] }))
+    } finally {
       setLoadingShortlist(false)
     }
   }
-  
+
   const locationLabel = remote ? 'télétravail' : 'localisation'
-
-
-
 
   // ─── Helpers affichage shortlist ───────────────────────────────────
   const getSkillsTotal = (r) => {
@@ -415,34 +436,46 @@ const submit = async e => {
                 onChange={e => setExpertiseObjective(e.target.value)}
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium">Durée estimée</label>
-              <div className="flex gap-3">
-                <input
-                  type="number"
-                  min="1"
-                  className="mt-1 w-1/2 rounded-md border px-3 py-2"
-                  placeholder="ex : 3"
-                  value={expertiseDuration?.split(' ')[0] || ''}
-                  onChange={e => {
-                    const unit = expertiseDuration?.split(' ')[1] || 'jours'
-                    setExpertiseDuration(`${e.target.value} ${unit}`)
-                  }}
-                />
-                <select
-                  className="mt-1 w-1/2 rounded-md border px-3 py-2 bg-white"
-                  value={expertiseDuration?.split(' ')[1] || 'jours'}
-                  onChange={e => {
-                    const val = expertiseDuration?.split(' ')[0] || ''
-                    setExpertiseDuration(`${val} ${e.target.value}`)
-                  }}
-                >
-                  <option value="jours">jours</option>
-                  <option value="semaines">semaines</option>
-                  <option value="mois">mois</option>
-                  <option value="années">années</option>
-                </select>
-              </div>
+              <label className="block text-sm font-medium">Enveloppe prévue (€)</label>
+              <input
+                type="number" min="0"
+                className="mt-1 w-full rounded-md border px-3 py-2"
+                placeholder="ex : 3 000"
+                value={expertiseBudget}
+                onChange={e => setExpertiseBudget(e.target.value)}
+              />
+            </div>
+
+            <div>
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+  <div>
+    <span className="block text-xs text-gray-600 mb-1">Urgence</span>
+    <select
+      className="w-full rounded-md border px-3 py-2 bg-white"
+      value={expertiseUrgency}
+      onChange={e=>setExpertiseUrgency(e.target.value)}
+    >
+      <option value="faible">Faible</option>
+      <option value="moyenne">Moyenne</option>
+      <option value="forte">Forte</option>
+    </select>
+  </div>
+  <div>
+    <span className="block text-xs text-gray-600 mb-1">Importance /10</span>
+    <select
+      className="w-full rounded-md border px-3 py-2 bg-white"
+      value={expertiseUrgencyWeight}
+      onChange={e=>setExpertiseUrgencyWeight(Number(e.target.value))}
+    >
+      {importanceOptions.map(n => <option key={n} value={n}>{n}</option>)}
+    </select>
+  </div>
+</div>
+
+
+
             </div>
           </div>
         )}
@@ -490,6 +523,17 @@ const submit = async e => {
                 onChange={e=>setAlternanceDescription(e.target.value)}
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium">Niveau d’études actuel</label>
+              <input
+                className="mt-1 w-full rounded-md border px-3 py-2"
+                placeholder="ex : Bac+1, BUT2, Licence, M1..."
+                value={alternanceStudyLevel}
+                onChange={e=>setAlternanceStudyLevel(e.target.value)}
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium mb-1">Rémunération</label>
               <div className="flex flex-wrap items-center gap-6">
@@ -527,8 +571,8 @@ const submit = async e => {
           </div>
         )}
 
-        {/* TJM fourchette + importance (affiché sauf pour pré-embauche/alternance) */}
-        {kind !== 'preembauche' && kind !== 'alternance' && (
+        {/* TJM fourchette + importance (mission uniquement) */}
+        {kind === 'mission' && (
           <div>
             <label className="block text-2xl font-bold text-gray-800 mb-4">
               TJM souhaité
@@ -543,42 +587,65 @@ const submit = async e => {
                 <input type="number" min="0" value={tjmMax} onChange={e=>setTjmMax(e.target.value)} className="w-full rounded-xl border px-3 py-2" />
               </div>
               <div>
-                <span className="block text-xs text-gray-600 mb-1">Importance /10</span>
-                <input type="number" min="1" max="10" value={tjmWeight} onChange={e=>setTjmWeight(e.target.value)} className="w-full rounded-xl border px-3 py-2" />
+              <span className="block text-xs text-gray-600 mb-1">Importance /10</span>
+              <select
+                className="w-full rounded-xl border px-3 py-2 bg-white"
+                value={tjmWeight}
+                onChange={e=>setTjmWeight(Number(e.target.value))}
+              >
+                {importanceOptions.map(n => <option key={n} value={n}>{n}</option>)}
+              </select>
+
               </div>
             </div>
             {!tjmOk && <div className="mt-1 text-sm text-red-600">Min/Max incohérents.</div>}
           </div>
         )}
 
-        {/* Localisation */}
-        <div className="space-y-3">
-          <label className="block text-2xl font-bold text-gray-800 mb-4">Localisation</label>
-          <label className="inline-flex items-center gap-2">
-            <input type="checkbox" checked={remote} onChange={e=>setRemote(e.target.checked)} />
-            <span>Télétravail</span>
-          </label>
-          {remote ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <span className="block text-xs text-gray-600 mb-1">Jours TT (1–5)</span>
-                <input type="number" min="1" max="5" value={remoteDaysCount} onChange={e=>setRemoteDaysCount(e.target.value)} className="w-full rounded-xl border px-3 py-2" />
+        {/* Localisation (masqué pour expertise) */}
+        {kind !== 'expertise' && (
+          <div className="space-y-3">
+            <label className="block text-2xl font-bold text-gray-800 mb-4">Localisation</label>
+            <label className="inline-flex items-center gap-2">
+              <input type="checkbox" checked={remote} onChange={e=>setRemote(e.target.checked)} />
+              <span>Télétravail</span>
+            </label>
+            {remote ? (
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <span className="block text-xs text-gray-600 mb-1">Jours TT (1–5)</span>
+                  <input type="number" min="1" max="5" value={remoteDaysCount} onChange={e=>setRemoteDaysCount(e.target.value)} className="w-full rounded-xl border px-3 py-2" />
+                </div>
+                <div className="sm:col-span-2">
+                  <span className="block text-xs text-gray-600">Importance /10</span>
+                  <select
+                    className="w-full rounded-xl border px-3 py-2 bg-white"
+                    value={locationWeight}
+                    onChange={e=>setLocationWeight(Number(e.target.value))}
+                  >
+                    {importanceOptions.map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </div>
+
               </div>
-              <div className="sm:col-span-2">
-                <span className="block text-xs text-gray-600">Importance /10</span>
-                <input type="number" min="0" max="10" value={locationWeight} onChange={e=>setLocationWeight(e.target.value)} className="w-full rounded-xl border px-3 py-2" />
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <CitySelect value={city} onChange={setCity} />
-              <div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <CitySelect value={city} onChange={setCity} />
+                <div>
                 <span className="block text-xs text-gray-600 mb-1">Importance /10</span>
-                <input type="number" min="0" max="10" value={locationWeight} onChange={e=>setLocationWeight(e.target.value)} className="w-full rounded-xl border px-3 py-2" />
+                <select
+                  className="w-full rounded-xl border px-3 py-2 bg-white"
+                  value={locationWeight}
+                  onChange={e=>setLocationWeight(Number(e.target.value))}
+                >
+                  {importanceOptions.map(n => <option key={n} value={n}>{n}</option>)}
+                </select>
+
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         {/* Technologies */}
         <div>
@@ -609,8 +676,15 @@ const submit = async e => {
                       </select>
                     </td>
                     <td className="px-3 py-2">
-                      <input type="number" min="0" max="10" value={row.weight} onChange={e=>updateRow(idx,{weight:e.target.value})} className="w-full rounded-lg border px-3 py-2" />
+                      <select
+                        className="w-full rounded-lg border px-3 py-2 bg-white"
+                        value={row.weight}
+                        onChange={e=>updateRow(idx,{weight:Number(e.target.value)})}
+                      >
+                        {importanceOptions.map(n => <option key={n} value={n}>{n}</option>)}
+                      </select>
                     </td>
+
                     <td className="px-3 py-2 text-right">
                       <button type="button" onClick={()=>removeRow(idx)} className="text-sm text-red-600 hover:underline" disabled={techRows.length===1}>
                         Supprimer
@@ -665,11 +739,10 @@ const submit = async e => {
         )}
         {error && <div className="text-red-600">{error}</div>}
 
-{/* Résultat shortlist */}
-{!loadingShortlist && (shortlist?.length > 0) && (
-  <div ref={shortlistRef} className="mt-6">
-    <h3 className="text-2xl md:text-3xl font-semibold text-center text-[#8EBDFC] mb-2">Top 10</h3>
-
+        {/* Résultat shortlist */}
+        {!loadingShortlist && (shortlist?.length > 0) && (
+          <div ref={shortlistRef} className="mt-6">
+            <h3 className="text-2xl md:text-3xl font-semibold text-center text-[#8EBDFC] mb-2">Top 10</h3>
             <div className="mx-auto mb-4 h-1 w-16 rounded-full bg-[#8EBDFC]" />
 
             {/* Filtrer: masquer profils avec skills à 0% */}
@@ -685,124 +758,119 @@ const submit = async e => {
 
                   return (
                     <div key={r.userId} className="rounded-2xl border border-[#8EBDFC]/30 bg-white shadow-sm p-4">
-                  {/* En-tête : bandeau gradient avec profil + scores */}
-                  <div className="rounded-xl bg-gradient-to-r from-[#F5FAFF] to-[#ECF3FF] border border-[#8EBDFC]/40 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <div className="text-xs text-gray-500">Profil</div>
-                      <div className="text-lg font-semibold">
-                        {r.fullName || `ID ${r.userId}`}
+                      {/* En-tête : bandeau gradient avec profil + scores */}
+                      <div className="rounded-xl bg-gradient-to-r from-[#F5FAFF] to-[#ECF3FF] border border-[#8EBDFC]/40 px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                          <div className="text-xs text-gray-500">Profil</div>
+                          <div className="text-lg font-semibold">
+                            {r.fullName || `ID ${r.userId}`}
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="inline-flex items-center rounded-full border border-[#8EBDFC] bg-[#8EBDFC]/10 px-3 py-1 text-sm font-semibold text-blue-700">
+                            score {r.score}%
+                          </span>
+
+                          <span className="h-6 w-px bg-[#8EBDFC]/30 mx-1 hidden sm:block" />
+
+                          <span className="inline-flex items-center rounded-full bg-[#EAF2FF] text-blue-800 px-3 py-1 text-sm">
+                            skills {skillsTotal ?? 0}%
+                          </span>
+                          <span className="inline-flex items-center rounded-full bg-[#EAF2FF] text-blue-800 px-3 py-1 text-sm">
+                            tjm {r.details?.tjm ?? 0}%
+                          </span>
+                          <span className="inline-flex items-center rounded-full bg-[#EAF2FF] text-blue-800 px-3 py-1 text-sm">
+                            {locationLabel} {r.details?.location ?? 0}%
+                          </span>
+
+                          <span className="h-6 w-px bg-[#8EBDFC]/30 mx-1 hidden sm:block" />
+
+                          {hasFutureDate ? (
+                            <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-orange-100 text-orange-800">
+                              dispo le {availText}
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-green-100 text-green-800">
+                              disponible
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Détails étalés */}
+                      <div className="mt-4 space-y-3 text-sm">
+                        {(r.details?.skills?.total ?? 0) < 100 && perTech.length > 0 && (
+                          <div>
+                            <div className="font-semibold text-gray-800 mb-2">Détails skills:</div>
+                            <div className="rounded-lg border border-gray-200 overflow-hidden">
+                              <div className="grid grid-cols-12 bg-gray-50 text-xs font-medium text-gray-600 px-3 py-2">
+                                <div className="col-span-4">Technologie</div>
+                                <div className="col-span-4">Attendu vs Profil</div>
+                                <div className="col-span-4 text-right">Match</div>
+                              </div>
+                              <ul>
+                                {[...perTech].sort((a, b) => (b.match ?? 0) - (a.match ?? 0)).map((d, i) => (
+                                  <li
+                                    key={`${d.techName}-${i}`}
+                                    className="grid grid-cols-12 items-center px-3 py-2 border-t border-gray-100"
+                                  >
+                                    <div className="col-span-4 text-sm text-gray-800 font-semibold">{d.techName}</div>
+                                    <div className="col-span-4 text-xs text-gray-600">
+                                      <span className="capitalize">{d.requestedLevel || '—'}</span>
+                                      <span className="mx-1 text-gray-400">→</span>
+                                      <span className="capitalize font-medium text-gray-800">{d.profileLevel || '—'}</span>
+                                    </div>
+                                    <div className="col-span-4">
+                                      <div className="flex items-center justify-end gap-3">
+                                        {d.match === 0 ? (
+                                          <span className="text-sm font-semibold text-red-600 flex items-center gap-1">
+                                            ✖ 0%
+                                          </span>
+                                        ) : (
+                                          <>
+                                            <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                              <div
+                                                className="h-2 bg-[#7CB2F7]"
+                                                style={{ width: `${Math.max(0, Math.min(100, d.match || 0))}%` }}
+                                              />
+                                            </div>
+                                            <span className="tabular-nums text-sm font-semibold">{d.match}%</span>
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Détails du profil sélectionné (TJM + télétravail) */}
+                      <div className="pt-4">
+                        <div className="font-semibold text-gray-800 mb-2">Détails du profil :</div>
+                        <div className="px-3 py-2 text-sm text-gray-700 space-y-1">
+                          <div>
+                            <span className="font-medium">
+                              TJM du profil : {r.details?.tjmMin && r.details?.tjmMax
+                                ? `${r.details.tjmMin}–${r.details.tjmMax} €`
+                                : r.details?.tjmValue
+                                  ? `${r.details.tjmValue} €`
+                                  : '—'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="font-medium">
+                              Télétravail : {r.details?.teleworkDays
+                                ? `${r.details.teleworkDays} jour${r.details.teleworkDays > 1 ? 's' : ''} / semaine`
+                                : 'non précisé'}
+                            </span>
+                          </div>
+                        </div>
                       </div>
                     </div>
-
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center rounded-full border border-[#8EBDFC] bg-[#8EBDFC]/10 px-3 py-1 text-sm font-semibold text-blue-700">
-                        score {r.score}%
-                      </span>
-
-                      <span className="h-6 w-px bg-[#8EBDFC]/30 mx-1 hidden sm:block" />
-
-                      <span className="inline-flex items-center rounded-full bg-[#EAF2FF] text-blue-800 px-3 py-1 text-sm">
-                        skills {skillsTotal ?? 0}%
-                      </span>
-                      <span className="inline-flex items-center rounded-full bg-[#EAF2FF] text-blue-800 px-3 py-1 text-sm">
-                        tjm {r.details?.tjm ?? 0}%
-                      </span>
-                      <span className="inline-flex items-center rounded-full bg-[#EAF2FF] text-blue-800 px-3 py-1 text-sm">
-                        {locationLabel} {r.details?.location ?? 0}%
-                      </span>
-
-
-                      <span className="h-6 w-px bg-[#8EBDFC]/30 mx-1 hidden sm:block" />
-
-                      {hasFutureDate ? (
-                        <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-orange-100 text-orange-800">
-                          dispo le {availText}
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold bg-green-100 text-green-800">
-                          disponible
-                        </span>
-                      )}
-
-                    </div>
-                  </div>
-
-
-{/* Détails étalés */}
-<div className="mt-4 space-y-3 text-sm">
-
-{(r.details?.skills?.total ?? 0) < 100 && perTech.length > 0 && (
-  <div>
-    <div className="font-semibold text-gray-800 mb-2">Détails skills:</div>
-    <div className="rounded-lg border border-gray-200 overflow-hidden">
-      <div className="grid grid-cols-12 bg-gray-50 text-xs font-medium text-gray-600 px-3 py-2">
-        <div className="col-span-4">Technologie</div>
-        <div className="col-span-4">Attendu vs Profil</div>
-        <div className="col-span-4 text-right">Match</div>
-      </div>
-      <ul>
-        {[...perTech].sort((a, b) => (b.match ?? 0) - (a.match ?? 0)).map((d, i) => (
-          <li
-            key={`${d.techName}-${i}`}
-            className="grid grid-cols-12 items-center px-3 py-2 border-t border-gray-100"
-          >
-            <div className="col-span-4 text-sm text-gray-800 font-semibold">{d.techName}</div>
-            <div className="col-span-4 text-xs text-gray-600">
-              <span className="capitalize">{d.requestedLevel || '—'}</span>
-              <span className="mx-1 text-gray-400">→</span>
-              <span className="capitalize font-medium text-gray-800">{d.profileLevel || '—'}</span>
-            </div>
-            <div className="col-span-4">
-              <div className="flex items-center justify-end gap-3">
-                {d.match === 0 ? (
-                  <span className="text-sm font-semibold text-red-600 flex items-center gap-1">
-                    ✖ 0%
-                  </span>
-                ) : (
-                  <>
-                    <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-                      <div
-                        className="h-2 bg-[#7CB2F7]"
-                        style={{ width: `${Math.max(0, Math.min(100, d.match || 0))}%` }}
-                      />
-                    </div>
-                    <span className="tabular-nums text-sm font-semibold">{d.match}%</span>
-                  </>
-                )}
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
-    </div>
-  </div>
-)}
-</div>
-
-{/* Détails du profil sélectionné (TJM + télétravail) */}
-<div className="pt-4">
-  <div className="font-semibold text-gray-800 mb-2">Détails du profil :</div>
-  <div className="px-3 py-2 text-sm text-gray-700 space-y-1">
-    <div>
-<span className="font-medium">
-  TJM du profil : {r.details?.tjmMin && r.details?.tjmMax
-    ? `${r.details.tjmMin}–${r.details.tjmMax} €`
-    : r.details?.tjmValue
-      ? `${r.details.tjmValue} €`
-      : '—'}
-</span>
-
-    </div>
-    <div>
-      <span className="font-medium">
-        Télétravail : {r.details?.teleworkDays
-          ? `${r.details.teleworkDays} jour${r.details.teleworkDays > 1 ? 's' : ''} / semaine`
-          : 'non précisé'}
-      </span>
-    </div>
-  </div>
-</div>
-                      </div>
                   )
                 })}
             </div>
