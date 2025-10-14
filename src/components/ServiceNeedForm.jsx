@@ -77,7 +77,7 @@ export default function ServiceNeedForm() {
     <div>
       <div className="text-sm font-semibold mb-2">Texte de ma demande :</div>
       <textarea
-        placeholder="Décris ton besoin en quelques lignes"
+        placeholder="Décrivez votre besoin en quelques lignes"
         value={description}
         onChange={e => setDescription(e.target.value)}
         className="textarea textarea-bordered w-full"

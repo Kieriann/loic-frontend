@@ -30,14 +30,19 @@ export default function ConfirmEmailPage() {
   }, [token]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-primary p-4">
-      <div className="bg-white p-8 rounded shadow max-w-md text-center">
+<div className="fixed inset-0 flex items-center justify-center bg-primary p-6">
+  <div className="w-full max-w-md bg-white p-8 rounded-2xl shadow-xl text-center">
         {status === 'pending' && <p>Confirmation en cours…</p>}
         {status === 'success' && (
           <>
-            <h1 className="text-2xl font-bold mb-4">✓ Confirmé !</h1>
+            <h1 className="text-2xl font-bold mb-2">✓ Confirmé !</h1>
             <p className="mb-6">{message}</p>
-            <Link to="/login" className="text-white bg-darkBlue px-4 py-2 rounded">Se connecter</Link>
+            <Link
+              to="/login"
+              className="block w-full bg-darkBlue text-white font-semibold py-2.5 rounded-lg hover:opacity-90 transition"
+            >
+              Se connecter
+            </Link>
           </>
         )}
         {status === 'error' && (
