@@ -35,6 +35,11 @@ import { decodeToken } from './utils/decodeToken'
 import SuggestionsPage from './pages/SuggestionsPage'
 import ClientRequestForm from './components/Client/ClientRequestForm'
 import IndepMessagerie from './components/IndepMessagerie' 
+import ForumPage from './pages/ForumPage'
+import ThreadView from './pages/ThreadView'
+import ForumListPage from './pages/ForumListPage.jsx'
+
+
 
 function getRole() {
   const t = localStorage.getItem('token') || ''
@@ -151,6 +156,9 @@ useEffect(() => {
             <Route path="/login-client" element={<Login expectedRole="CLIENT" />} />
             <Route path="/suggestions" element={<SuggestionsPage />} />
             <Route path="/messages/:otherId" element={<MessageRedirect />} />
+            <Route path="/forum" element={<ForumListPage />} />
+            <Route path="/forum/:id" element={<ThreadView />} />
+
 
 
           </Routes>
@@ -168,12 +176,17 @@ useEffect(() => {
     </>
   ) : (
     <>
-      <Route path="/client" element={<ClientDashboard />} />
-      <Route path="/profile" element={<RedirectClientAway><ProfilePage /></RedirectClientAway>} />
-      <Route path="/profile/edit" element={<RedirectClientAway><EditProfilePage /></RedirectClientAway>} />
-      <Route path="/confirm-email" element={<ConfirmEmailPage />} />
-      <Route path="*" element={<RoleLandingRedirect />} />
-      <Route path="/client/faire-une-demande" element={<ClientRequestForm />} />
+<Route path="/client" element={<ClientDashboard />} />
+<Route path="/profile" element={<RedirectClientAway><ProfilePage /></RedirectClientAway>} />
+<Route path="/profile/edit" element={<RedirectClientAway><EditProfilePage /></RedirectClientAway>} />
+<Route path="/confirm-email" element={<ConfirmEmailPage />} />
+
+<Route path="/forum" element={<ForumListPage />} />
+<Route path="/forum/:id" element={<ForumPage />} />
+
+<Route path="/client/faire-une-demande" element={<ClientRequestForm />} />
+
+<Route path="*" element={<RoleLandingRedirect />} />
     </>
   )}
 </Routes>

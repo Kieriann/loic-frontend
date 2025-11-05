@@ -8,6 +8,7 @@ import { useSearchParams }            from 'react-router-dom';
 import IndepMessagerie from '../components/IndepMessagerie';
 import ServiceNeedForm   from '../components/ServiceNeedForm';
 import ServiceNeedsList  from '../components/ServiceNeedsList';
+import SideBar from '../components/SideBar.jsx';
 
 export default function ProfilePage() {
   /* ------------------------------------------------------------------ */
@@ -138,44 +139,13 @@ async function handleSendSuggestion(e) {
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
       <div className="w-full max-w-6xl flex gap-6 items-stretch">
-        {/* ───── Onglets latéraux ───── */}
-        <div className="w-48 bg-white rounded-2xl shadow-md p-6 h-full">
-         <div className="flex flex-col gap-3">
-{['profil', 'experiences', 'realisations', 'prestations', 'messages', 'suggestions'].map(tab => (
-  <React.Fragment key={tab}>
-    {tab === 'suggestions' && <div className="my-3 border-t border-gray-200" />}
-    <button
- onClick={() => {
-   setSelectedTab(tab)
-   const params = new URLSearchParams(window.location.search)
-   const other = params.get('otherId')
-   const extra = tab === 'messages' && other ? `&otherId=${other}` : ''
-   navigate(`/profile?tab=${tab}${extra}`, { replace: true })
- }}
-      className={`w-full rounded-xl px-4 py-2 font-semibold text-left ${
-        selectedTab === tab
-          ? 'bg-blue-100 text-darkBlue'
-          : 'hover:bg-blue-50'
-      }`}
-    >
-      <span className="flex justify-between items-center w-full">
-        {tab.charAt(0).toUpperCase() + tab.slice(1)}
-        {tab === 'messages' && unreadCount > 0 && (
-          <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-            {unreadCount}
-          </span>
-        )}
-      </span>
-    </button>
-  </React.Fragment>
-))}
-  </div>
-</div>
-
-
-
-
-        {/* ───── Contenu central ───── */}
+<SideBar
+  selectedTab={selectedTab}
+  setSelectedTab={setSelectedTab}
+  unreadCount={unreadCount}
+  navigate={navigate}
+/>
+       {/* ───── Contenu central ───── */}
         <div className="flex-1 bg-white rounded-2xl shadow-md p-6 space-y-10">
 
 
@@ -188,6 +158,7 @@ async function handleSendSuggestion(e) {
             {selectedTab === 'prestations'   && 'Prestations'}
             {selectedTab === 'messages'    && 'Messagerie'}
             {selectedTab === 'suggestions'  && 'Suggestions'}
+            {selectedTab === 'forum'  && 'Forum'}
 
           </h1>
 
@@ -493,6 +464,13 @@ async function handleSendSuggestion(e) {
             <IndepMessagerie />
           </Section>
         )}
+
+
+
+
+
+
+
 
         </div>
       </div>

@@ -1,158 +1,135 @@
-import React, { useState, useMemo } from "react";
+// ─── Détail shortlist : cercle + tableau (maquette client) ───
+import React from 'react'
+
+/* Cercle pourcentage (SVG) – sans libellé sous le cercle */
+function PercentCircle({ value = 0, size = 120, stroke = 10 }) {
+  const r = (size - stroke) / 2
+  const c = 2 * Math.PI * r
+  const v = Math.max(0, Math.min(100, Math.round(value)))
+  const dash = (v / 100) * c
+  return (
+    <div className="flex items-center justify-center">
+      <svg width={size} height={size} aria-label="Score global">
+        <g transform={`translate(${size/2},${size/2})`}>
+          <circle r={r} fill="none" stroke="#e5e7eb" strokeWidth={stroke} />
+          <circle r={r} fill="none" stroke="#8EBDFC" strokeWidth={stroke} strokeLinecap="round"
+                  strokeDasharray={`${dash} ${c-dash}`} transform="rotate(-90)" />
+          <text textAnchor="middle" dominantBaseline="middle"
+                fontSize={Math.round(size*0.28)} fontWeight="700" fill="#111827">
+            {v}%
+          </text>
+        </g>
+      </svg>
+    </div>
+  )
+}
+
+const levelLabel = (v) =>
+  ({ beginner:'Débutant', junior:'Junior', intermediate:'Intermédiaire', senior:'Senior', expert:'Expert' }[String(v||'').toLowerCase()] || v)
+
+const getPerTech = (r) =>
+  (typeof r?.details?.skills === 'object') ? (r.details.skills.details || []) : []
 
 export default function ShortlistDebug({ result, weights, reqTechs }) {
-  const [open, setOpen] = useState(false);
+  if (!result) return null
 
-const w = weights || { skills: 0, tjm: 0, telework: 0 };
-  const totalW =
-    (Number(w.skills) || 0) +
-    (Number(w.tjm) || 0) +
-    (Number(w.telework) || 0);
+  // Map techno -> détail API
+  const perTech = getPerTech(result)
+  const perTechMap = new Map(perTech.map(d => [String(d.techName || '').toLowerCase(), d]))
 
-  const perTech = Array.isArray(result?.details?.skills?.details)
-    ? result.details.skills.details
-    : [];
+  // Lignes demandées côté client
+  const reqTechList = (Array.isArray(reqTechs) ? reqTechs : [])
+    .filter(t => (t.technology || '').trim())
+    .map(t => ({
+      name: String(t.technology).trim(),
+      levelLabel: levelLabel(t.level),
+      weight: Number(t.weight) || 0,
+    }))
 
-  const reqMap = useMemo(() => {
-    const m = Object.create(null);
-    (reqTechs || []).forEach((t) => {
-      const key = String(t?.technology ?? t?.name ?? "")
-        .trim()
-        .toLowerCase();
-      m[key] = {
-        name: t?.technology ?? t?.name ?? "",
-        level: t?.level ?? "",
-        weight: Number(t?.weight) || 0,
-      };
-    });
-    return m;
-  }, [reqTechs]);
+  // Items = toutes technos + TJM + Télétravail
+  const skillItems = reqTechList.map(t => {
+    const f = perTechMap.get(t.name.toLowerCase())
+    const matchPct = Math.max(0, Math.min(100, f?.match ?? 0))
+    return { kind:'skill', name:t.name, matchPct, weight:t.weight }
+  })
 
-  const skillsPct = Number(result?.details?.skills?.total ?? 0);
-  const tjmPct = Number(result?.details?.tjm ?? 0);
-const telePct = Number(result?.details?.telework ?? 0);
+  const tjmItem  = { kind:'tjm',   name:'TJM',         matchPct:Number(result?.details?.tjm      ?? 0), weight:Number(weights?.tjm      || 0) }
+  const teleItem = { kind:'tele',  name:'Télétravail', matchPct:Number(result?.details?.telework ?? 0), weight:Number(weights?.telework || 0) }
 
+  const items = [...skillItems, tjmItem, teleItem]
 
-  const scoreNum =
-    totalW > 0
-      ? (((skillsPct / 100) * (w.skills || 0) +
-  (tjmPct / 100) * (w.tjm || 0) +
-  (telePct / 100) * (w.telework || 0)) /
-  totalW) *
-100
-      : 0;
+  // Colonnes calculées
+  const cols = items.map(it => {
+    const header = `${it.name} (${Math.round(it.matchPct)}% × ${it.weight})` // ← espace avant ( )
+    const unit   = Math.round(it.matchPct * it.weight)
+    return { header, unit, weight: it.weight }
+  })
+
+  const unitSum   = cols.reduce((a,c)=>a+c.unit, 0)
+  const weightSum = cols.reduce((a,c)=>a+c.weight, 0)
+  const globalPct = weightSum ? (unitSum / weightSum) : 0
+
+  const fr = (n) => (typeof n === 'number' ? n.toLocaleString('fr-FR') : n)
 
   return (
-    <div className="mt-3">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="text-sm underline text-blue-700 hover:text-blue-900"
-      >
-        {open ? "Masquer le détail des calculs" : "Voir le détail des calculs"}
-      </button>
-
-      {open && (
-        <div className="mt-2 rounded-xl border border-[#8EBDFC]/40 bg-[#F8FBFF] p-3">
-          {/* Résumé */}
-          <div className="flex flex-wrap items-center gap-2 mb-3">
-            <span className="inline-flex items-center rounded-full bg-[#EAF2FF] px-2 py-0.5 text-sm">
-              skills {skillsPct}% × {w.skills}
-            </span>
-            <span className="inline-flex items-center rounded-full bg-[#EAF2FF] px-2 py-0.5 text-sm">
-              tjm {tjmPct}% × {w.tjm}
-            </span>
-            <span className="inline-flex items-center rounded-full bg-[#EAF2FF] px-2 py-0.5 text-sm">
-            télétravail {telePct}% × {w.telework}
-            </span>
-          </div>
-
-{/* Formule */}
-<div className="text-xs text-gray-700 mb-3">
-  Score = (skills/100 × {w.skills}) + (tjm/100 × {w.tjm}) + (télétravail/100 × {w.telework}) ÷ ({totalW}) × 100 = {Math.round(scoreNum)}% 
-</div>
-
-
-          {/* Détail par techno */}
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
-            <table className="min-w-full text-sm">
-              <thead className="bg-gray-50 text-gray-700">
-                <tr>
-                  <th className="px-3 py-2 text-left font-semibold">Technologie</th>
-                  <th className="px-3 py-2 text-left font-semibold">Attendu</th>
-                  <th className="px-3 py-2 text-left font-semibold">Profil</th>
-                  <th className="px-3 py-2 text-left font-semibold">Poids</th>
-                  <th className="px-3 py-2 text-right font-semibold">Match</th>
-                </tr>
-              </thead>
-              <tbody>
-                {perTech.length === 0 && (
-                  <tr>
-                    <td className="px-3 py-2" colSpan={5}>
-                      Aucune techno demandée.
-                    </td>
-                  </tr>
-                )}
-                {perTech.map((t, i) => {
-                  const key = String(t?.techName ?? "").toLowerCase();
-                  const req = reqMap[key] || {
-                    name: t?.techName ?? "",
-                    level: t?.requestedLevel ?? "",
-                    weight: 0,
-                  };
-                  return (
-                    <tr key={i} className={i > 0 ? "border-t" : ""}>
-                      <td className="px-3 py-2">{req.name}</td>
-                      <td className="px-3 py-2">
-                        {t?.requestedLevel ?? req.level}
-                        <span className="text-xs text-gray-500">
-                          {" "}
-                          ({t?.requestedNum})
-                        </span>
-                      </td>
-                      <td className="px-3 py-2">
-                        {t?.profileLevel ?? "—"}
-                        <span className="text-xs text-gray-500">
-                          {" "}
-                          ({t?.profileNum})
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 tabular-nums">{req.weight}</td>
-                      <td className="px-3 py-2 text-right tabular-nums">
-                        {Number(t?.match ?? 0)}%
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Composants unitaires */}
-            <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-            <div className="rounded-lg border border-gray-200 bg-white p-2">
-              <div className="text-gray-500 text-xs">TJM (profil)</div>
-              <div className="font-semibold">
-                {result?.details?.tjmMin != null && result?.details?.tjmMax != null
-                  ? `${result.details.tjmMin}–${result.details.tjmMax} €`
-                  : result?.details?.tjmValue != null
-                  ? `${result.details.tjmValue} €`
-                  : "—"}
-              </div>
-              <div className="text-xs text-gray-600">score {tjmPct}%</div>
-            </div>
-            <div className="rounded-lg border border-gray-200 bg-white p-2">
-              <div className="text-gray-500 text-xs">Télétravail</div>
-              <div className="font-semibold">
-                {result?.details?.teleworkDays != null
-                  ? `${result.details.teleworkDays} j/s`
-                  : "—"}
-              </div>
-                <div className="text-xs text-gray-600">score {telePct}%</div>
-            </div>
-          </div>
+    <details className="mt-3 group">
+      <summary className="cursor-pointer select-none list-none">
+        <div className="inline-flex items-center gap-2 rounded-md px-2 py-1 text-sm text-blue-900 bg-blue-50 border border-blue-200">
+          <span className="font-semibold">Détail du calcul</span>
+          <span className="opacity-70 group-open:hidden">▼</span>
+          <span className="opacity-70 hidden group-open:inline">▲</span>
         </div>
-      )}
-    </div>
-  );
+      </summary>
+
+      {/* CERCLE */}
+      <div className="mt-4 flex justify-center">
+        <PercentCircle value={globalPct} />
+      </div>
+
+      {/* TABLEAU – fond grisé UNIQUEMENT sur la 1ʳᵉ colonne, chiffres centrés, sans “+” */}
+      <div className="mt-6 overflow-x-auto rounded-xl border border-gray-200">
+        <table className="min-w-full text-sm">
+          <thead className="text-gray-700">
+            <tr>
+<th className="px-3 py-2 text-left font-semibold w-24 bg-gray-50">Attendus</th>
+            {cols.map((c, i) => (
+              <th key={`h-${i}`} className="px-3 py-2 text-left font-medium bg-white">{c.header}</th>
+            ))}
+<th className="px-3 py-2 text-center font-semibold w-24 bg-gray-50">Total</th>
+
+            </tr>
+          </thead>
+          <tbody>
+            {/* Scores unitaires */}
+            <tr className="border-t">
+              <td className="px-3 py-2 font-semibold bg-gray-50">Scores unitaires</td>
+              {cols.map((c, i) => (
+                <td key={`u-${i}`} className="px-3 py-2 text-center tabular-nums">{fr(c.unit)}</td>
+              ))}
+<td className="px-3 py-2 text-center tabular-nums bg-gray-50 font-semibold">= {fr(unitSum)}</td>
+            </tr>
+
+            {/* Importance */}
+            <tr className="border-t">
+              <td className="px-3 py-2 font-semibold bg-gray-50">Importance</td>
+              {cols.map((c, i) => (
+                <td key={`w-${i}`} className="px-3 py-2 text-center tabular-nums">{fr(c.weight)}</td>
+              ))}
+<td className="px-3 py-2 text-center tabular-nums bg-gray-50 font-semibold">= {fr(weightSum)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      {/* SCORE GLOBAL – centré, plus gros, plus visible */}
+      <div className="mt-4 flex justify-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-[#8EBDFC] bg-[#EAF2FF] px-4 py-2">
+          <span className="text-base font-semibold">Score global</span>
+          <span className="text-2xl font-extrabold tabular-nums">
+            {fr(unitSum)} / {fr(weightSum)} = {(weightSum ? (unitSum/weightSum) : 0).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
+          </span>
+        </div>
+      </div>
+    </details>
+  )
 }

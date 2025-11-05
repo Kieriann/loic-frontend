@@ -778,13 +778,25 @@ return (
                 const mismatches = perTech.filter(d => (d.match ?? 0) < 100)
                 const availRaw = r?.details?.availabilityText || 'oui';
                 const availText = formatAvail(availRaw);
+                const skillsPct   = Number(r?.details?.skills?.total   ?? 0);
+                const tjmPct      = Number(r?.details?.tjm            ?? 0);
+                const telePct     = Number(r?.details?.telework       ?? 0);
+                const skillsWeight = Number(r?.details?.skills?.weight ?? lastWeights?.skills ?? 0);
+
                 const hasFutureDate = availText !== 'oui';
-                const points =
-                  (skillsTotal || 0) +
-                  (r.details?.tjm || 0) +
-                  (r.details?.telework || 0);
 
+                const totalW =
+                  skillsWeight +
+                  (Number(lastWeights?.tjm) || 0) +
+                  (Number(lastWeights?.telework) || 0);
 
+                const scoreNum =
+                  totalW > 0
+                    ? (((skillsPct / 100) * skillsWeight +
+                        (tjmPct   / 100) * (lastWeights?.tjm      || 0) +
+                        (telePct  / 100) * (lastWeights?.telework || 0)) /
+                      totalW) * 100
+                    : 0;
                 return (
                   <div key={r.userId} className="rounded-2xl border border-[#8EBDFC]/30 bg-white shadow-sm p-4">
                     {/* En-tête : bandeau gradient avec profil + scores */}
@@ -799,7 +811,7 @@ return (
 
                         <div className="flex items-center gap-1 whitespace-nowrap flex-nowrap overflow-x-auto">
                         <span className="inline-flex items-center rounded-full border border-[#8EBDFC] bg-[#8EBDFC]/10 px-3 py-1 text-sm font-semibold text-blue-700">
-                          score {points} pts
+                          score {Math.round(scoreNum)}%
                         </span>
 
                         <span className="h-6 w-px bg-[#8EBDFC]/30 mx-1 hidden sm:block" />
