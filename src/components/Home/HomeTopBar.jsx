@@ -44,11 +44,31 @@ export default function HomeTopBar({ isConnected }) {
       {/* À droite : login/signup ou menu connecté */}
       <div className="flex gap-10 text-white font-bold text-2xl items-center">
 
-        {isConnected ? (
-          <div className="w-9 h-9 rounded-full border border-white flex items-center justify-center bg-white text-blue-500 text-xl">
-            ☰
-          </div>
-        ) : (
+{isConnected ? (
+  <div className="relative">
+    <div
+      onClick={() => setOpen(!open)}
+      className="w-9 h-9 rounded-full border border-white flex items-center justify-center bg-white text-blue-500 text-xl cursor-pointer"
+    >
+      ☰
+    </div>
+
+    {open && (
+      <div className="absolute right-0 mt-2 bg-white text-darkBlue shadow-lg rounded p-3 w-40">
+        <button
+          className="w-full text-left hover:bg-gray-100 p-2 rounded"
+          onClick={() => {
+            localStorage.removeItem('token')
+            window.location.href = '/'
+          }}
+        >
+          Déconnexion
+        </button>
+      </div>
+    )}
+  </div>
+) : (
+
           <>
             <Link to="/login">Connexion</Link>
             <Link to="/signup">Inscription</Link>
