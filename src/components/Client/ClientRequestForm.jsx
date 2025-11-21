@@ -13,7 +13,7 @@ import {
   deleteClientSavedSearch,
 } from '../../api/clientSavedSearches'
 
-export default function ClientRequestForm({ selectedSavedSearch }) {
+ export default function ClientRequestForm({ selectedSavedSearch, onNewSavedSearch }) {
   const [searchParams] = useSearchParams()
   const editId = searchParams.get('edit')
 
@@ -515,13 +515,12 @@ export default function ClientRequestForm({ selectedSavedSearch }) {
 
       try {
         const createdSearch = await createClientSavedSearch(savedQuery)
-        if (createdSearch) {
-          setSavedSearches((prev) => [createdSearch, ...prev])
+        if (createdSearch && onNewSavedSearch) {
+          onNewSavedSearch(createdSearch)
         }
       } catch (e) {
         console.error('Erreur sauvegarde recherche', e)
       }
-
       const criteria = {
         kind:
           String(kind || 'expertise').toLowerCase() === 'mission'

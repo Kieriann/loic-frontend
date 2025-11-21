@@ -88,7 +88,12 @@ const handleDeleteSavedSearch = async (id) => {
         <main className="flex-1 bg-white rounded-2xl shadow-md p-6 flex flex-col">
           {tab === 'profile' && <ClientProfile />}
           {tab === 'demande' && (
-            <ClientRequestForm selectedSavedSearch={selectedSavedSearch} />
+            <ClientRequestForm
+              selectedSavedSearch={selectedSavedSearch}
+              onNewSavedSearch={(search) =>
+                setSavedSearches(prev => [search, ...prev])
+              }
+            />
           )}
           {tab === 'statut' && <ClientRequestsStatus />}
         </main>
