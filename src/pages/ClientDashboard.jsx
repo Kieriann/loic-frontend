@@ -36,12 +36,15 @@ export default function ClientDashboard() {
     setSearchParams(p)
   }
 
-  const handleSelectSavedSearch = (search) => {
-    setSelectedSavedSearch(search)
-    const p = new URLSearchParams(searchParams)
-    p.set('tab', 'demande')
-    setSearchParams(p)
-  }
+const handleSelectSavedSearch = (search) => {
+  setSelectedSavedSearch(prev =>
+    prev && prev.id === search.id ? { ...search } : search
+  )
+  const p = new URLSearchParams(searchParams)
+  p.set('tab', 'demande')
+  setSearchParams(p)
+}
+
 
 const handleRenameSavedSearch = async (id, newName) => {
   try {
