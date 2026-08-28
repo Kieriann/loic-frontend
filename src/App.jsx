@@ -5,9 +5,6 @@ import {
   Route,
   Navigate,
   Link,
-  useNavigate,
-  useParams,
-  useLocation,
 } from 'react-router-dom'
 import Signup from './pages/Signup'
 import SignupSuccess from './pages/SignupSuccess'
@@ -18,7 +15,7 @@ import ProfilePage from './pages/ProfilePage'
 import AdminPage from './pages/AdminPage'
 import AdminProfilDetail from './pages/AdminProfilDetail'
 import CenteredLayout from './components/CenteredLayout'
-import { fetchProfile } from './api'
+import { fetchCurrentUser } from './api'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SessionManager from './components/SessionManager'
@@ -28,15 +25,12 @@ import Home from './pages/Home'
 import Stats from './pages/Stats'
 import Indep from './pages/Indep'
 import Entreprise from './pages/Entreprise'
-import HomeTopBar from './components/Home/HomeTopBar'
 import Header from './components/Header'
 import ClientDashboard from './pages/ClientDashboard'
 import { decodeToken } from './utils/decodeToken'
-import SuggestionsPage from './pages/SuggestionsPage'
 import ClientRequestForm from './components/Client/ClientRequestForm'
 import IndepMessagerie from './components/IndepMessagerie' 
 import ForumPage from './pages/ForumPage'
-import ThreadView from './pages/ThreadView'
 import ForumListPage from './pages/ForumListPage.jsx'
 
 
@@ -56,33 +50,21 @@ function RoleLandingRedirect() {
   return <Navigate to="/profile" replace />
 }
 
-function MessageRedirect() {
-  const { otherId } = useParams()
-  const location = useLocation()
-  const fromNeed = new URLSearchParams(location.search).get('fromNeed') || ''
-  return (
-    <Navigate
- to={`/profile?tab=messages&otherId=${otherId}${fromNeed ? `&fromNeed=${fromNeed}` : ''}`}
-      replace
-    />
-  )
-}
-
-
 function AppRouter({ token, setToken }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const location = useLocation()
 
 useEffect(() => {
   if (!token) {
+    setUser(null)
     setLoading(false)
     return
   }
-  fetchProfile(token)
-    .then(res => setUser({ isAdmin: res.isAdmin }))
+  setLoading(true)
+  fetchCurrentUser(token)
+    .then(res => setUser(res))
     .catch(err => {
-      if (err?.response?.status === 401) {
+      if (err?.status === 401) {
         localStorage.removeItem('token')
         setToken(null)
       } else {
@@ -152,12 +134,12 @@ useEffect(() => {
             <Route path="/entreprise" element={<Entreprise />} />
             <Route path="/cgu" element={<Cgu />} />
             <Route path="*" element={<Navigate to="/" replace />} />
-            <Route path="/login-indep" element={<Login expectedRole="INDEP" />} />
-            <Route path="/login-client" element={<Login expectedRole="CLIENT" />} />
-            <Route path="/suggestions" element={<SuggestionsPage />} />
-            <Route path="/messages/:otherId" element={<MessageRedirect />} />
-            <Route path="/forum" element={<ForumListPage />} />
-            <Route path="/forum/:id" element={<ThreadView />} />
+            <Route path="/login-indep" element={<Login expectedRole="INDEP" onLogin={setToken} />} />
+            <Route path="/login-client" element={<Login expectedRole="CLIENT" onLogin={setToken} />} />
+            <Route path="/suggestions" element={<Navigate to="/login" replace />} />
+            <Route path="/messages/:otherId" element={<Navigate to="/login" replace />} />
+            <Route path="/forum" element={<Navigate to="/login" replace />} />
+            <Route path="/forum/:id" element={<Navigate to="/login" replace />} />
 
 
 
@@ -203,7 +185,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <SessionManager>
+      <SessionManager token={token}>
         <AppRouter token={token} setToken={setToken} />
       </SessionManager>
     </BrowserRouter>

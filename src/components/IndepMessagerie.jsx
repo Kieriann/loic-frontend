@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import axios from 'axios'
 
 export default function IndepMessagerie() {
@@ -10,14 +10,15 @@ export default function IndepMessagerie() {
   const [threads, setThreads] = useState([])
   const bottomRef = useRef(null)
   const [searchParams] = useSearchParams()
+  const { otherId: routeOtherId } = useParams()
 
   const API = import.meta.env.VITE_API_URL || ''
   const otherIdNum = Number(otherId) || 0
 
   useEffect(() => {
-    const id = searchParams.get('otherId') || localStorage.getItem('lastOtherId')
+    const id = routeOtherId || searchParams.get('otherId') || localStorage.getItem('lastOtherId')
     if (id) setOtherId(String(id))
-  }, [searchParams])
+  }, [routeOtherId, searchParams])
 
   useEffect(() => {
     if (otherId) localStorage.setItem('lastOtherId', String(otherId))
@@ -54,7 +55,7 @@ export default function IndepMessagerie() {
         })
     }
     fetchMessages()
-    const interval = setInterval(fetchMessages, 3000)
+    const interval = setInterval(fetchMessages, 10000)
     return () => clearInterval(interval)
   }, [otherId, API])
 
@@ -63,13 +64,14 @@ export default function IndepMessagerie() {
   }, [messages])
 
   const sendMessage = async () => {
-    if (!newMessage || !otherIdNum) return
+    const content = newMessage.trim()
+    if (!content || !otherIdNum) return
     const t = localStorage.getItem('token')
     if (!t) return (window.location.href = '/login')
     try {
       const res = await axios.post(
         `${API}/api/messages`,
-        { receiverId: otherIdNum, content: newMessage },
+        { receiverId: otherIdNum, content },
         { headers: { Authorization: `Bearer ${t}` } }
       )
       setMessages(prev => [...prev, res.data])
@@ -152,6 +154,7 @@ export default function IndepMessagerie() {
           placeholder="Écrire un message..."
           value={newMessage}
           onChange={e => setNewMessage(e.target.value)}
+          maxLength={5000}
           className="border p-2 flex-1"
         />
         <button onClick={sendMessage} className="bg-green-500 text-white px-4 ml-2">

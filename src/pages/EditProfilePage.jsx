@@ -13,6 +13,7 @@ export default function EditProfilePage() {
     firstname: '',
     lastname : '',
     phone    : '',
+    email    : '',
     siret    : '',
     bio      : '',
     smallDayRate : '',
@@ -24,6 +25,7 @@ export default function EditProfilePage() {
     teleworkDays : 0,
     website: '',
     workerStatus: 'indep',
+    diffusionAutorisee: false,
   })
 
   const [langInput,   setLangInput]   = useState('')
@@ -97,15 +99,17 @@ export default function EditProfilePage() {
         /* profil  ---------------------------------------------------- */
         if (res.profile) {
           const {
-            firstname, lastname, phone, siret, bio,
+            firstname, lastname, phone, email, siret, bio,
             smallDayRate, mediumDayRate, highDayRate,
             languages, isEmployed, availableDate, workerStatus,
+            diffusionAutorisee,
           } = res.profile
 
         setProfile({
           firstname: firstname ?? '',
           lastname : lastname  ?? '',
           phone    : phone     ?? '',
+          email    : email     ?? '',
           siret    : siret     ?? '',
           bio      : bio       ?? '',
           smallDayRate : smallDayRate  ?? '',
@@ -116,6 +120,7 @@ export default function EditProfilePage() {
           availableDate: availableDate ?? '',
           website     : res.profile.website ?? '',
           workerStatus: workerStatus ?? 'indep',
+          diffusionAutorisee: !!diffusionAutorisee,
         })
 
 
@@ -165,9 +170,7 @@ export default function EditProfilePage() {
               id     : f.id,
               name   : f.originalName,
               source : 'cloud',
-              version: f.version,
-              publicId: f.publicId,
-              format : f.format,
+              url    : f.url,
             })),
           }))
         : [{ title:'', description:'', technos:[], files:[] }]
@@ -335,17 +338,7 @@ const handleSubmit = async () => {
     });
   });
 
-  /* ---------- 3. DEBUG (facultatif) ---------------------------------- */
-  console.log('--- DEBUG FormData profil ---');
-  for (const [k, v] of formData.entries()) {
-    console.log(k, v instanceof File ? `[File] ${v.name}` : v);
-  }
-  console.log('--- DEBUG FormData réals ---');
-  for (const [k, v] of realFormData.entries()) {
-    console.log(k, v instanceof File ? `[File] ${v.name}` : v);
-  }
-
-  /* ---------- 4. appels backend ------------------------------------- */
+  /* ---------- 3. appels backend ------------------------------------- */
   try {
     const token = localStorage.getItem('token');
 
@@ -428,7 +421,7 @@ return (
       <h1 className="text-2xl text-darkBlue font-bold text-center">
         Modifier mon profil
       </h1>
-      <div className="flex gap-3 justify-center">
+      <div className="flex flex-wrap gap-3 justify-center">
         {['profil', 'experiences', 'realisations', 'prestations'].map(tab => (
           <button
             key={tab}
@@ -447,7 +440,7 @@ return (
       {/* ───── PROFIL ───── */}
       {selectedTab === 'profil' && (
         <>
-         <div className="space-y-2">
+          <div className="space-y-2">
             <label className="text-xl font-semibold text-darkBlue">Statut</label>
             <div className="flex gap-6">
               <label className="inline-flex items-center gap-2">
@@ -472,7 +465,36 @@ return (
               </label>
             </div>
           </div>
+
           <ProfileInfo data={profile} setData={setProfile} errors={errors} />
+
+          {/* Email */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Email
+            </label>
+            <input
+              type="email"
+              value={profile.email}
+              onChange={e => setProfile({ ...profile, email: e.target.value })}
+              className="border rounded px-3 py-2 w-full"
+            />
+          </div>
+
+          {/* Autorisation de diffusion */}
+          <label className="inline-flex items-center gap-2 mt-3">
+            <input
+              type="checkbox"
+              checked={profile.diffusionAutorisee}
+              onChange={e =>
+                setProfile({ ...profile, diffusionAutorisee: e.target.checked })
+              }
+            />
+            <span className="text-sm text-gray-700">
+              Autoriser la diffusion de mon mail aux membres Freesbiz
+            </span>
+          </label>
+
           <AddressInfo data={address} setData={setAddress} errors={errors} />
 
         <input

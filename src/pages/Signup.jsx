@@ -22,8 +22,7 @@ export default function Signup({ onLogin }) {
         setError('Échec de l’inscription')
       }
     } catch (err) {
-      console.error(err)
-      setError('Échec de l’inscription')
+      setError(err.message || 'Échec de l’inscription')
     }
   }
 
@@ -43,7 +42,7 @@ export default function Signup({ onLogin }) {
     <div className="min-h-screen py-10 px-4 pt-28">
       <HomeTopBar isConnected={!!localStorage.getItem('token')} />
 
-      <div className="max-w-xl mx-auto bg-white p-8 rounded-xl shadow-md mt-40">
+      <div className="max-w-xl mx-auto bg-white p-6 sm:p-8 rounded-xl shadow-md mt-24 sm:mt-40">
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {error && <p className="text-red-600">{error}</p>}
 
@@ -63,11 +62,16 @@ export default function Signup({ onLogin }) {
             onChange={e => setPassword(e.target.value)}
             placeholder="Mot de passe"
             type="password"
+            minLength={12}
+            maxLength={128}
+            autoComplete="new-password"
             required
             className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-darkBlue"
           />
 
-          <div className="flex justify-center gap-10 mt-6 mb-6 text-lg font-semibold text-darkBlue">
+          <p className="text-sm text-gray-600">12 caractères minimum.</p>
+
+          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-10 mt-6 mb-6 text-base sm:text-lg font-semibold text-darkBlue">
             <label className="flex items-center gap-2">
               <input type="radio" name="role" value="INDEP" checked={role==='INDEP'} onChange={()=>setRole('INDEP')} />
               Je suis indépendant ou salarié

@@ -1,16 +1,18 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import logo from '../../assets/logo.png'
+import logo from '../../assets/logo.webp'
 import cx from 'classnames'
+import { logout } from '../../api'
 
 export default function HomeTopBar({ isConnected }) {
   const location = useLocation()
   const current = location.pathname
+  const [open, setOpen] = useState(false)
 
   return (
-    <div className="flex justify-between items-center max-w-5xl mx-auto px-6 py-4">
+    <div className="relative flex justify-between items-center max-w-5xl mx-auto px-3 sm:px-6 py-4">
       {/* Onglets à gauche */}
-        <div className="flex gap-10 text-white font-bold text-2xl items-center">
+        <div className="flex gap-3 sm:gap-10 text-white font-bold text-sm sm:text-xl lg:text-2xl items-center">
         <Link
           to="/"
           className={cx(
@@ -36,13 +38,13 @@ export default function HomeTopBar({ isConnected }) {
         <img
         src={logo}
         alt="Logo Free's Biz"
-        className="h-60 border border-white rounded-full shadow-xl bg-white/10 backdrop-blur"
+        className="h-24 sm:h-40 lg:h-52 border border-white rounded-full shadow-xl bg-white/10 backdrop-blur"
         style={{ boxShadow: '0 8px 30px rgba(0,0,0,0.2)' }}
         />
       </div>
 
       {/* À droite : login/signup ou menu connecté */}
-      <div className="flex gap-10 text-white font-bold text-2xl items-center">
+      <div className="flex gap-3 sm:gap-10 text-white font-bold text-sm sm:text-xl lg:text-2xl items-center">
 
 {isConnected ? (
   <div className="relative">
@@ -57,8 +59,8 @@ export default function HomeTopBar({ isConnected }) {
       <div className="absolute right-0 mt-2 bg-white text-darkBlue shadow-lg rounded p-3 w-40">
         <button
           className="w-full text-left hover:bg-gray-100 p-2 rounded"
-          onClick={() => {
-            localStorage.removeItem('token')
+          onClick={async () => {
+            await logout()
             window.location.href = '/'
           }}
         >

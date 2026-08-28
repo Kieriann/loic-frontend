@@ -18,6 +18,10 @@ export default function ResetPasswordPage() {
       setError('Les mots de passe ne correspondent pas.')
       return
     }
+    if (password.length < 12) {
+      setError('Le mot de passe doit contenir au moins 12 caractères.')
+      return
+    }
 
     try {
       const res = await fetch(`${import.meta.env.VITE_API_URL}/api/reset-password`, {
@@ -48,6 +52,9 @@ export default function ResetPasswordPage() {
           placeholder="Nouveau mot de passe"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          minLength={12}
+          maxLength={128}
+          autoComplete="new-password"
           required
           className="w-full border px-4 py-2 rounded"
         />
@@ -56,6 +63,9 @@ export default function ResetPasswordPage() {
           placeholder="Confirmez le mot de passe"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          minLength={12}
+          maxLength={128}
+          autoComplete="new-password"
           required
           className="w-full border px-4 py-2 rounded"
         />

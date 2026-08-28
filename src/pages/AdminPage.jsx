@@ -4,6 +4,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { logout } from '../api'
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -17,7 +18,8 @@ export default function AdminPage() {
   const fetchProfils = async (query = '') => {
     setLoading(true)
     try {
-      const res = await fetch(`${API_URL}/api/admin/profils?search=${query}`, {
+      const params = new URLSearchParams({ search: query })
+      const res = await fetch(`${API_URL}/api/admin/profils?${params}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
         },
@@ -39,13 +41,13 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
-    fetchProfils()
-  }, [])
+    const timer = setTimeout(() => fetchProfils(search), 300)
+    return () => clearTimeout(timer)
+  }, [search])
 
   const handleSearch = (e) => {
     const val = e.target.value
     setSearch(val)
-    fetchProfils(val)
   }
 
   return (
@@ -62,8 +64,8 @@ export default function AdminPage() {
           <div className="mt-2 bg-white text-darkBlue shadow-lg rounded p-3 w-40">
             <button
               className="w-full text-left hover:bg-gray-100 p-2 rounded"
-              onClick={() => {
-                localStorage.removeItem('token')
+              onClick={async () => {
+                await logout()
                 window.location.href = '/'
               }}
             >

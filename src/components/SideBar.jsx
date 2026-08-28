@@ -2,8 +2,8 @@ import React from "react"
 
 export default function SideBar({ selectedTab, setSelectedTab, unreadCount, navigate }) {
   return (
-    <div className="w-[14rem] bg-white rounded-2xl shadow-md p-6 h-full">
-          <div className="flex flex-col gap-3">
+    <div className="w-full lg:w-[14rem] bg-white rounded-2xl shadow-md p-3 lg:p-6 h-full">
+          <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-visible">
         {['profil', 'experiences', 'realisations', 'prestations', 'messages', 'forum', 'suggestions'].map(tab => (
           <React.Fragment key={tab}>
             {tab === 'suggestions' && <div className="my-3 border-t border-gray-200" />}
@@ -19,7 +19,7 @@ export default function SideBar({ selectedTab, setSelectedTab, unreadCount, navi
                 const extra = tab === 'messages' && other ? `&otherId=${other}` : ''
                 navigate(`/profile?tab=${tab}${extra}`, { replace: true })
               }}
-              className={`w-full rounded-xl px-4 py-2 font-semibold text-left ${
+              className={`min-w-max lg:min-w-0 lg:w-full rounded-xl px-4 py-2 font-semibold text-left ${
                 selectedTab === tab
                   ? 'bg-blue-100 text-darkBlue'
                   : 'hover:bg-blue-50'

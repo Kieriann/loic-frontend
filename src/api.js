@@ -10,7 +10,7 @@ export const signup = async (data) => {
     body: JSON.stringify(data),
   })
   const json = await res.json()
-  if (!res.ok) throw new Error(json.error || 'Erreur d’inscription')
+  if (!res.ok) throw new Error(json.message || json.error || 'Erreur d’inscription')
   return json
 }
 
@@ -29,34 +29,33 @@ export const login = async (data) => {
   return json
 }
 
-export async function getAllDocuments() {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/documents`, {
-    credentials: 'include',
+export const fetchCurrentUser = async (token) => {
+  const res = await fetch(`${AUTH_URL}/me`, {
+    headers: { Authorization: `Bearer ${token}` },
   })
-  if (!res.ok) throw new Error('Erreur lors de la récupération des documents')
-  return res.json()
+  const json = await res.json().catch(() => ({}))
+  if (!res.ok) {
+    const error = new Error(json.error || 'Session invalide')
+    error.status = res.status
+    throw error
+  }
+  return json
 }
 
-export const fetchProfile = async (token) => {
-  const res = await fetch(`${BASE_URL}/api/profile/profil`, {
-    headers: { Authorization: `Bearer ${token}` },
-    credentials: 'include',
-  });
-
-  console.log('[fetchProfile] status', res.status);
-
-  if (!res.ok) {
-    const txt = await res.text();
-    throw new Error(
-      `Profil : ${res.status} ${res.statusText} – ${txt || 'aucune donnée'}`
-    );
+export const logout = async () => {
+  const token = localStorage.getItem('token')
+  if (token) {
+    await fetch(`${AUTH_URL}/logout`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    }).catch(() => {})
   }
-
-  return res.json();
-};
+  localStorage.removeItem('token')
+  localStorage.removeItem('user')
+}
 
 export async function setSponsorEmail(token, email) {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/sponsor`, {
+  const res = await fetch(`${BASE_URL}/api/sponsor`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -68,27 +67,9 @@ export async function setSponsorEmail(token, email) {
   return res.json()
 }
 
-export async function getCvCount() {
-  const res = await fetch(`${BASE_URL}/api/documents/count-cv`, {
-    method: 'GET',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-      'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-  })
-  const data = await res.json()
-  if (!res.ok) throw new Error(data?.error || 'Erreur compte CV')
-  return data?.count ?? 0
-}
-
 export async function getCvProfilesCount() {
   const res = await fetch(`${BASE_URL}/api/documents/count-cv-profiles`, {
     method: 'GET',
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token') || ''}`,
-      'Content-Type': 'application/json',
-    },
     credentials: 'include',
   })
   const data = await res.json()
@@ -98,21 +79,18 @@ export async function getCvProfilesCount() {
 
 export async function getProfilesCount() {
   const res = await fetch(`${BASE_URL}/api/documents/count-profiles`, {
+    method: 'GET',
     credentials: 'include',
   })
-  const ct = res.headers.get('content-type') || ''
-  if (!ct.includes('application/json')) {
-    const txt = await res.text()
-    throw new Error(`Réponse non-JSON (${res.status}) : ${txt.slice(0,120)}...`)
-  }
-  const { count } = await res.json()
-  if (!res.ok) throw new Error('Erreur fetch count-profiles')
-  return count ?? 0
+  const data = await res.json()
+  if (!res.ok) throw new Error(data?.error || 'Erreur fetch count-profiles')
+  return data?.count ?? 0
 }
 
 
+
 export async function createClientRequest(payload) {
-  const res = await fetch(`${import.meta.env.VITE_API_URL}/api/client/requests`, {
+  const res = await fetch(`${BASE_URL}/api/client/requests`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

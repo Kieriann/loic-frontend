@@ -51,13 +51,20 @@ useEffect(() => {
     .catch(e => setErr(e.status === 401 ? 'Non connecté' : 'Erreur chargement'))
 
   const s = getSocket()
+  s.emit('join', { room: `thread:${id}` })
   const onReply = (r) => {
     if (String(r.threadId) === String(id)) {
-      setThread(t => t ? { ...t, replies: [r, ...(t.replies || [])], _count: { ...(t._count||{}), replies: (t._count?.replies||0)+1 } } : t)
+      setThread(t => {
+        if (!t || (t.replies || []).some(existing => existing.id === r.id)) return t
+        return { ...t, replies: [r, ...(t.replies || [])], _count: { ...(t._count||{}), replies: (t._count?.replies||0)+1 } }
+      })
     }
   }
   s.on('reply:new', onReply)
-  return () => s.off('reply:new', onReply)
+  return () => {
+    s.emit('leave', { room: `thread:${id}` })
+    s.off('reply:new', onReply)
+  }
 }, [id])
 
 const submit = async (e) => {
@@ -69,7 +76,6 @@ const submit = async (e) => {
     setForm({ title: '', content: '' })
     setShowCompose(false)
     setThread(th)
-    setThreads((t) => [th, ...(t || [])])
     if (th?.id) navigate(`/forum/${th.id}`)
   } catch (e) {
     setErr(e.status === 401 ? 'Non connecté' : 'Erreur création sujet')
@@ -88,8 +94,10 @@ const submitReply = async (e) => {
       t
         ? {
             ...t,
-            replies: [r, ...(t.replies || [])],
-            _count: { ...(t._count || {}), replies: (t._count?.replies || 0) + 1 },
+            replies: (t.replies || []).some(existing => existing.id === r.id) ? t.replies : [r, ...(t.replies || [])],
+            _count: (t.replies || []).some(existing => existing.id === r.id)
+              ? t._count
+              : { ...(t._count || {}), replies: (t._count?.replies || 0) + 1 },
             lastActivityAt: r.createdAt,
           }
         : t
@@ -104,7 +112,7 @@ const submitReply = async (e) => {
 
 return (
   <div className="min-h-screen bg-primary">
- <div className="grid grid-cols-[14rem_minmax(0,1fr)_16rem] gap-4 px-6 py-6 w-full max-w-[1600px] mx-auto">
+ <div className="grid grid-cols-1 xl:grid-cols-[14rem_minmax(0,1fr)_16rem] gap-4 px-3 sm:px-6 py-6 w-full max-w-[1600px] mx-auto">
      {/* Colonne latérale à GAUCHE (navigation profil/exp/…) */}
      <SideBar
        selectedTab="forum"
@@ -153,6 +161,7 @@ return (
               className="w-full border rounded p-2"
               placeholder="Titre du sujet"
               value={form.title}
+              maxLength={150}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               disabled={err === 'Non connecté' || submitting}
             />
@@ -161,6 +170,7 @@ return (
               rows={3}
               placeholder="Contenu"
               value={form.content}
+              maxLength={10000}
               onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
               disabled={err === 'Non connecté' || submitting}
             />
@@ -219,6 +229,7 @@ return (
           rows={3}
           placeholder="Écrire une réponse…"
           value={reply}
+          maxLength={10000}
           onChange={(e) => setReply(e.target.value)}
           disabled={err === 'Non connecté' || replying}
         />

@@ -4,7 +4,10 @@ const API = import.meta.env.VITE_API_URL || 'http://localhost:4000'
 let socket
 export function getSocket() {
   if (!socket) {
-    socket = io(API, { withCredentials: true })
+    socket = io(API, {
+      withCredentials: true,
+      auth: callback => callback({ token: localStorage.getItem('token') || '' }),
+    })
   }
   return socket
 }

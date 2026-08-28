@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import cx from 'classnames'
-import axios from 'axios'
 
 const tabs = [
   { key: 'profile', label: 'Profil' },
@@ -15,21 +14,8 @@ export default function ClientSidebar({
   onRenameSavedSearch,
   onDeleteSavedSearch,
 }) {
-  const [unreadCount, setUnreadCount] = useState(0)
   const [editingId, setEditingId] = useState(null)
   const [editingName, setEditingName] = useState('')
-
-  useEffect(() => {
-    const fetchCount = () => {
-      axios
-        .get('/api/messages/unread/count', { withCredentials: true })
-        .then(res => setUnreadCount(res.data.unreadCount))
-        .catch(err => console.error(err))
-    }
-    fetchCount()
-    const interval = setInterval(fetchCount, 5000)
-    return () => clearInterval(interval)
-  }, [])
 
   return (
     <nav className="rounded-2xl border border-blue-200 bg-white p-3 shadow-md h-full flex flex-col">
@@ -47,11 +33,6 @@ export default function ClientSidebar({
               )}
             >
               <span>{t.label}</span>
-              {t.key === 'messages' && unreadCount > 0 && (
-                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-2 py-0.5">
-                  {unreadCount}
-                </span>
-              )}
             </button>
           </li>
         ))}

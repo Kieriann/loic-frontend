@@ -3,12 +3,10 @@
 import React, { useEffect, useState } from 'react';
 import { fetchProfile }               from '../api/fetchProfile';
 import { Navigate, useNavigate }      from 'react-router-dom';
-import axios                          from 'axios';
 import { useSearchParams }            from 'react-router-dom';
 import IndepMessagerie from '../components/IndepMessagerie';
-import ServiceNeedForm   from '../components/ServiceNeedForm';
-import ServiceNeedsList  from '../components/ServiceNeedsList';
 import SideBar from '../components/SideBar.jsx';
+
 
 export default function ProfilePage() {
   /* ------------------------------------------------------------------ */
@@ -56,13 +54,18 @@ useEffect(() => {
 
 useEffect(() => {
   const fetchCount = () => {
-    axios.get('/api/messages/unread/count', { withCredentials: true })
-      .then(res => setUnreadCount(res.data.unreadCount))
+    const token = localStorage.getItem('token')
+    if (!token) return
+    fetch(`${import.meta.env.VITE_API_URL}/api/messages/unread/count`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+      .then(res => res.ok ? res.json() : Promise.reject(new Error('Unread count failed')))
+      .then(data => setUnreadCount(data.unreadCount))
       .catch(err => console.error(err))
   }
 
   fetchCount()
-  const interval = setInterval(fetchCount, 5000)
+  const interval = setInterval(fetchCount, 30000)
   return () => clearInterval(interval)
 }, [])
 
@@ -138,7 +141,7 @@ async function handleSendSuggestion(e) {
   /* ------------------------------------------------------------------ */
   return (
     <div className="min-h-screen bg-primary flex justify-center px-4 py-10">
-      <div className="w-full max-w-6xl flex gap-6 items-stretch">
+      <div className="w-full max-w-6xl flex flex-col lg:flex-row gap-6 items-stretch">
 <SideBar
   selectedTab={selectedTab}
   setSelectedTab={setSelectedTab}
@@ -146,7 +149,7 @@ async function handleSendSuggestion(e) {
   navigate={navigate}
 />
        {/* ───── Contenu central ───── */}
-        <div className="flex-1 bg-white rounded-2xl shadow-md p-6 space-y-10">
+        <div className="min-w-0 flex-1 bg-white rounded-2xl shadow-md p-4 sm:p-6 space-y-10">
 
 
         <div className="mb-8">
@@ -231,6 +234,10 @@ async function handleSendSuggestion(e) {
                 {/* Infos */}
 <Section title="Informations">
   <Line label="Téléphone">{profile.phone}</Line>
+    <Line label="Email">{profile.email}</Line>
+  <Line label="Diffusion mail autorisée">
+    {profile.diffusionAutorisee ? 'Oui' : 'Non'}
+  </Line>
   <Line label="SIRET">{profile.siret}</Line>
   <Line label="En poste">{profile.isEmployed ? 'Oui' : 'Non'}</Line>
   <Line label="Statut">
@@ -304,14 +311,14 @@ async function handleSendSuggestion(e) {
 
               {/* Documents */}
               <Section title="Documents">
-                <div className="grid grid-cols-2 gap-10 items-center">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-10 items-center">
                   {/* Photo */}
                   <div className="text-center">
                     <h3 className="font-semibold text-darkBlue mb-4">Photo</h3>
                     {documents.filter(d => d.type === 'ID_PHOTO').map(doc => (
                       <img
                         key={doc.id}
-                        src={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
+                        src={doc.url}
                         alt="ID"
                         className="mx-auto rounded-full w-32 h-32 object-cover"
                       />
@@ -324,7 +331,7 @@ async function handleSendSuggestion(e) {
                     {documents.filter(d => d.type?.toLowerCase() === 'cv').map(doc => (
                       <a
                         key={doc.id}
-                        href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${doc.version}/${doc.publicId}.${doc.format}`}
+                        href={doc.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 underline block"
@@ -395,8 +402,8 @@ async function handleSendSuggestion(e) {
 
           {/* ─────────────────────────── RÉALISATIONS ─────────────────── */}
           {selectedTab === 'realisations' && (
-            <Section title="Réalisations">
-              {realisations.length ? (
+            <>
+            <Section title="Réalisations">              {realisations.length ? (
                 realisations.map(r => (
                   <div key={r.id} className="border rounded p-4 mb-4 bg-[#f8fbff]">
                     <p><strong>Titre :</strong> {r.title}</p>
@@ -414,7 +421,7 @@ async function handleSendSuggestion(e) {
   r.files.map(f => (
     <a
       key={f.id}
-      href={`https://res.cloudinary.com/dwwt3sgbw/image/upload/v${f.version}/${f.publicId}.${f.format}`}
+      href={f.url}
       target="_blank"
       rel="noopener noreferrer"
       className="text-blue-600 underline block"
@@ -430,6 +437,8 @@ async function handleSendSuggestion(e) {
                 <p className="italic text-gray-500">Aucune réalisation</p>
               )}
             </Section>
+
+            </>
           )}
 
          {/* ─────────────────────────── PRESTATIONS ──────────────────── */}
@@ -448,12 +457,6 @@ async function handleSendSuggestion(e) {
       )}
     </Section>
 
-    <Section title="Mon besoin en prestations">
-      <ServiceNeedForm />
-      <ServiceNeedsList onContact={(candidateIds, needId) => {
-        candidateIds.forEach((uid) => window.open(`/messages/${uid}?fromNeed=${needId}`, '_blank'))
-      }} />
-    </Section>
   </>
 )}
 

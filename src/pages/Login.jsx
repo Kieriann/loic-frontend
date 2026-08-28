@@ -8,9 +8,25 @@ export default function Login({ onLogin, expectedRole = null }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState(null)
+  const [resendMessage, setResendMessage] = useState('')
   const navigate = useNavigate()
   const location = useLocation()
   const switchedMsg = location.state?.switchedMessage || null
+
+  const resendConfirmation = async () => {
+    setResendMessage('')
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/resend-confirmation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      })
+      const data = await response.json()
+      setResendMessage(data.message || 'Si le compte existe, un nouveau lien a été envoyé.')
+    } catch {
+      setResendMessage('Impossible de renvoyer le lien pour le moment.')
+    }
+  }
 
 
   const handleSubmit = async (e) => {
@@ -23,7 +39,7 @@ export default function Login({ onLogin, expectedRole = null }) {
       if (result.token) {
         localStorage.setItem('token', result.token)
         if (result.isFirstLogin) localStorage.setItem('needSponsor', '1')
-        onLogin(result.token)
+        onLogin?.(result.token)
         const payload = decodeToken(result.token)
         navigate(payload?.role === 'CLIENT' ? '/client' : '/profile', { replace: true })
       }
@@ -66,13 +82,14 @@ return (
               <button
                 type="button"
                 className="ml-4 underline text-sm"
-                onClick={() => navigate('/confirm-email')}
+                onClick={resendConfirmation}
               >
                 Renvoyer le lien
               </button>
             )}
           </div>
         )}
+        {resendMessage && <p className="text-sm text-blue-700">{resendMessage}</p>}
 
 
           <label className="block text-darkBlue font-semibold">Email</label>
@@ -91,6 +108,8 @@ return (
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Mot de passe"
             type="password"
+            autoComplete="current-password"
+            maxLength={128}
             required
             className="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-darkBlue"
           />

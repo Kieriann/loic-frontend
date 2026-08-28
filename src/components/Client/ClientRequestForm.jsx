@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import cx from 'classnames'
 import CitySelect from './CitySelect'
 import { createClientRequest } from '../../api'
@@ -12,13 +12,16 @@ import {
   updateClientSavedSearch,
   deleteClientSavedSearch,
 } from '../../api/clientSavedSearches'
+import NeedKindSelector from '../NeedKindSelector'
 
- export default function ClientRequestForm({ selectedSavedSearch, onNewSavedSearch }) {
+
+export default function ClientRequestForm({ selectedSavedSearch, onNewSavedSearch, onlyKind }) {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const editId = searchParams.get('edit')
 
   /* ── Choix simples ──────────────────────────────────────────────── */
-  const [kind, setKind] = useState('mission') // expertise | mission | preembauche | alternance
+ const [kind, setKind] = useState(() => onlyKind || 'mission') // expertise | mission | outil | preembauche | alternance
 
   // TJM
   const [tjmMin, setTjmMin] = useState('')
@@ -35,6 +38,7 @@ import {
   const [techRowsByKind, setTechRowsByKind] = useState({
     expertise: [{ technology: '', level: 'junior', weight: 1 }],
     mission: [{ technology: '', level: 'junior', weight: 1 }],
+    outil: [{ technology: '', level: 'junior', weight: 1 }],
     preembauche: [{ technology: '', level: 'junior', weight: 1 }],
     alternance: [{ technology: '', level: 'junior', weight: 1 }],
   })
@@ -95,6 +99,10 @@ import {
     }
   }, [loadingShortlist, shortlist])
 
+ useEffect(() => {
+   if (onlyKind) setKind(onlyKind)
+ }, [onlyKind])
+
   // Recherches enregistrées
   const [savedSearches, setSavedSearches] = useState([])
   const [isLoadingSaved, setIsLoadingSaved] = useState(false)
@@ -123,8 +131,7 @@ import {
   const applySavedSearch = (search) => {
     if (!search || !search.query) return
     const q = search.query || {}
-    const savedKind = q.kind || 'mission'
-
+   const savedKind = q.kind || 'mission'
     setKind(savedKind)
 
     setTjmMin(q.tjmMin ?? '')
@@ -348,6 +355,8 @@ import {
   const canSearch =
     kind === 'mission'
       ? tjmOk && locationOk && techOk
+      : kind === 'outil'
+     ? techOk // pas de TJM ni localisation
       : kind === 'expertise'
       ? techOk && expertiseOk // pas de TJM ni localisation
       : kind === 'preembauche'
@@ -366,6 +375,7 @@ import {
     setTechRowsByKind({
       expertise:   [{ technology: '', level: 'junior', weight: 1 }],
       mission:     [{ technology: '', level: 'junior', weight: 1 }],
+      outil:       [{ technology: '', level: 'junior', weight: 1 }],
       preembauche: [{ technology: '', level: 'junior', weight: 1 }],
       alternance:  [{ technology: '', level: 'junior', weight: 1 }],
     })
@@ -402,6 +412,8 @@ import {
       const kindUpper =
         kind === 'mission'
           ? 'MISSION'
+          : kind === 'outil'
+         ? 'OUTIL'
           : kind === 'preembauche'
           ? 'PREEMBAUCHE'
           : kind === 'alternance'
@@ -427,8 +439,15 @@ import {
         technologies,
       }
 
-      const payload =
-        kindUpper === 'EXPERTISE'
+ const payload =
+   kindUpper === 'OUTIL'
+     ? {
+         kind: kindUpper,
+         tjmMin: null,
+         tjmMax: null,
+         technologies,
+       }
+     : kindUpper === 'EXPERTISE'
           ? {
               // pas de TJM ni de localisation pour expertise
               kind: kindUpper,
@@ -525,6 +544,8 @@ import {
         kind:
           String(kind || 'expertise').toLowerCase() === 'mission'
             ? 'MISSION'
+            : String(kind || 'expertise').toLowerCase() === 'outil'
+            ? 'OUTIL'
             : String(kind || 'expertise').toLowerCase() === 'preembauche'
             ? 'PREEMBAUCHE'
             : String(kind || 'expertise').toLowerCase() === 'alternance'
@@ -532,11 +553,11 @@ import {
             : 'EXPERTISE',
 
         // Pour EXPERTISE : ignorer localisation + TJM
-        cityId: kind === 'expertise' ? null : (city && (city.id || city.value)) || null,
-        remote: kind === 'expertise' ? true : remote,
-        remoteDaysCount: kind === 'expertise' ? 0 : Number(remoteDaysCount) || 0,
-        tjmMin: kind === 'expertise' ? null : tjmMin ? Number(tjmMin) : null,
-        tjmMax: kind === 'expertise' ? null : tjmMax ? Number(tjmMax) : null,
+       cityId: (kind === 'expertise' || kind === 'outil') ? null : (city && (city.id || city.value)) || null,
+       remote: (kind === 'expertise' || kind === 'outil') ? true : remote,
+       remoteDaysCount: (kind === 'expertise' || kind === 'outil') ? 0 : Number(remoteDaysCount) || 0,
+       tjmMin: (kind === 'expertise' || kind === 'outil') ? null : tjmMin ? Number(tjmMin) : null,
+       tjmMax: (kind === 'expertise' || kind === 'outil') ? null : tjmMax ? Number(tjmMax) : null,
 
         technologies: techRows
           .filter((r) => (r.technology || '').trim())
@@ -556,8 +577,8 @@ import {
 
       const derivedWeights = {
         skills: skillImportance,
-        tjm: kind === 'expertise' ? 0 : Number(tjmWeight) || 0,
-        telework: kind === 'expertise' ? 0 : Number(locationWeight) || 0,
+       tjm: (kind === 'expertise' || kind === 'outil') ? 0 : Number(tjmWeight) || 0,
+       telework: (kind === 'expertise' || kind === 'outil') ? 0 : Number(locationWeight) || 0,
         availability: 0,
       }
 
@@ -588,59 +609,23 @@ import {
     <section>
       <form onSubmit={submit} className="space-y-8">
         {/* Type de besoin */}
-        <div>
-        <div className="flex items-center justify-between mb-4">
-          <label className="block text-2xl font-bold text-gray-800">
-            Vous cherchez
-          </label>
-
-          <button
-            type="button"
-            onClick={resetForm}
-            className="text-sm text-gray-500 underline hover:text-gray-700"
-          >
-            Effacer tous les champs
-          </button>
-        </div>
-          <div className="flex flex-wrap items-center gap-6">
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="radio"
-                value="mission"
-                checked={kind === 'mission'}
-                onChange={() => setKind('mission')}
-              />
-              <span>une mission</span>
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="radio"
-                value="expertise"
-                checked={kind === 'expertise'}
-                onChange={() => setKind('expertise')}
-              />
-              <span>une expertise</span>
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="radio"
-                value="preembauche"
-                checked={kind === 'preembauche'}
-                onChange={() => setKind('preembauche')}
-              />
-              <span>pré-embauche</span>
-            </label>
-            <label className="inline-flex items-center gap-2">
-              <input
-                type="radio"
-                value="alternance"
-                checked={kind === 'alternance'}
-                onChange={() => setKind('alternance')}
-              />
-              <span>alternance</span>
-            </label>
+          {!onlyKind && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-2xl font-bold text-gray-800">
+                Vous cherchez
+              </label>
+              <button
+                type="button"
+                onClick={resetForm}
+                className="text-sm text-gray-500 underline hover:text-gray-700"
+              >
+                Effacer tous les champs
+              </button>
+            </div>
+            <NeedKindSelector value={kind} onChange={setKind} />
           </div>
-        </div>
+        )}
 
         {/* Expertise */}
         {kind === 'expertise' && (
@@ -862,7 +847,7 @@ import {
         )}
 
         {/* Localisation (masqué pour expertise) */}
-        {kind !== 'expertise' && (
+        {kind !== 'expertise' && kind !== 'outil' && (
           <div className="space-y-3">
             <label className="block text-2xl font-bold text-gray-800 mb-4">
               Localisation
@@ -932,9 +917,11 @@ import {
         {/* Technologies */}
         <div>
           <div className="mb-3">
-            <label className="block text-2xl font-bold text-gray-800 mb-4">
-              Technologies requises
-            </label>
+ {!onlyKind && (
+   <label className="block text-2xl font-bold text-gray-800 mb-4">
+     Technologies requises
+   </label>
+ )}
           </div>
           <div className="overflow-x-auto">
             <table className="min-w-full border rounded-xl overflow-hidden">
@@ -1111,6 +1098,16 @@ import {
                           <div className="text-lg font-semibold">
                             {r.fullName || `ID ${r.userId}`}
                           </div>
+                        <div className="text-xs text-gray-500">
+                          {r.city || 'Localisation non renseignée'}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/messages/${r.userId}`)}
+                          className="mt-2 rounded-lg bg-blue-700 px-3 py-1.5 text-sm font-semibold text-white hover:bg-blue-800"
+                        >
+                          Contacter
+                        </button>
                         </div>
 
                         <div className="flex items-center gap-1 whitespace-nowrap flex-nowrap overflow-x-auto">

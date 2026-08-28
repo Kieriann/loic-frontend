@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import logo from '../assets/logo.png'
+import logo from '../assets/logo.webp'
 import SponsorModal from './SponsorModal'
+import { logout } from '../api'
 
 export default function Header() {
   const [open, setOpen] = useState(false)
@@ -15,9 +16,8 @@ export default function Header() {
     }
   }, [])
 
-const handleLogout = () => {
-  localStorage.removeItem('token')
-  localStorage.removeItem('user')
+const handleLogout = async () => {
+  await logout()
   setOpen(false)
   window.location.replace('/') 
 }
