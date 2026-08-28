@@ -9,7 +9,7 @@ export default function Footer() {
   return (
     <footer className="text-center text-sm text-gray-500 py-6">
       <p>
-        © 2025 Free's Biz ·{' '}
+        © {new Date().getFullYear()} Free's Biz ·{' '}
         <Link to="/cgu" className="underline hover:text-gray-700">
           CGU
         </Link>{' '}

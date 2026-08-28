@@ -4,7 +4,6 @@ import {
   Routes,
   Route,
   Navigate,
-  Link,
 } from 'react-router-dom'
 import Signup from './pages/Signup'
 import SignupSuccess from './pages/SignupSuccess'
@@ -90,40 +89,17 @@ useEffect(() => {
             <Route
               path="/login"
               element={
-                <>
-                  <Login
-                    onLogin={t => {
-                      localStorage.setItem('token', t)
-                      setToken(t)
-                    }}
-                  />
-                  <p className="mt-4 text-center">
-                    Pas encore de compte ?{' '}
-                    <Link to="/signup" className="text-darkBlue underline">
-                      S’inscrire
-                    </Link>
-                  </p>
-                </>
+                <Login
+                  onLogin={t => {
+                    localStorage.setItem('token', t)
+                    setToken(t)
+                  }}
+                />
               }
             />
             <Route
               path="/signup"
-              element={
-                <>
-                  <Signup
-                    onLogin={t => {
-                      localStorage.setItem('token', t)
-                      setToken(t)
-                    }}
-                  />
-                  <p className="mt-4 text-center">
-                    Déjà inscrit ?{' '}
-                    <Link to="/login" className="text-darkBlue underline">
-                      Se connecter
-                    </Link>
-                  </p>
-                </>
-              }
+              element={<Signup />}
             />
             <Route path="/signup-success" element={<CenteredLayout><SignupSuccess /></CenteredLayout>} />
             <Route path="/confirm-email" element={<CenteredLayout><ConfirmEmailPage /></CenteredLayout>} />
